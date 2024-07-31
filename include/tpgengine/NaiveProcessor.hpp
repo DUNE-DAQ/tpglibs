@@ -17,7 +17,7 @@ namespace tpgengine {
 
 class NaiveProcessor : public AbstractProcessor<std::array<int16_t, 16>> {
   public:
-    using naive_array_t = std:;array<int16_t, 16>;
+    using naive_array_t = std::array<int16_t, 16>;
 
     virtual naive_array_t process(const naive_array_t& signal) override {
       return AbstractProcessor<naive_array_t>::process(signal);

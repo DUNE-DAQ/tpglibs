@@ -15,12 +15,17 @@
 
 namespace tpgengine {
 
+// Compilation warns about some AVX alignment attributes that are ignored.
+// This use case should not worry about these warnings.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
 class AVXProcessor : public AbstractProcessor<__m256i> {
   public:
     virtual __m256i process(const __m256i& signal) override {
       return AbstractProcessor<__m256i>::process(signal);
     }
 };
+#pragma GCC diagnostic pop
 
 } // namespace tpgengine
 
