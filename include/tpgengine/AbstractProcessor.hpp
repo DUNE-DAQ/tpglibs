@@ -24,8 +24,8 @@ class AbstractProcessor {
 
     virtual ~AbstractProcessor() = default;
 
-    virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
-    void set_next_processor(std::shared_ptr<AbstractProcessor<T>>& next_processor) {
+    virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) {};
+    void set_next_processor(std::shared_ptr<AbstractProcessor<T>> next_processor) {
       m_next_processor = next_processor;
     }
 
