@@ -7,6 +7,7 @@
  */
 
 #include "tpgengine/AVXProcessor.hpp"
+#include "tpgengine/AVXUtils.hpp"
 
 #ifndef TPGENGINE_AVXRUNSUMPROCESSOR_HPP_
 #define TPGENGINE_AVXRUNSUMPROCESSOR_HPP_

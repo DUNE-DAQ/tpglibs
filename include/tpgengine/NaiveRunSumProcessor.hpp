@@ -7,6 +7,7 @@
  */
 
 #include "tpgengine/NaiveProcessor.hpp"
+#include "tpgengine/NaiveUtils.hpp"
 
 #include <algorithm>
 
