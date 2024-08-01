@@ -6,7 +6,7 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXProcessor.hpp"
+#include "tpgengine/AVXFactory.hpp"
 
 #ifndef TPGENGINE_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGENGINE_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_

@@ -6,7 +6,7 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXProcessor.hpp"
+#include "tpgengine/AVXFactory.hpp"
 #include "tpgengine/AVXUtils.hpp"
 
 #ifndef TPGENGINE_AVXRUNSUMPROCESSOR_HPP_

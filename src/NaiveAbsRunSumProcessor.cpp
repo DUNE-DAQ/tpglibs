@@ -10,6 +10,8 @@
 
 namespace tpgengine {
 
+REGISTER_NAIVEPROCESSOR_CREATOR("NaiveAbsRunSumProcessor", NaiveAbsRunSumProcessor)
+
 NaiveAbsRunSumProcessor::naive_array_t NaiveAbsRunSumProcessor::process(const naive_array_t& signal) {
   naive_array_t abs_signal;
 

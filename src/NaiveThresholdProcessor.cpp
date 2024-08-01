@@ -10,6 +10,8 @@
 
 namespace tpgengine {
 
+REGISTER_NAIVEPROCESSOR_CREATOR("NaiveThresholdProcessor", NaiveThresholdProcessor)
+
 void NaiveThresholdProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   int16_t config_thresholds[3] = {config["plane0"], config["plane1"], config["plane2"]};
 

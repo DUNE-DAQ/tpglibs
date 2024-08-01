@@ -6,7 +6,7 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveProcessor.hpp"
+#include "tpgengine/NaiveFactory.hpp"
 
 #ifndef TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_
 #define TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_

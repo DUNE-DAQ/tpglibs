@@ -10,6 +10,8 @@
 
 namespace tpgengine {
 
+REGISTER_AVXPROCESSOR_CREATOR("AVXFrugalPedestalSubtractProcessor", AVXFrugalPedestalSubtractProcessor)
+
 void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   m_accum_limit = config["accum_limit"];
 }

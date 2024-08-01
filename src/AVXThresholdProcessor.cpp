@@ -10,6 +10,8 @@
 
 namespace tpgengine {
 
+REGISTER_AVXPROCESSOR_CREATOR("AVXThresholdProcessor", AVXThresholdProcessor)
+
 void AVXThresholdProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   int16_t thresholds[16];
   int16_t config_thresholds[3] = {config["plane0"], config["plane1"], config["plane2"]};

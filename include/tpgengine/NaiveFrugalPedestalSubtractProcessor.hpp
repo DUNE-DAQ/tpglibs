@@ -6,7 +6,7 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveProcessor.hpp"
+#include "tpgengine/NaiveFactory.hpp"
 
 #ifndef TPGENGINE_NAIVEFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGENGINE_NAIVEFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_

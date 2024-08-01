@@ -6,7 +6,7 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveProcessor.hpp"
+#include "tpgengine/NaiveFactory.hpp"
 #include "tpgengine/NaiveUtils.hpp"
 
 #include <algorithm>

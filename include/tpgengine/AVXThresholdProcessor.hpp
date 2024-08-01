@@ -6,7 +6,7 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXProcessor.hpp"
+#include "tpgengine/AVXFactory.hpp"
 
 #ifndef TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_
 #define TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_

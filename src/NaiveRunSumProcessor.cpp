@@ -10,6 +10,8 @@
 
 namespace tpgengine {
 
+REGISTER_NAIVEPROCESSOR_CREATOR("NaiveRunSumProcessor", NaiveRunSumProcessor)
+
 void NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   int16_t config_memory[3] = {config["memory_factor_plane0"],
                               config["memory_factor_plane1"],

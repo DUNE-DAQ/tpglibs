@@ -10,6 +10,8 @@
 
 namespace tpgengine {
 
+REGISTER_AVXPROCESSOR_CREATOR("AVXRunSumProcessor", AVXRunSumProcessor)
+
 void AVXRunSumProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   int16_t memory_factors[16];
   int16_t config_memory[3] = {config["memory_factor_plane0"],
