@@ -7,6 +7,9 @@ include(CMakeFindDependencyMacro)
 # the place of this comment. Make sure they match up with the
 # find_package calls in your package's CMakeLists.txt file
 
+find_dependency(fmt)
+find_dependency(nlohmann_json)
+find_dependency(trgdataformats)
 
 
 # Figure out whether or not this dependency is an installed package or
