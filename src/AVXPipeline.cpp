@@ -1,16 +1,16 @@
 /**
- * @file AVXGenerator.cpp
+ * @file AVXPipeline.cpp
  *
  * This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
-#include "tpgengine/AVXGenerator.hpp"
+#include "tpgengine/AVXPipeline.hpp"
 
 namespace tpgengine {
 
 __m256i
-AVXGenerator::save_state(const __m256i& processed_signal) {
+AVXPipeline::save_state(const __m256i& processed_signal) {
   __m256i active     = _mm256_cmpgt_epi16(processed_signal, _mm256_setzero_si256());
   __m256i inactive   = _mm256_cmpeq_epi16(processed_signal, _mm256_setzero_si256());
   __m256i was_active = _mm256_cmpgt_epi16(m_adc_integral, _mm256_setzero_si256());
@@ -32,7 +32,7 @@ AVXGenerator::save_state(const __m256i& processed_signal) {
 }
 
 bool
-AVXGenerator::check_for_tps(const __m256i& tp_mask) {
+AVXPipeline::check_for_tps(const __m256i& tp_mask) {
   // tp_mask & 0xFFFF = 0 -> tp_mask == 0.
   // True => tp_mask is all zeros and has no TPs.
   // Negate!
@@ -40,7 +40,7 @@ AVXGenerator::check_for_tps(const __m256i& tp_mask) {
 }
 
 std::vector<dunedaq::trgdataformats::TriggerPrimitive>
-AVXGenerator::generate_tps(const __m256i& tp_mask) {
+AVXPipeline::generate_tps(const __m256i& tp_mask) {
   // Mask everything that's relevant.
   __m256i time_over_threshold = _mm256_blendv_epi8(_mm256_setzero_si256(), m_time_over_threshold, tp_mask);
   __m256i adc_integral = _mm256_blendv_epi8(_mm256_setzero_si256(), m_adc_integral, tp_mask);

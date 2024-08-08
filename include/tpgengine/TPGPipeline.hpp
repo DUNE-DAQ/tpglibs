@@ -1,13 +1,13 @@
 /**
- * @file TPGenerator.hpp
+ * @file TPGPipeline.hpp
  *
  * This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#ifndef TPGENGINE_TPGENERATOR_HPP_
-#define TPGENGINE_TPGENERATOR_HPP_
+#ifndef TPGENGINE_TPGPIPELINE_HPP_
+#define TPGENGINE_TPGPIPELINE_HPP_
 
 #include "tpgengine/AbstractFactory.hpp"
 
@@ -19,7 +19,7 @@
 namespace tpgengine {
 
 template <typename T, typename U>
-class TPGenerator {
+class TPGPipeline {
   public:
     using processor_t = T;
     using signal_t = U;
@@ -79,4 +79,4 @@ class TPGenerator {
 
 } // namespace tpgengine
 
-#endif // TPGENGINE_TPGENERATOR_HPP_
+#endif // TPGENGINE_TPGPIPELINE_HPP_

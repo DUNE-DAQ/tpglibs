@@ -35,7 +35,7 @@ add_library(tpgengine SHARED
 	src/NaiveFrugalPedestalSubstractProcessor.cpp
 	src/NaiveRunSumProcessor.cpp
 	src/NaiveThresholdProcessor.cpp
-	src/AVXGenerator.cpp
+	src/AVXPipeline.cpp
 	)
 target_include_directories(tpgengine PUBLIC
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

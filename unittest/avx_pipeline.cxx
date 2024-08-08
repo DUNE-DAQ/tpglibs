@@ -9,7 +9,7 @@
 #define BOOST_TEST_MODULE boost_test_macro_overview
 #define FMT_HEADER_ONLY
 
-#include "tpgengine/AVXGenerator.hpp"
+#include "tpgengine/AVXPipeline.hpp"
 
 #include <boost/test/included/unit_test.hpp>
 #include <fmt/core.h>
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
                                   _mm256_set1_epi16(0)};
 #pragma GCC diagnostic pop
 
-  AVXGenerator generator = AVXGenerator();
+  AVXPipeline generator = AVXPipeline();
 
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
