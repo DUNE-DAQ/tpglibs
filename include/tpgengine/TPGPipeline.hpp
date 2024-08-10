@@ -68,10 +68,10 @@ class TPGPipeline {
     virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> generate_tps(const signal_t& tp_mask) = 0;
 
   protected:
-    signal_t m_adc_integral;
-    signal_t m_adc_peak;
-    signal_t m_time_over_threshold;
-    signal_t m_time_peak;
+    signal_t m_adc_integral{};
+    signal_t m_adc_peak{};
+    signal_t m_time_over_threshold{};
+    signal_t m_time_peak{};
     std::shared_ptr<AbstractFactory<processor_t>> m_factory = AbstractFactory<processor_t>::get_instance();
     std::shared_ptr<processor_t> m_processor_head;
     int16_t m_plane_numbers[16];
