@@ -1,5 +1,5 @@
 /**
- * @file avx_factory.cxx
+ * @file avx_pipeline.cxx
  *
  * This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
                                   _mm256_set1_epi16(0)};
 #pragma GCC diagnostic pop
 
-  AVXPipeline generator = AVXPipeline();
+  AVXPipeline pipeline = AVXPipeline();
 
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
@@ -67,14 +67,14 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     }
   };
 
-  generator.set_plane_numbers(plane_numbers);
-  generator.configure(configs);
+  pipeline.set_plane_numbers(plane_numbers);
+  pipeline.configure(configs);
 
   // ADC peak should max at 1600 for all channels.
   bool adc_peak_at_1600 = true;
 
   for (const __m256i& signal : signals) {
-    std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = generator.process(signal);
+    std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = pipeline.process(signal);
     if (tps.empty()) continue;
 
     for (auto tp : tps) {
