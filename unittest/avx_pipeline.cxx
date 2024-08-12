@@ -38,7 +38,22 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
 
   AVXPipeline pipeline = AVXPipeline();
 
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers = {{  0, 0},
+                                                                    { 10, 0},
+                                                                    { 20, 0},
+                                                                    { 30, 0},
+                                                                    { 40, 0},
+                                                                    {100, 1},
+                                                                    {110, 1},
+                                                                    {120, 1},
+                                                                    {130, 1},
+                                                                    {140, 1},
+                                                                    {200, 2},
+                                                                    {210, 2},
+                                                                    {220, 2},
+                                                                    {230, 2},
+                                                                    {240, 2},
+                                                                    {250, 2}};
 
   // Horrendous brackets.
   std::vector<nlohmann::json> configs = {
@@ -67,8 +82,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     }
   };
 
-  pipeline.set_plane_numbers(plane_numbers);
-  pipeline.configure(configs);
+  pipeline.configure(configs, channel_plane_numbers);
 
   // ADC peak should max at 1600 for all channels.
   bool adc_peak_at_1600 = true;

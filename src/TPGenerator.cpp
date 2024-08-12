@@ -11,17 +11,16 @@
 namespace tpgengine {
 
 void
-TPGenerator::set_plane_numbers(const int16_t* plane_numbers) {
-  const int16_t *cursor = plane_numbers;
-  for (int p = 0; p < m_num_pipelines; p++) {
-    m_tpg_pipelines[p].set_plane_numbers(cursor + p * m_num_channels_per_pipeline);
-  }
-}
+TPGenerator::configure(const std::vector<nlohmann::json>& configs,
+                       const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
+  m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;
 
-void
-TPGenerator::configure(const std::vector<nlohmann::json>& configs) {
   for (int p = 0; p < m_num_pipelines; p++) {
-    m_tpg_pipelines[p].configure(configs);
+    AVXPipeline new_pipe = AVXPipeline();
+    auto begin_channel_plane = channel_plane_numbers.begin() + p*m_num_channels_per_pipeline;
+    auto end_channel_plane = begin_channel_plane + m_num_channels_per_pipeline;
+    new_pipe.configure(configs, std::vector<std::pair<int16_t, int16_t>>(begin_channel_plane, end_channel_plane));
+    m_tpg_pipelines.push_back(new_pipe);
   }
 }
 

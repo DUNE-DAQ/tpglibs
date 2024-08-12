@@ -24,15 +24,21 @@ class TPGPipeline {
     using processor_t = T;
     using signal_t = U;
 
-    virtual void configure(const std::vector<nlohmann::json> configs) {
+    virtual void configure(const std::vector<nlohmann::json> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
+
+      int16_t plane_numbers[16];
+      for (int i = 0; i < 16; i++) {
+        m_channels[i] = channel_plane_numbers[i].first;
+        plane_numbers[i] = channel_plane_numbers[i].second;
+      }
 
       for (const nlohmann::json& config : configs) {
         // Get the requested processor.
         std::shared_ptr<processor_t> processor = m_factory->create_processor(config["name"]);
 
         // Configure it.
-        processor->configure(config["config"], m_plane_numbers);
+        processor->configure(config["config"], plane_numbers);
 
         // If it's the first one, make it the head.
         if (!prev_processor) {
@@ -44,12 +50,6 @@ class TPGPipeline {
         // Otherwise, start linking the chain.
         prev_processor->set_next_processor(processor);
         prev_processor = processor;
-      }
-    }
-
-    void set_plane_numbers(const int16_t* plane_numbers) {
-      for (int i = 0; i < 16; i++) {
-        m_plane_numbers[i] = plane_numbers[i];
       }
     }
 
@@ -72,9 +72,9 @@ class TPGPipeline {
     signal_t m_adc_peak{};
     signal_t m_time_over_threshold{};
     signal_t m_time_peak{};
+    int16_t m_channels[16];
     std::shared_ptr<AbstractFactory<processor_t>> m_factory = AbstractFactory<processor_t>::get_instance();
     std::shared_ptr<processor_t> m_processor_head;
-    int16_t m_plane_numbers[16];
 };
 
 } // namespace tpgengine

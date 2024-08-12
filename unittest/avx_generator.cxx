@@ -10,6 +10,9 @@
 
 #include "tpgengine/TPGenerator.hpp"
 
+#include "fddetdataformats/WIBEthFrame.hpp"
+#include "fddetdataformats/TDEEthFrame.hpp"
+
 #include <boost/test/included/unit_test.hpp>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -30,11 +33,11 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     }
   }
 
-  // Lazy with the plane assignments.
-  int16_t plane_numbers[64] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                               2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                               0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  // Lazy with the channel-plane assignments.
+  std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers = {{ 0, 0}, { 1, 0}, { 2, 0}, { 3, 0}, { 4, 0}, { 5, 0}, { 6, 0}, { 7, 0}, { 8, 0}, { 9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0},
+                                                                    {16, 1}, {17, 1}, {18, 1}, {19, 1}, {20, 1}, {21, 1}, {22, 1}, {23, 1}, {24, 1}, {25, 1}, {26, 1}, {27, 1}, {28, 1}, {29, 1}, {30, 1}, {31, 1},
+                                                                    {32, 2}, {33, 2}, {34, 2}, {35, 2}, {36, 2}, {37, 2}, {38, 2}, {39, 2}, {40, 2}, {41, 2}, {42, 2}, {43, 2}, {44, 2}, {45, 2}, {46, 2}, {47, 2},
+                                                                    {48, 0}, {49, 0}, {50, 0}, {51, 0}, {52, 0}, {53, 1}, {54, 1}, {55, 1}, {56, 1}, {57, 1}, {58, 2}, {59, 2}, {60, 2}, {61, 2}, {62, 2}, {63, 2}};
 
   // Just using the thresholding for simplicity.
   std::vector<nlohmann::json> configs = {
@@ -44,15 +47,14 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
         {
           {"plane0", 200},
           {"plane1", 300},
-          {"plane2", 450}
+          {"plane2", 445}
         }
       }
     }
   };
 
   TPGenerator tpg;
-  tpg.set_plane_numbers(plane_numbers);
-  tpg.configure(configs);
+  tpg.configure(configs, channel_plane_numbers);
 
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = tpg(&frame);
 
@@ -63,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     if (tp.adc_peak < min_peak) min_peak = tp.adc_peak;
   }
 
-  BOOST_TEST(tp_count == 576);
+  BOOST_TEST(tp_count == 600);
   BOOST_TEST(min_peak > 200);  // Truly it should depend on the plane, so this is naive.
 }
 
