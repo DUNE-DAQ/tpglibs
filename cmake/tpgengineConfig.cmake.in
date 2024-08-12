@@ -9,6 +9,8 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(fmt)
 find_dependency(nlohmann_json)
+find_dependency(detdataformats)
+find_dependency(fddetdataformats)
 find_dependency(trgdataformats)
 
 

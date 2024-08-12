@@ -12,6 +12,8 @@ find_package(daq-cmake REQUIRED)
 find_package(fmt REQUIRED)
 
 find_package(nlohmann_json REQUIRED)
+find_package(detdataformats REQUIRED)
+find_package(fddetdataformats REQUIRED)
 find_package(trgdataformats REQUIRED)
 
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
@@ -36,13 +38,14 @@ add_library(tpgengine SHARED
 	src/NaiveRunSumProcessor.cpp
 	src/NaiveThresholdProcessor.cpp
 	src/AVXPipeline.cpp
+	src/TPGenerator.cpp
 	)
 target_include_directories(tpgengine PUBLIC
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 	$<BUILD_INTERFACE:${PROJECTSOURCE_DIR}/src>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
-target_link_libraries(tpgengine PRIVATE nlohmann_json::nlohmann_json trgdataformats::trgdataformats fmt::fmt)
+target_link_libraries(tpgengine PRIVATE nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt)
 install(TARGETS tpgengine EXPORT tpgengineTargets)
 
 CONFIGURE_PACKAGE_CONFIG_FILE(cmake/tpgengineConfig.cmake.in

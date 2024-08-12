@@ -12,3 +12,8 @@ add_executable(test_avx_pipeline avx_pipeline.cxx)
 target_link_libraries(test_avx_pipeline PRIVATE tpgengine fmt::fmt trgdataformats::trgdataformats)
 target_include_directories(test_avx_pipeline PRIVATE ${BOOST_INCLUDE_DIRS})
 add_test(NAME avx_pipeline COMMAND test_avx_pipeline)
+
+add_executable(test_avx_generator avx_generator.cxx)
+target_link_libraries(test_avx_generator PRIVATE tpgengine fmt::fmt fddetdataformats::fddetdataformats trgdataformats::trgdataformats)
+target_include_directories(test_avx_generator PRIVATE ${BOOST_INCLUDE_DIRS})
+add_test(NAME avx_generator COMMAND test_avx_generator)
