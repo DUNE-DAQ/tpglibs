@@ -30,11 +30,10 @@ TPGenerator::expand_frame(const __m256i& regi) {
 
   // Prepare even (2,4,6,8), odd (1,3,5,7) rows in 64-bit sense.
   __m256i odd  = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 0, 1, 2, 3, 4, 5, 6));
-  __m256i even = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(0, 1, 2, 3, 4, 5, 6, 7));
 
   // Shift into place.
+  __m256i even = _mm256_sllv_epi64(regi, _mm256_setr_epi64x(6, 14, 22, 30));
   odd  = _mm256_srlv_epi64(odd, _mm256_setr_epi64x(30, 22, 14, 6));
-  even = _mm256_sllv_epi64(even, _mm256_setr_epi64x(6, 14, 22, 30));
 
   // Everything is center aligned in 32-bit. Mask and right-align the right side.
   __m256i both  = _mm256_blend_epi32(even, odd, 0b01010101);
