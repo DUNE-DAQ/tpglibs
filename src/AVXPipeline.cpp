@@ -65,9 +65,7 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
     tp.type                = tp.Type::kTPC;
     tp.algorithm           = tp.Algorithm::kUnknown; // TODO: Choose a separate way to represent the mixed processors.
 
-    // Outside dependencies and references are needed for these. Let the outside handle their updates.
-    tp.channel = m_channels[i];
-    tp.time_start = tp_tot[i];
+    // time_start is handled at the next level up, since it is aware of the true and relative times.
     tps.push_back(tp);
   }
 

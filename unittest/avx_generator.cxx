@@ -54,7 +54,8 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   };
 
   TPGenerator tpg;
-  tpg.configure(configs, channel_plane_numbers);
+  constexpr int sample_tick_difference = 1; // Arbitrary choice for this test. Live has been 32 (2024-08-15).
+  tpg.configure(configs, channel_plane_numbers, sample_tick_difference);
 
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = tpg(&frame);
 
