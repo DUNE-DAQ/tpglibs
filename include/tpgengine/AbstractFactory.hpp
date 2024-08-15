@@ -28,7 +28,7 @@ class AbstractFactory {
     AbstractFactory() {}
     AbstractFactory(const AbstractFactory&) = delete;
     AbstractFactory& operator=(const AbstractFactory&) = delete;
-    virtual ~AbstractFactory() {}
+    virtual ~AbstractFactory() = default;
 
     std::shared_ptr<T> create_processor(const std::string& processor_name);
     static void register_creator(const std::string& processor_name, create_processor_func creator);

@@ -24,6 +24,8 @@ class TPGPipeline {
     using processor_t = T;
     using signal_t = U;
 
+    virtual ~TPGPipeline() = default;
+
     virtual void configure(const std::vector<nlohmann::json> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
