@@ -26,7 +26,7 @@ class TPGPipeline {
 
     virtual ~TPGPipeline() = default;
 
-    virtual void configure(const std::vector<nlohmann::json> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
+    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
       int16_t plane_numbers[16];
@@ -35,12 +35,12 @@ class TPGPipeline {
         plane_numbers[i] = channel_plane_numbers[i].second;
       }
 
-      for (const nlohmann::json& config : configs) {
+      for (const auto& name_config : configs) {
         // Get the requested processor.
-        std::shared_ptr<processor_t> processor = m_factory->create_processor(config["name"]);
+        std::shared_ptr<processor_t> processor = m_factory->create_processor(name_config.first);
 
         // Configure it.
-        processor->configure(config["config"], plane_numbers);
+        processor->configure(name_config.second, plane_numbers);
 
         // If it's the first one, make it the head.
         if (!prev_processor) {

@@ -11,7 +11,7 @@
 namespace tpglibs {
 
 void
-TPGenerator::configure(const std::vector<nlohmann::json>& configs,
+TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                        const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers,
                        const int sample_tick_difference) {
   m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;

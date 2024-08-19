@@ -22,7 +22,7 @@ class TPGenerator {
   int m_sample_tick_difference;
 
   public:
-    void configure(const std::vector<nlohmann::json>& configs,
+    void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                    const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers,
                    const int sample_tick_difference);
 
