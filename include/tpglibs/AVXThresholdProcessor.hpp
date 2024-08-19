@@ -6,12 +6,12 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXFactory.hpp"
+#include "tpglibs/AVXFactory.hpp"
 
 #ifndef TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_
 #define TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class AVXThresholdProcessor : public AVXProcessor {
   __m256i m_threshold;
@@ -21,6 +21,6 @@ class AVXThresholdProcessor : public AVXProcessor {
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_

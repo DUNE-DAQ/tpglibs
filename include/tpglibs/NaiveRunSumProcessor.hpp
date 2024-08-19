@@ -6,15 +6,15 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveFactory.hpp"
-#include "tpgengine/NaiveUtils.hpp"
+#include "tpglibs/NaiveFactory.hpp"
+#include "tpglibs/NaiveUtils.hpp"
 
 #include <algorithm>
 
 #ifndef TPGENGINE_NAIVERUNSUMPROCESSOR_HPP_
 #define TPGENGINE_NAIVERUNSUMPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class NaiveRunSumProcessor : public NaiveProcessor {
   naive_array_t m_memory_factor;
@@ -26,6 +26,6 @@ class NaiveRunSumProcessor : public NaiveProcessor {
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_NAIVERUNSUMPROCESSOR_HPP_

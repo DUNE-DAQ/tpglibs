@@ -13,7 +13,7 @@
 #ifndef TPGENGINE_NAIVEPROCESSOR_HPP_
 #define TPGENGINE_NAIVEPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class NaiveProcessor : public AbstractProcessor<std::array<int16_t, 16>> {
   public:
@@ -24,6 +24,6 @@ class NaiveProcessor : public AbstractProcessor<std::array<int16_t, 16>> {
     }
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_NAIVEPROCESSOR_HPP_

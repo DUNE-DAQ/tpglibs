@@ -9,14 +9,14 @@
 #ifndef TPGENGINE_TPGPIPELINE_HPP_
 #define TPGENGINE_TPGPIPELINE_HPP_
 
-#include "tpgengine/AbstractFactory.hpp"
+#include "tpglibs/AbstractFactory.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
 
 #include <nlohmann/json.hpp>
 #include <vector>
 
-namespace tpgengine {
+namespace tpglibs {
 
 template <typename T, typename U>
 class TPGPipeline {
@@ -79,6 +79,6 @@ class TPGPipeline {
     std::shared_ptr<processor_t> m_processor_head;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_TPGPIPELINE_HPP_

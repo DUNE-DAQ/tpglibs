@@ -9,10 +9,10 @@
 #ifndef TPGENGINE_AVXPIPELINE_HPP_
 #define TPGENGINE_AVXPIPELINE_HPP_
 
-#include "tpgengine/TPGPipeline.hpp"
-#include "tpgengine/AVXFactory.hpp"
+#include "tpglibs/TPGPipeline.hpp"
+#include "tpglibs/AVXFactory.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-attributes"
@@ -24,6 +24,6 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
 };
 #pragma GCC diagnostic pop
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXPIPELINE_HPP_

@@ -17,7 +17,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace tpgengine {
+namespace tpglibs {
 
 template <typename T>
 class AbstractFactory {
@@ -41,8 +41,8 @@ class AbstractFactory {
     static name_creator_map& get_creators();
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
-#include "tpgengine/AbstractFactory.hxx"
+#include "tpglibs/AbstractFactory.hxx"
 
 #endif // TPGENGINE_ABSTRACTFACTORY_HPP_

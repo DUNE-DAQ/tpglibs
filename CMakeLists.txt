@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(tpgengine VERSION 0.0.0)
+project(tpglibs VERSION 0.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -28,7 +28,7 @@ endif()
 
 ##############################################################################
 
-add_library(tpgengine SHARED
+add_library(tpglibs SHARED
 	src/AVXAbsRunSumProcessor.cpp
 	src/AVXFrugalPedestalSubtractProcessor.cpp
 	src/AVXRunSumProcessor.cpp
@@ -40,22 +40,22 @@ add_library(tpgengine SHARED
 	src/AVXPipeline.cpp
 	src/TPGenerator.cpp
 	)
-target_include_directories(tpgengine PUBLIC
+target_include_directories(tpglibs PUBLIC
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 	$<BUILD_INTERFACE:${PROJECTSOURCE_DIR}/src>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	)
-target_link_libraries(tpgengine PRIVATE nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt)
-install(TARGETS tpgengine EXPORT tpgengineTargets)
+target_link_libraries(tpglibs PRIVATE nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt)
+install(TARGETS tpglibs EXPORT tpglibsTargets)
 
-CONFIGURE_PACKAGE_CONFIG_FILE(cmake/tpgengineConfig.cmake.in
-	${CMAKE_CURRENT_BINARY_DIR}/tpgengineConfig.cmake
+CONFIGURE_PACKAGE_CONFIG_FILE(cmake/tpglibsConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/tpglibsConfig.cmake
 	INSTALL_DESTINATION ${CMAKE_INSTALL_CMAKEDIR}
 	)
 
 add_subdirectory(unittest)
 
-install(EXPORT tpgengineTargets DESTINATION ${CMAKE_INSTALL_CMAKEDIR} NAMESPACE tpgengine::)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tpgengineConfig.cmake
+install(EXPORT tpglibsTargets DESTINATION ${CMAKE_INSTALL_CMAKEDIR} NAMESPACE tpglibs::)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tpglibsConfig.cmake
 	DESTINATION ${CMAKE_INSTALL_CMAKEDIR})
 install(DIRECTORY include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h??")

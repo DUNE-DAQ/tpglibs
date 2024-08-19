@@ -11,10 +11,10 @@
 
 namespace py = pybind11;
 
-namespace dunedaq::tpgengine::python {
+namespace dunedaq::tpglibs::python {
 
 void
 register_renameme(py::module& m)
 {}
 
-} // namespace dunedaq::tpgengine::python
+} // namespace dunedaq::tpglibs::python

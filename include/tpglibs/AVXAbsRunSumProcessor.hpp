@@ -6,18 +6,18 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXRunSumProcessor.hpp"
+#include "tpglibs/AVXRunSumProcessor.hpp"
 
 #ifndef TPGENGINE_AVXABSRUNSUMPROCESSOR_HPP_
 #define TPGENGINE_AVXABSRUNSUMPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class AVXAbsRunSumProcessor : public AVXRunSumProcessor {
   public:
     __m256i process(const __m256i& signal) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXABSRUNSUMPROCESSOR_HPP_

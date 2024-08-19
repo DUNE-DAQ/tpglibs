@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXFrugalPedestalSubtractProcessor.hpp"
+#include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXFrugalPedestalSubtractProcessor", AVXFrugalPedestalSubtractProcessor)
 
@@ -46,4 +46,4 @@ __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   return AVXProcessor::process(_mm256_sub_epi16(signal, m_pedestal));
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveFrugalPedestalSubtractProcessor.hpp"
+#include "tpglibs/NaiveFrugalPedestalSubtractProcessor.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveFrugalPedestalSubtractProcessor", NaiveFrugalPedestalSubtractProcessor)
 
@@ -46,4 +46,4 @@ NaiveFrugalPedestalSubtractProcessor::process(const naive_array_t& signal) {
   return NaiveProcessor::process(subtracted_signal);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

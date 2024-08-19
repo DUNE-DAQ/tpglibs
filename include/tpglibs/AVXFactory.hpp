@@ -9,20 +9,20 @@
 #ifndef TPGENGINE_AVXFACTORY_HPP_
 #define TPGENGINE_AVXFACTORY_HPP_
 
-#include "tpgengine/AbstractFactory.hpp"
-#include "tpgengine/AVXProcessor.hpp"
+#include "tpglibs/AbstractFactory.hpp"
+#include "tpglibs/AVXProcessor.hpp"
 
 #define REGISTER_AVXPROCESSOR_CREATOR(processor_name, processor_class)                                                                     \
   static struct processor_class##Registrar {                                                                                               \
     processor_class##Registrar() {                                                                                                         \
-      tpgengine::AVXFactory::register_creator(processor_name, []() -> std::shared_ptr<tpgengine::AVXProcessor> {return std::make_shared<processor_class>();});      \
+      tpglibs::AVXFactory::register_creator(processor_name, []() -> std::shared_ptr<tpglibs::AVXProcessor> {return std::make_shared<processor_class>();});      \
     }                                                                                                                                      \
   } processor_class##_registrar;
 
-namespace tpgengine {
+namespace tpglibs {
 
 class AVXFactory : public AbstractFactory<AVXProcessor> {};
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXFACTORY_HPP_

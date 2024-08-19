@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/TPGenerator.hpp"
+#include "tpglibs/TPGenerator.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 void
 TPGenerator::configure(const std::vector<nlohmann::json>& configs,
@@ -47,4 +47,4 @@ TPGenerator::expand_frame(const __m256i& regi) {
 }
 
 
-} // namespace tpgengine
+} // namespace tpglibs

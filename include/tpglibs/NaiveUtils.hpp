@@ -11,7 +11,7 @@
 #ifndef TPGENGINE_NAIVEUTILS_HPP_
 #define TPGENGINE_NAIVEUTILS_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 // Modeled to be consistent with AVX.
 inline int16_t _naive_div_int16(const int16_t& a, const int16_t& b) {
@@ -22,6 +22,6 @@ inline int16_t _naive_div_int16(const int16_t& a, const int16_t& b) {
   return (int16_t)(mulhrs);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_NAIVEUTILS_HPP_

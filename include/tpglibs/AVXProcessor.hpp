@@ -6,14 +6,14 @@
  * received with this code.
  */
 
-#include "tpgengine/AbstractProcessor.hpp"
+#include "tpglibs/AbstractProcessor.hpp"
 
 #include <immintrin.h>
 
 #ifndef TPGENGINE_AVXPROCESSOR_HPP_
 #define TPGENGINE_AVXPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 // Compilation warns about some AVX alignment attributes that are ignored.
 // This use case should not worry about these warnings.
@@ -27,6 +27,6 @@ class AVXProcessor : public AbstractProcessor<__m256i> {
 };
 #pragma GCC diagnostic pop
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXPROCESSOR_HPP_

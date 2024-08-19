@@ -9,7 +9,7 @@
 #ifndef TPGENGINE_ABSTRACTFACTORY_HXX_
 #define TPGENGINE_ABSTRACTFACTORY_HXX_
 
-namespace tpgengine {
+namespace tpglibs {
 
 template <typename T>
 std::shared_ptr<AbstractFactory<T>> AbstractFactory<T>::s_single_factory = nullptr;
@@ -56,6 +56,6 @@ std::shared_ptr<AbstractFactory<T>> AbstractFactory<T>::get_instance()
   return s_single_factory;
 }
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_ABSTRACTFACTORY_HXX_

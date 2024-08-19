@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveAbsRunSumProcessor.hpp"
+#include "tpglibs/NaiveAbsRunSumProcessor.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveAbsRunSumProcessor", NaiveAbsRunSumProcessor)
 
@@ -22,4 +22,4 @@ NaiveAbsRunSumProcessor::naive_array_t NaiveAbsRunSumProcessor::process(const na
   return NaiveRunSumProcessor::process(abs_signal);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveRunSumProcessor.hpp"
+#include "tpglibs/NaiveRunSumProcessor.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveRunSumProcessor", NaiveRunSumProcessor)
 
@@ -40,4 +40,4 @@ NaiveRunSumProcessor::naive_array_t NaiveRunSumProcessor::process(const naive_ar
   return NaiveProcessor::process(m_running_sum);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

@@ -9,13 +9,13 @@
 #define BOOST_TEST_MODULE boost_test_macro_overview
 #define FMT_HEADER_ONLY
 
-#include "tpgengine/AVXPipeline.hpp"
+#include "tpglibs/AVXPipeline.hpp"
 
 #include <boost/test/included/unit_test.hpp>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
-namespace tpgengine {
+namespace tpglibs {
 
 BOOST_AUTO_TEST_CASE(test_macro_overview)
 {
@@ -102,4 +102,4 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(adc_peak_at_1600);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

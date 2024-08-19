@@ -6,12 +6,12 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveFactory.hpp"
+#include "tpglibs/NaiveFactory.hpp"
 
 #ifndef TPGENGINE_NAIVEFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGENGINE_NAIVEFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class NaiveFrugalPedestalSubtractProcessor : public NaiveProcessor {
   naive_array_t m_pedestal{};
@@ -23,6 +23,6 @@ class NaiveFrugalPedestalSubtractProcessor : public NaiveProcessor {
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_NAIVEFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_

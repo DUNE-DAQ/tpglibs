@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXThresholdProcessor.hpp"
+#include "tpglibs/AVXThresholdProcessor.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXThresholdProcessor", AVXThresholdProcessor)
 
@@ -32,4 +32,4 @@ __m256i AVXThresholdProcessor::process(const __m256i& signal) {
   return AVXProcessor::process(above_threshold);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

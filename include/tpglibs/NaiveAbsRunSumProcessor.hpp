@@ -6,20 +6,20 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveRunSumProcessor.hpp"
+#include "tpglibs/NaiveRunSumProcessor.hpp"
 
 #include <cmath>
 
 #ifndef TPGENGINE_NAIVEABSRUNSUMPROCESSOR_HPP_
 #define TPGENGINE_NAIVEABSRUNSUMPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class NaiveAbsRunSumProcessor : public NaiveRunSumProcessor {
   public:
     naive_array_t process(const naive_array_t& signal) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_NAIVEABSRUNSUMPROCESSOR_HPP_

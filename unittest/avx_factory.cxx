@@ -9,13 +9,13 @@
 #define BOOST_TEST_MODULE boost_test_macro_overview
 #define FMT_HEADER_ONLY
 
-#include "tpgengine/AVXFactory.hpp"
+#include "tpglibs/AVXFactory.hpp"
 
 #include <boost/test/included/unit_test.hpp>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
-namespace tpgengine {
+namespace tpglibs {
 
 BOOST_AUTO_TEST_CASE(test_macro_overview)
 {
@@ -87,4 +87,4 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(same_rs);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

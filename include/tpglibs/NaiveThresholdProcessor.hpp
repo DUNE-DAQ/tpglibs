@@ -6,12 +6,12 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveFactory.hpp"
+#include "tpglibs/NaiveFactory.hpp"
 
 #ifndef TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_
 #define TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class NaiveThresholdProcessor : public NaiveProcessor {
   naive_array_t m_threshold;
@@ -21,6 +21,6 @@ class NaiveThresholdProcessor : public NaiveProcessor {
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_

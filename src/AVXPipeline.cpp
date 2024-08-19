@@ -5,9 +5,9 @@
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
-#include "tpgengine/AVXPipeline.hpp"
+#include "tpglibs/AVXPipeline.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 __m256i
 AVXPipeline::save_state(const __m256i& processed_signal) {
@@ -79,4 +79,4 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
   return tps;
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

@@ -6,13 +6,13 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXFactory.hpp"
-#include "tpgengine/AVXUtils.hpp"
+#include "tpglibs/AVXFactory.hpp"
+#include "tpglibs/AVXUtils.hpp"
 
 #ifndef TPGENGINE_AVXRUNSUMPROCESSOR_HPP_
 #define TPGENGINE_AVXRUNSUMPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class AVXRunSumProcessor : public AVXProcessor {
   __m256i m_memory_factor;
@@ -24,6 +24,6 @@ class AVXRunSumProcessor : public AVXProcessor {
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXRUNSUMPROCESSOR_HPP_

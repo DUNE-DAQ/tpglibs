@@ -8,7 +8,7 @@
 
 #define BOOST_TEST_MODULE boost_test_macro_overview
 
-#include "tpgengine/TPGenerator.hpp"
+#include "tpglibs/TPGenerator.hpp"
 
 #include "fddetdataformats/WIBEthFrame.hpp"
 #include "fddetdataformats/TDEEthFrame.hpp"
@@ -17,7 +17,7 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
-namespace tpgengine {
+namespace tpglibs {
 
 BOOST_AUTO_TEST_CASE(test_macro_overview)
 {
@@ -70,4 +70,4 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(min_peak > 200);  // Truly it should depend on the plane, so this is naive.
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

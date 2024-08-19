@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXRunSumProcessor.hpp"
+#include "tpglibs/AVXRunSumProcessor.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXRunSumProcessor", AVXRunSumProcessor)
 
@@ -42,4 +42,4 @@ __m256i AVXRunSumProcessor::process(const __m256i& signal) {
   return AVXProcessor::process(m_running_sum);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

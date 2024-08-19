@@ -6,12 +6,12 @@
  * received with this code.
  */
 
-#include "tpgengine/AVXFactory.hpp"
+#include "tpglibs/AVXFactory.hpp"
 
 #ifndef TPGENGINE_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGENGINE_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
   __m256i m_pedestal = _mm256_setzero_si256();
@@ -23,6 +23,6 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_

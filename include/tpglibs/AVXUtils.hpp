@@ -11,7 +11,7 @@
 #ifndef TPGENGINE_AVXUTILS_HPP_
 #define TPGENGINE_AVXUTILS_HPP_
 
-namespace tpgengine {
+namespace tpglibs {
 
 // NaiveUtils.hpp has the lay version.
 inline __m256i _mm256_div_epi16(const __m256i& va, const int16_t& b) {
@@ -19,6 +19,6 @@ inline __m256i _mm256_div_epi16(const __m256i& va, const int16_t& b) {
   return _mm256_mulhrs_epi16(va, vb);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_AVXUTILS_HPP_

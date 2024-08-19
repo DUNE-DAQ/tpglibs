@@ -13,7 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <memory>
 
-namespace tpgengine {
+namespace tpglibs {
 
 template <class T>
 class AbstractProcessor {
@@ -37,6 +37,6 @@ class AbstractProcessor {
     }
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_ABSTRACTPROCESSOR_HPP_

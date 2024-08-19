@@ -6,9 +6,9 @@
  * received with this code.
  */
 
-#include "tpgengine/NaiveThresholdProcessor.hpp"
+#include "tpglibs/NaiveThresholdProcessor.hpp"
 
-namespace tpgengine {
+namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveThresholdProcessor", NaiveThresholdProcessor)
 
@@ -30,4 +30,4 @@ NaiveThresholdProcessor::naive_array_t NaiveThresholdProcessor::process(const na
   return NaiveProcessor::process(above_threshold);
 }
 
-} // namespace tpgengine
+} // namespace tpglibs

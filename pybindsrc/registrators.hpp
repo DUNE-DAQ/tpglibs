@@ -14,7 +14,7 @@
 
 #include <pybind11/pybind11.h>
 
-namespace dunedaq::tpgengine::python {
+namespace dunedaq::tpglibs::python {
 
   void register_renameme(pybind11::module&);
 

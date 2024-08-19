@@ -13,12 +13,12 @@
 
 namespace py = pybind11;
 
-namespace dunedaq::tpgengine::python {
+namespace dunedaq::tpglibs::python {
 
-PYBIND11_MODULE(_daq_tpgengine_py, m)
+PYBIND11_MODULE(_daq_tpglibs_py, m)
 {
 
-  m.doc() = "C++ implementation of the tpgengine modules";
+  m.doc() = "C++ implementation of the tpglibs modules";
 
   // You'd want to change renameme to the name of a function which
   // you'd like to have a python binding to
@@ -26,4 +26,4 @@ PYBIND11_MODULE(_daq_tpgengine_py, m)
   register_renameme(m);
 }
 
-} // namespace dunedaq::tpgengine::python
+} // namespace dunedaq::tpglibs::python

@@ -9,11 +9,11 @@
 #ifndef TPGENGINE_TPGENERATOR_HPP_
 #define TPGENGINE_TPGENERATOR_HPP_
 
-#include "tpgengine/AVXPipeline.hpp"
+#include "tpglibs/AVXPipeline.hpp"
 
 #include <utility>
 
-namespace tpgengine {
+namespace tpglibs {
 
 class TPGenerator {
   static const uint8_t m_num_channels_per_pipeline = 16; // AVX2 with int16 data samples allows us to process 16 channels.
@@ -64,6 +64,6 @@ class TPGenerator {
     __m256i expand_frame(const __m256i& regi);
 };
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_TPGENERATOR_HPP_

@@ -9,20 +9,20 @@
 #ifndef TPGENGINE_NAIVEFACTORY_HPP_
 #define TPGENGINE_NAIVEFACTORY_HPP_
 
-#include "tpgengine/AbstractFactory.hpp"
-#include "tpgengine/NaiveProcessor.hpp"
+#include "tpglibs/AbstractFactory.hpp"
+#include "tpglibs/NaiveProcessor.hpp"
 
 #define REGISTER_NAIVEPROCESSOR_CREATOR(processor_name, processor_class)                                                                                     \
     static struct processor_class##Registrar {                                                                                                               \
           processor_class##Registrar() {                                                                                                                     \
-                  tpgengine::NaiveFactory::register_creator(processor_name, []() -> std::shared_ptr<tpgengine::NaiveProcessor> {return std::make_shared<processor_class>();});      \
+                  tpglibs::NaiveFactory::register_creator(processor_name, []() -> std::shared_ptr<tpglibs::NaiveProcessor> {return std::make_shared<processor_class>();});      \
                 }                                                                                                                                            \
         } processor_class##_registrar;
 
-namespace tpgengine {
+namespace tpglibs {
 
   class NaiveFactory : public AbstractFactory<NaiveProcessor> {};
 
-} // namespace tpgengine
+} // namespace tpglibs
 
 #endif // TPGENGINE_NAIVEFACTORY_HPP_
