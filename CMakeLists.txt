@@ -9,8 +9,10 @@ add_compile_options(-O2)
 set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake)
 
 find_package(daq-cmake REQUIRED)
-find_package(fmt REQUIRED)
 
+daq_setup_environment()
+
+find_package(fmt REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(detdataformats REQUIRED)
 find_package(fddetdataformats REQUIRED)
@@ -28,34 +30,13 @@ endif()
 
 ##############################################################################
 
-add_library(tpglibs SHARED
-	src/AVXAbsRunSumProcessor.cpp
-	src/AVXFrugalPedestalSubtractProcessor.cpp
-	src/AVXRunSumProcessor.cpp
-	src/AVXThresholdProcessor.cpp
-	src/NaiveAbsRunSumProcessor.cpp
-	src/NaiveFrugalPedestalSubstractProcessor.cpp
-	src/NaiveRunSumProcessor.cpp
-	src/NaiveThresholdProcessor.cpp
-	src/AVXPipeline.cpp
-	src/TPGenerator.cpp
-	)
-target_include_directories(tpglibs PUBLIC
-	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-	$<BUILD_INTERFACE:${PROJECTSOURCE_DIR}/src>
-	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-	)
-target_link_libraries(tpglibs PRIVATE nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt)
-install(TARGETS tpglibs EXPORT tpglibsTargets)
+daq_add_library( *.cpp  LINK_LIBRARIES nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt )
 
-CONFIGURE_PACKAGE_CONFIG_FILE(cmake/tpglibsConfig.cmake.in
-	${CMAKE_CURRENT_BINARY_DIR}/tpglibsConfig.cmake
-	INSTALL_DESTINATION ${CMAKE_INSTALL_CMAKEDIR}
-	)
+daq_add_python_bindings(*.cpp LINK_LIBRARIES ${PROJECT_NAME})
 
-add_subdirectory(unittest)
+daq_add_unit_test(avx_factory_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(avx_generator_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(avx_pipeline_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(avx_processors_test LINK_LIBRARIES tpglibs)
 
-install(EXPORT tpglibsTargets DESTINATION ${CMAKE_INSTALL_CMAKEDIR} NAMESPACE tpglibs::)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tpglibsConfig.cmake
-	DESTINATION ${CMAKE_INSTALL_CMAKEDIR})
-install(DIRECTORY include/${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h??")
+daq_install()
