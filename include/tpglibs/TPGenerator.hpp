@@ -62,6 +62,7 @@ class TPGenerator {
 
   private:
     __m256i expand_frame(const __m256i& regi);
+    __m256i old_expand_frame(const __m256i& regi);
 };
 
 } // namespace tpglibs
