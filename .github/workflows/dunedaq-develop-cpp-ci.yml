@@ -5,14 +5,14 @@ name: build-develop
 on:
   push:
     branches: 
-      - production/v4
+      - develop
       - patch/*
       - prep-release/*
     paths-ignore:
       - 'docs/**'
       - '.github/**'
   pull_request:
-    branches: [ production/v4 ]
+    branches: [ develop ]
   schedule:
     - cron: "0 9 * * *"
 
@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - image: "ghcr.io/dune-daq/nightly-release-alma9:production_v4"
+          - image: "ghcr.io/dune-daq/nightly-release-alma9:development_v5"
             os_name: "a9"
     container:
       image: ${{ matrix.image }}
@@ -49,8 +49,10 @@ jobs:
       run: |
           export REPO=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')
           source /cvmfs/dunedaq.opensciencegrid.org/setup_dunedaq.sh
-          setup_dbt latest_v4 || true
+          setup_dbt latest_v5 || true
           release_name="last_fddaq"
+
+          if [[ -n $( sed -r -n '/- name: '$REPO'$/p' daq-release/configs/nddaq/nddaq-develop/release.yaml ) ]] ; then release_name="last_nddaq"; fi
 
           dbt-create -n $release_name dev-${{ matrix.os_name }}
 
@@ -64,7 +66,7 @@ jobs:
           export REPO=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')
           cd $GITHUB_WORKSPACE/dev-${{ matrix.os_name }}
           source env.sh || true
-
+          test $REPO == "dbe" && spack load dbe || true
           spack unload $REPO || true
           cp -pr $GITHUB_WORKSPACE/DUNE-DAQ/$REPO $GITHUB_WORKSPACE/dev-${{ matrix.os_name }}/sourcecode
           dbt-build # --unittest # --lint
