@@ -25,7 +25,6 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   dunedaq::fddetdataformats::WIBEthFrame frame;
 
   const int num_time_samples_per_frame = dunedaq::fddetdataformats::WIBEthFrame::s_time_samples_per_frame;
-  const int num_adc_words_per_ts = dunedaq::fddetdataformats::WIBEthFrame::s_num_adc_words_per_ts;
 
   for (int t_sample = 0; t_sample < num_time_samples_per_frame; t_sample++) {
     for (int chan = 0; chan < 64; chan++) {
