@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_TPGPIPELINE_HPP_
-#define TPGENGINE_TPGPIPELINE_HPP_
+#ifndef TPGLIBS_TPGPIPELINE_HPP_
+#define TPGLIBS_TPGPIPELINE_HPP_
 
 #include "tpglibs/AbstractFactory.hpp"
 
@@ -81,4 +81,4 @@ class TPGPipeline {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_TPGPIPELINE_HPP_
+#endif // TPGLIBS_TPGPIPELINE_HPP_

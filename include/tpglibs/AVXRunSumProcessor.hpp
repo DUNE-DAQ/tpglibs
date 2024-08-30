@@ -9,8 +9,8 @@
 #include "tpglibs/AVXFactory.hpp"
 #include "tpglibs/AVXUtils.hpp"
 
-#ifndef TPGENGINE_AVXRUNSUMPROCESSOR_HPP_
-#define TPGENGINE_AVXRUNSUMPROCESSOR_HPP_
+#ifndef TPGLIBS_AVXRUNSUMPROCESSOR_HPP_
+#define TPGLIBS_AVXRUNSUMPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -26,4 +26,4 @@ class AVXRunSumProcessor : public AVXProcessor {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_AVXRUNSUMPROCESSOR_HPP_
+#endif // TPGLIBS_AVXRUNSUMPROCESSOR_HPP_

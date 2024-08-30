@@ -8,8 +8,8 @@
 
 #include <immintrin.h>
 
-#ifndef TPGENGINE_AVXUTILS_HPP_
-#define TPGENGINE_AVXUTILS_HPP_
+#ifndef TPGLIBS_AVXUTILS_HPP_
+#define TPGLIBS_AVXUTILS_HPP_
 
 namespace tpglibs {
 
@@ -21,4 +21,4 @@ inline __m256i _mm256_div_epi16(const __m256i& va, const int16_t& b) {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_AVXUTILS_HPP_
+#endif // TPGLIBS_AVXUTILS_HPP_

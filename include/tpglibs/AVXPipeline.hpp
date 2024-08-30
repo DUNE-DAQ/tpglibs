@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_AVXPIPELINE_HPP_
-#define TPGENGINE_AVXPIPELINE_HPP_
+#ifndef TPGLIBS_AVXPIPELINE_HPP_
+#define TPGLIBS_AVXPIPELINE_HPP_
 
 #include "tpglibs/TPGPipeline.hpp"
 #include "tpglibs/AVXFactory.hpp"
@@ -26,4 +26,4 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_AVXPIPELINE_HPP_
+#endif // TPGLIBS_AVXPIPELINE_HPP_

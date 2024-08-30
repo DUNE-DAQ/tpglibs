@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_ABSTRACTFACTORY_HPP_
-#define TPGENGINE_ABSTRACTFACTORY_HPP_
+#ifndef TPGLIBS_ABSTRACTFACTORY_HPP_
+#define TPGLIBS_ABSTRACTFACTORY_HPP_
 
 #include <cstdint>
 #include <exception>
@@ -45,4 +45,4 @@ class AbstractFactory {
 
 #include "tpglibs/AbstractFactory.hxx"
 
-#endif // TPGENGINE_ABSTRACTFACTORY_HPP_
+#endif // TPGLIBS_ABSTRACTFACTORY_HPP_

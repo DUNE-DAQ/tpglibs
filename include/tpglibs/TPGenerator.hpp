@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_TPGENERATOR_HPP_
-#define TPGENGINE_TPGENERATOR_HPP_
+#ifndef TPGLIBS_TPGENERATOR_HPP_
+#define TPGLIBS_TPGENERATOR_HPP_
 
 #include "tpglibs/AVXPipeline.hpp"
 
@@ -67,4 +67,4 @@ class TPGenerator {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_TPGENERATOR_HPP_
+#endif // TPGLIBS_TPGENERATOR_HPP_

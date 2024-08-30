@@ -8,8 +8,8 @@
 
 #include "tpglibs/NaiveFactory.hpp"
 
-#ifndef TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_
-#define TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_
+#ifndef TPGLIBS_NAIVETHRESHOLDPROCESSOR_HPP_
+#define TPGLIBS_NAIVETHRESHOLDPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -23,4 +23,4 @@ class NaiveThresholdProcessor : public NaiveProcessor {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_NAIVETHRESHOLDPROCESSOR_HPP_
+#endif // TPGLIBS_NAIVETHRESHOLDPROCESSOR_HPP_

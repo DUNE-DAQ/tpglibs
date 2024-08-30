@@ -11,8 +11,8 @@
 
 #include <algorithm>
 
-#ifndef TPGENGINE_NAIVERUNSUMPROCESSOR_HPP_
-#define TPGENGINE_NAIVERUNSUMPROCESSOR_HPP_
+#ifndef TPGLIBS_NAIVERUNSUMPROCESSOR_HPP_
+#define TPGLIBS_NAIVERUNSUMPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -28,4 +28,4 @@ class NaiveRunSumProcessor : public NaiveProcessor {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_NAIVERUNSUMPROCESSOR_HPP_
+#endif // TPGLIBS_NAIVERUNSUMPROCESSOR_HPP_

@@ -8,8 +8,8 @@
 
 #include <cstdint>
 
-#ifndef TPGENGINE_NAIVEUTILS_HPP_
-#define TPGENGINE_NAIVEUTILS_HPP_
+#ifndef TPGLIBS_NAIVEUTILS_HPP_
+#define TPGLIBS_NAIVEUTILS_HPP_
 
 namespace tpglibs {
 
@@ -24,4 +24,4 @@ inline int16_t _naive_div_int16(const int16_t& a, const int16_t& b) {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_NAIVEUTILS_HPP_
+#endif // TPGLIBS_NAIVEUTILS_HPP_

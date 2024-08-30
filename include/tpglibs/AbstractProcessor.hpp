@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_ABSTRACTPROCESSOR_HPP_
-#define TPGENGINE_ABSTRACTPROCESSOR_HPP_
+#ifndef TPGLIBS_ABSTRACTPROCESSOR_HPP_
+#define TPGLIBS_ABSTRACTPROCESSOR_HPP_
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
@@ -39,4 +39,4 @@ class AbstractProcessor {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_ABSTRACTPROCESSOR_HPP_
+#endif // TPGLIBS_ABSTRACTPROCESSOR_HPP_

@@ -10,8 +10,8 @@
 
 #include <immintrin.h>
 
-#ifndef TPGENGINE_AVXPROCESSOR_HPP_
-#define TPGENGINE_AVXPROCESSOR_HPP_
+#ifndef TPGLIBS_AVXPROCESSOR_HPP_
+#define TPGLIBS_AVXPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -29,4 +29,4 @@ class AVXProcessor : public AbstractProcessor<__m256i> {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_AVXPROCESSOR_HPP_
+#endif // TPGLIBS_AVXPROCESSOR_HPP_
