@@ -10,8 +10,8 @@
 
 #include <cmath>
 
-#ifndef TPGENGINE_NAIVEABSRUNSUMPROCESSOR_HPP_
-#define TPGENGINE_NAIVEABSRUNSUMPROCESSOR_HPP_
+#ifndef TPGLIBS_NAIVEABSRUNSUMPROCESSOR_HPP_
+#define TPGLIBS_NAIVEABSRUNSUMPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -22,4 +22,4 @@ class NaiveAbsRunSumProcessor : public NaiveRunSumProcessor {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_NAIVEABSRUNSUMPROCESSOR_HPP_
+#endif // TPGLIBS_NAIVEABSRUNSUMPROCESSOR_HPP_

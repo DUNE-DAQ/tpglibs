@@ -36,7 +36,7 @@ AVXPipeline::check_for_tps(const __m256i& tp_mask) {
   // tp_mask & 0xFFFF = 0 -> tp_mask == 0.
   // True => tp_mask is all zeros and has no TPs.
   // Negate!
-  return !_mm256_testz_si256(tp_mask, _mm256_set1_epi16(0xFFFF));
+  return !_mm256_testz_si256(tp_mask, _mm256_set1_epi16(-1));
 }
 
 std::vector<dunedaq::trgdataformats::TriggerPrimitive>
@@ -60,6 +60,7 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
     dunedaq::trgdataformats::TriggerPrimitive tp;
     tp.adc_integral        = tp_integral[i];
     tp.adc_peak            = tp_adc_peak[i];
+    tp.channel             = m_channels[i];
     tp.time_peak           = tp_time_peak[i];
     tp.time_over_threshold = tp_tot[i];
     tp.type                = tp.Type::kTPC;

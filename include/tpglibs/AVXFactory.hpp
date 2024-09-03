@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_AVXFACTORY_HPP_
-#define TPGENGINE_AVXFACTORY_HPP_
+#ifndef TPGLIBS_AVXFACTORY_HPP_
+#define TPGLIBS_AVXFACTORY_HPP_
 
 #include "tpglibs/AbstractFactory.hpp"
 #include "tpglibs/AVXProcessor.hpp"
@@ -25,4 +25,4 @@ class AVXFactory : public AbstractFactory<AVXProcessor> {};
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_AVXFACTORY_HPP_
+#endif // TPGLIBS_AVXFACTORY_HPP_

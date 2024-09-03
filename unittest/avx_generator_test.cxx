@@ -13,7 +13,7 @@
 #include "fddetdataformats/WIBEthFrame.hpp"
 #include "fddetdataformats/TDEEthFrame.hpp"
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
@@ -25,7 +25,6 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   dunedaq::fddetdataformats::WIBEthFrame frame;
 
   const int num_time_samples_per_frame = dunedaq::fddetdataformats::WIBEthFrame::s_time_samples_per_frame;
-  const int num_adc_words_per_ts = dunedaq::fddetdataformats::WIBEthFrame::s_num_adc_words_per_ts;
 
   for (int t_sample = 0; t_sample < num_time_samples_per_frame; t_sample++) {
     for (int chan = 0; chan < 64; chan++) {
@@ -40,15 +39,13 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
                                                                     {48, 0}, {49, 0}, {50, 0}, {51, 0}, {52, 0}, {53, 1}, {54, 1}, {55, 1}, {56, 1}, {57, 1}, {58, 2}, {59, 2}, {60, 2}, {61, 2}, {62, 2}, {63, 2}};
 
   // Just using the thresholding for simplicity.
-  std::vector<nlohmann::json> configs = {
+  std::vector<std::pair<std::string, nlohmann::json>> configs = {
     {
-      {"name", "AVXThresholdProcessor"},
-      {"config",
-        {
-          {"plane0", 200},
-          {"plane1", 300},
-          {"plane2", 445}
-        }
+      "AVXThresholdProcessor",
+      {
+        {"plane0", 200},
+        {"plane1", 300},
+        {"plane2", 445}
       }
     }
   };

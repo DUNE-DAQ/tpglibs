@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_ABSTRACTFACTORY_HXX_
-#define TPGENGINE_ABSTRACTFACTORY_HXX_
+#ifndef TPGLIBS_ABSTRACTFACTORY_HXX_
+#define TPGLIBS_ABSTRACTFACTORY_HXX_
 
 namespace tpglibs {
 
@@ -58,4 +58,4 @@ std::shared_ptr<AbstractFactory<T>> AbstractFactory<T>::get_instance()
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_ABSTRACTFACTORY_HXX_
+#endif // TPGLIBS_ABSTRACTFACTORY_HXX_

@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_NAIVEFACTORY_HPP_
-#define TPGENGINE_NAIVEFACTORY_HPP_
+#ifndef TPGLIBS_NAIVEFACTORY_HPP_
+#define TPGLIBS_NAIVEFACTORY_HPP_
 
 #include "tpglibs/AbstractFactory.hpp"
 #include "tpglibs/NaiveProcessor.hpp"
@@ -25,4 +25,4 @@ namespace tpglibs {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_NAIVEFACTORY_HPP_
+#endif // TPGLIBS_NAIVEFACTORY_HPP_

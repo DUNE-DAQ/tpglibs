@@ -6,8 +6,8 @@
  * received with this code.
  */
 
-#ifndef TPGENGINE_TPGENERATOR_HPP_
-#define TPGENGINE_TPGENERATOR_HPP_
+#ifndef TPGLIBS_TPGENERATOR_HPP_
+#define TPGLIBS_TPGENERATOR_HPP_
 
 #include "tpglibs/AVXPipeline.hpp"
 
@@ -22,7 +22,7 @@ class TPGenerator {
   int m_sample_tick_difference;
 
   public:
-    void configure(const std::vector<nlohmann::json>& configs,
+    void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                    const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers,
                    const int sample_tick_difference);
 
@@ -43,7 +43,14 @@ class TPGenerator {
 
         // Loop in pipelines.
         for (int p = 0; p < m_num_pipelines; p++) {
+          if (p == m_num_pipelines - 1)
+            cursor -= 4; // Take a step of 32 bit backwards for the last sub-frame.
+
           __m256i regi = _mm256_lddqu_si256((__m256i*)cursor);
+
+          if (p == m_num_pipelines - 1) // Permute the row order to use the same operation.
+            regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
+
           __m256i expanded_subframe = expand_frame(regi);
           std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
 
@@ -62,8 +69,9 @@ class TPGenerator {
 
   private:
     __m256i expand_frame(const __m256i& regi);
+    __m256i old_expand_frame(const __m256i& regi);
 };
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_TPGENERATOR_HPP_
+#endif // TPGLIBS_TPGENERATOR_HPP_

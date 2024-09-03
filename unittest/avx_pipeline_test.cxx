@@ -11,7 +11,7 @@
 
 #include "tpglibs/AVXPipeline.hpp"
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
@@ -56,28 +56,24 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
                                                                     {250, 2}};
 
   // Horrendous brackets.
-  std::vector<nlohmann::json> configs = {
+  std::vector<std::pair<std::string, nlohmann::json>> configs = {
     {
-      {"name", "AVXRunSumProcessor"},
-      {"config",
-        {
-          {"memory_factor_plane0", 10},
-          {"memory_factor_plane1", 10},
-          {"memory_factor_plane2", 10},
-          {"scale_factor_plane0", 10},
-          {"scale_factor_plane1", 10},
-          {"scale_factor_plane2", 10},
-        }
+      "AVXRunSumProcessor",
+      {
+        {"memory_factor_plane0", 10},
+        {"memory_factor_plane1", 10},
+        {"memory_factor_plane2", 10},
+        {"scale_factor_plane0", 10},
+        {"scale_factor_plane1", 10},
+        {"scale_factor_plane2", 10},
       }
     },
     {
-      {"name", "AVXThresholdProcessor"},
-      {"config",
-        {
-          {"plane0", 200},
-          {"plane1", 1000},
-          {"plane2", 1500}
-        }
+      "AVXThresholdProcessor",
+      {
+        {"plane0", 200},
+        {"plane1", 1000},
+        {"plane2", 1500}
       }
     }
   };

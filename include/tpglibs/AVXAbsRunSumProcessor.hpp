@@ -8,8 +8,8 @@
 
 #include "tpglibs/AVXRunSumProcessor.hpp"
 
-#ifndef TPGENGINE_AVXABSRUNSUMPROCESSOR_HPP_
-#define TPGENGINE_AVXABSRUNSUMPROCESSOR_HPP_
+#ifndef TPGLIBS_AVXABSRUNSUMPROCESSOR_HPP_
+#define TPGLIBS_AVXABSRUNSUMPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -20,4 +20,4 @@ class AVXAbsRunSumProcessor : public AVXRunSumProcessor {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_AVXABSRUNSUMPROCESSOR_HPP_
+#endif // TPGLIBS_AVXABSRUNSUMPROCESSOR_HPP_

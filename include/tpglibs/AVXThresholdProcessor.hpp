@@ -8,8 +8,8 @@
 
 #include "tpglibs/AVXFactory.hpp"
 
-#ifndef TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_
-#define TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_
+#ifndef TPGLIBS_AVXTHRESHOLDPROCESSOR_HPP_
+#define TPGLIBS_AVXTHRESHOLDPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -23,4 +23,4 @@ class AVXThresholdProcessor : public AVXProcessor {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_AVXTHRESHOLDPROCESSOR_HPP_
+#endif // TPGLIBS_AVXTHRESHOLDPROCESSOR_HPP_

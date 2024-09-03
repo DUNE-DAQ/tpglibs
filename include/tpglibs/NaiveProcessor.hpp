@@ -10,8 +10,8 @@
 
 #include <array>
 
-#ifndef TPGENGINE_NAIVEPROCESSOR_HPP_
-#define TPGENGINE_NAIVEPROCESSOR_HPP_
+#ifndef TPGLIBS_NAIVEPROCESSOR_HPP_
+#define TPGLIBS_NAIVEPROCESSOR_HPP_
 
 namespace tpglibs {
 
@@ -26,4 +26,4 @@ class NaiveProcessor : public AbstractProcessor<std::array<int16_t, 16>> {
 
 } // namespace tpglibs
 
-#endif // TPGENGINE_NAIVEPROCESSOR_HPP_
+#endif // TPGLIBS_NAIVEPROCESSOR_HPP_
