@@ -14,9 +14,10 @@
 namespace tpglibs {
 
 class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
-  __m256i m_pedestal = _mm256_setzero_si256();
-  __m256i m_accum = _mm256_setzero_si256();
-  int16_t m_accum_limit{10};
+  protected:
+    __m256i m_pedestal = _mm256_setzero_si256();
+    __m256i m_accum = _mm256_setzero_si256();
+    int16_t m_accum_limit{10};
 
   public:
     __m256i process(const __m256i& signal) override;
