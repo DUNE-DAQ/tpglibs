@@ -18,7 +18,7 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
   // If it was active and is now inactive, then it must be a new TP.
   __m256i new_tps    = _mm256_and_si256(was_active, inactive);
 
-  m_adc_integral = _mm256_adds_epi16(m_adc_integral, processed_signal);
+  m_adc_integral = _mm256_adds_epu16(m_adc_integral, processed_signal);
 
   __m256i above_peak = _mm256_cmpgt_epi16(processed_signal, m_adc_peak);
 
@@ -47,8 +47,8 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
   __m256i adc_peak = _mm256_blendv_epi8(_mm256_setzero_si256(), m_adc_peak, tp_mask);
   __m256i time_peak = _mm256_blendv_epi8(_mm256_setzero_si256(), m_time_peak, tp_mask);
 
-  // Convert to int16_t.
-  int16_t tp_tot[16], tp_integral[16], tp_adc_peak[16], tp_time_peak[16];
+  // Convert to uint16_t.
+  uint16_t tp_tot[16], tp_integral[16], tp_adc_peak[16], tp_time_peak[16];
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(tp_tot), time_over_threshold);
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(tp_integral), adc_integral);
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(tp_adc_peak), adc_peak);
