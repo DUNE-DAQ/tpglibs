@@ -19,7 +19,7 @@ void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config,
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);
-  __m256i is_lt = _mm256_cmpeq_epi16(m_pedestal, signal);
+  __m256i is_lt = _mm256_cmpgt_epi16(m_pedestal, signal);
 
   // Update m_accum.
   __m256i to_add = _mm256_setzero_si256();                                    // Assumes equal to pedestal.
