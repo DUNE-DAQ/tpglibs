@@ -1,7 +1,7 @@
 /**
- * @file avx_processors.cxx
+ * @file avx_processors_test.cxx
  *
- * This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */

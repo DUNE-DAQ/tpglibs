@@ -1,7 +1,7 @@
 /**
  * @file TPGenerator.hpp
  *
- * This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
@@ -15,6 +15,13 @@
 
 namespace tpglibs {
 
+/**
+ * @class TPGenerator
+ *
+ * @brief TPG driving class.
+ *
+ * This is the interface that receives raw data frames to process and outputs the TPs accordingly.
+ */
 class TPGenerator {
   static const uint8_t m_num_channels_per_pipeline = 16; // AVX2 with int16 data samples allows us to process 16 channels.
   uint8_t m_num_pipelines = 0;  // Gets set inside configure.
@@ -22,10 +29,25 @@ class TPGenerator {
   int m_sample_tick_difference;
 
   public:
+    /**
+     * @brief Setup and configure the AVX pipelines.
+     *
+     * @param configs A vector of pairs: AVX pipeline to use and its configuration.
+     * @param channel_plane_numbers A vector of channel numbers and their plane numbers.
+     * @param sample_tick_difference Number of ticks between time samples in expected data frames.
+     */
     void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                    const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers,
                    const int sample_tick_difference);
 
+    /**
+     * @brief Driving function for the TPG.
+     *
+     * This function receives the frames, expands, sends down AVX pipelines, and returns TPs that were generated.
+     *
+     * @param frame A data frame to process and generate TPs from.
+     * @return A vector of TPs.
+     */
     template <typename T>
     std::vector<dunedaq::trgdataformats::TriggerPrimitive> operator()(const T* frame) {
       // Max number of TPs for a channel: number of time samples / 2.
@@ -68,8 +90,8 @@ class TPGenerator {
     }
 
   private:
-    __m256i expand_frame(const __m256i& regi);
-    __m256i old_expand_frame(const __m256i& regi);
+    __m256i expand_frame(const __m256i& regi); /// @brief Expansion from 14-bit signals to 16-bit.
+    __m256i old_expand_frame(const __m256i& regi); /// @brief Legacy expansion function.
 };
 
 } // namespace tpglibs

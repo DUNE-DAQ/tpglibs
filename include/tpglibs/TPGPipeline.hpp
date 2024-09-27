@@ -1,7 +1,7 @@
 /**
  * @file TPGPipeline.hpp
  *
- * This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
@@ -18,14 +18,27 @@
 
 namespace tpglibs {
 
+/**
+ * @class TPGPipeline
+ *
+ * @brief Abstract class for the TPG pipeline.
+ */
 template <typename T, typename U>
 class TPGPipeline {
   public:
+    /** @brief  Processor type to use. Generally AVX. */
     using processor_t = T;
+    /** @brief Signal type to use. Generally __m256i. */
     using signal_t = U;
 
     virtual ~TPGPipeline() = default;
 
+    /**
+     * @brief Configure the pieces to the pipeline.
+     *
+     * @param configs Vector of processors and configurations to be used.
+     * @param channel_plane_numbers Vector of channel numbers and their plane numbers.
+     */
     virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
@@ -55,6 +68,9 @@ class TPGPipeline {
       }
     }
 
+    /**
+     * @brief Process a signal through the pipeline.
+     */
     virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> process(const signal_t& signal) {
       signal_t tp_mask = save_state(m_processor_head->process(signal));
 
@@ -65,17 +81,29 @@ class TPGPipeline {
       return tps;
     }
 
+    /** @brief Pure virtual function that will check if any TPs can be generated. */
     virtual bool check_for_tps(const signal_t& tp_mask) = 0;
+
+    /** @brief Pure virtual function that will save the state of the generation. */
     virtual signal_t save_state(const signal_t& processed_signal) = 0;
+
+    /** @brief Pure virtual function that will generate TPs given a mask to draw from. */
     virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> generate_tps(const signal_t& tp_mask) = 0;
 
   protected:
+    /** @brief The on-going ADC integral for channels that are considered active. */
     signal_t m_adc_integral{};
+    /** @brief The ADC peak for channels that are considered active. */
     signal_t m_adc_peak{};
+    /** @brief The time over threshold for channels that are considered active. */
     signal_t m_time_over_threshold{};
+    /** @brief The time for a channel's ADC peak. */
     signal_t m_time_peak{};
+    /** @brief Detector channel numbers for the 16 channels that are being processed. */
     int16_t m_channels[16];
+    /** @brief Processor factory singleton. */
     std::shared_ptr<AbstractFactory<processor_t>> m_factory = AbstractFactory<processor_t>::get_instance();
+    /** @brief Processor head to start from. */
     std::shared_ptr<processor_t> m_processor_head;
 };
 
