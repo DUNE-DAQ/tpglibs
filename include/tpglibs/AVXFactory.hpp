@@ -1,7 +1,7 @@
 /**
  * @file AVXFactory.hpp
  *
- * This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
@@ -12,6 +12,7 @@
 #include "tpglibs/AbstractFactory.hpp"
 #include "tpglibs/AVXProcessor.hpp"
 
+/** @brief Factory registration macro. */
 #define REGISTER_AVXPROCESSOR_CREATOR(processor_name, processor_class)                                                                     \
   static struct processor_class##Registrar {                                                                                               \
     processor_class##Registrar() {                                                                                                         \
@@ -21,6 +22,7 @@
 
 namespace tpglibs {
 
+/** @brief AVX typed abstract factory. */
 class AVXFactory : public AbstractFactory<AVXProcessor> {};
 
 } // namespace tpglibs
