@@ -11,14 +11,18 @@ namespace tpglibs {
 
 __m256i
 AVXPipeline::save_state(const __m256i& processed_signal) {
-  __m256i active     = _mm256_cmpgt_epi16(processed_signal, _mm256_setzero_si256());
-  __m256i inactive   = _mm256_cmpeq_epi16(processed_signal, _mm256_setzero_si256());
-  __m256i was_active = _mm256_cmpgt_epi16(m_adc_integral, _mm256_setzero_si256());
+  __m256i active       = _mm256_cmpgt_epi16(processed_signal, _mm256_setzero_si256());
+  __m256i inactive     = _mm256_cmpeq_epi16(processed_signal, _mm256_setzero_si256());
+  __m256i was_inactive = _mm256_cmpeq_epi16(m_adc_integral, _mm256_setzero_si256());
 
-  // If it was active and is now inactive, then it must be a new TP.
-  __m256i new_tps    = _mm256_and_si256(was_active, inactive);
+  // If it was *not* inactive and is now inactive, then it must be a new TP.
+  __m256i new_tps = _mm256_andnot_si256(was_inactive, inactive);
 
   m_adc_integral = _mm256_adds_epu16(m_adc_integral, processed_signal);
+
+  // If it is saturated, then we want to close early.
+  __m256i is_saturated = _mm256_cmpeq_epi16(m_adc_integral, _mm256_set1_epi16(-1));
+  new_tps = _mm256_or_si256(new_tps, is_saturated);
 
   __m256i above_peak = _mm256_cmpgt_epi16(processed_signal, m_adc_peak);
 
