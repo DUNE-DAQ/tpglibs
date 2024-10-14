@@ -66,7 +66,7 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
     tp.adc_peak            = tp_adc_peak[i];
     tp.channel             = m_channels[i];
     tp.time_peak           = tp_time_peak[i];
-    tp.time_over_threshold = tp_tot[i];
+    tp.time_over_threshold = tp_tot[i];              // TOT was incremented by 1 in AVX. Need to convert in TPGenerator.hpp.
     tp.type                = tp.Type::kTPC;
     tp.algorithm           = tp.Algorithm::kUnknown; // TODO: Choose a separate way to represent the mixed processors.
 
