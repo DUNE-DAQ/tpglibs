@@ -24,6 +24,11 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
 
   // If it is saturated, then increment the hi and reset.
   __m256i is_saturated = _mm256_cmpeq_epi16(m_adc_integral_lo, _mm256_set1_epi16(-1));
+  // If lo and tmp are the same, then it is *not* saturated and happened to exactly sum to 0xFFFF.
+  __m256i exact = _mm256_cmpeq_epi16(m_adc_integral_lo, adc_integral_tmp);
+  // So, (!exact) & is_saturated == [truly saturated].
+  is_saturated  = _mm256_andnot_si256(exact, is_saturated);
+
   __m256i to_add = _mm256_and_si256(_mm256_set1_epi16(1), is_saturated);
   m_adc_integral_hi = _mm256_adds_epu16(m_adc_integral_hi, to_add);
 
