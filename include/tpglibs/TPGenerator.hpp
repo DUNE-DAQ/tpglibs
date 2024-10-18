@@ -80,6 +80,7 @@ class TPGenerator {
           for (auto tp : tps) {
             tp.time_start = (t - tp.time_over_threshold) * m_sample_tick_difference + timestamp;
             tp.time_peak  = tp.time_peak * m_sample_tick_difference + tp.time_start;
+            tp.time_over_threshold *= m_sample_tick_difference;  // Convert to the same "time" units.
             tp_aggr.push_back(tp);
           }
           cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
