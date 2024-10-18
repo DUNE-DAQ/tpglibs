@@ -78,7 +78,7 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
   for (int i = 0; i < 16; i++) {
     if (tp_tot[i] == 0) continue;  // Don't track non-TPs.
     dunedaq::trgdataformats::TriggerPrimitive tp;
-    tp.adc_integral        = tp_integral_lo[i] + ((uint32_t)tp_integral_hi[i] << 16);
+    tp.adc_integral        = uint32_t(tp_integral_lo[i]) + (uint32_t(tp_integral_hi[i]) << 16);
     tp.adc_peak            = tp_adc_peak[i];
     tp.channel             = m_channels[i];
     tp.time_peak           = tp_time_peak[i];
