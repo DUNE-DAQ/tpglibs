@@ -18,6 +18,12 @@ namespace tpglibs {
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 /** @brief AVX typed TPG pipeline. */
 class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
+  /** @brief A vector of 1s. */
+  const __m256i m_ones_register = _mm256_set1_epi16(1);
+
+  /** @brief A vector of uint16_t max. */
+  const __m256i m_max_value_register = _mm256_set1_epi16(-1);
+
   public:
     /** @brief Save the state of the processed signals.
      *

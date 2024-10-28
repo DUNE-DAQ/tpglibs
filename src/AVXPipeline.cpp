@@ -23,13 +23,13 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
   m_adc_integral_lo = _mm256_add_epi16(m_adc_integral_lo, processed_signal);
 
   // If it is saturated, then increment the hi. The overflown integral already "reset".
-  __m256i is_saturated = _mm256_cmpeq_epi16(adc_integral_sat, _mm256_set1_epi16(-1));
+  __m256i is_saturated = _mm256_cmpeq_epi16(adc_integral_sat, m_max_value_register);
   // If lo and sat are the same, then it is *not* saturated and happened to exactly sum to 0xFFFF.
   __m256i exact = _mm256_cmpeq_epi16(m_adc_integral_lo, adc_integral_sat);
   // So, (!exact) & is_saturated == [truly saturated].
   is_saturated  = _mm256_andnot_si256(exact, is_saturated);
 
-  __m256i to_add = _mm256_and_si256(_mm256_set1_epi16(1), is_saturated);
+  __m256i to_add = _mm256_and_si256(m_ones_register, is_saturated);
   m_adc_integral_hi = _mm256_adds_epu16(m_adc_integral_hi, to_add);
 
   __m256i above_peak = _mm256_cmpgt_epi16(processed_signal, m_adc_peak);
@@ -37,7 +37,7 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
   m_adc_peak = _mm256_max_epi16(m_adc_peak, processed_signal);
   m_time_peak = _mm256_blendv_epi8(m_time_peak, m_time_over_threshold, above_peak);
 
-  __m256i time_add = _mm256_blendv_epi8(_mm256_setzero_si256(), _mm256_set1_epi16(1), active);
+  __m256i time_add = _mm256_blendv_epi8(_mm256_setzero_si256(), m_ones_register, active);
   m_time_over_threshold = _mm256_adds_epi16(m_time_over_threshold, time_add);
 
   return new_tps;
