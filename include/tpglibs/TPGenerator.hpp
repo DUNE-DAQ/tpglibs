@@ -28,6 +28,13 @@ class TPGenerator {
   std::vector<AVXPipeline> m_tpg_pipelines;
   int m_sample_tick_difference;
 
+  /** Frame Expansion Registers */
+  const __m256i m_odd_permute = _mm256_setr_epi32(1, 0, 1, 2, 3, 4, 5, 6);
+  const __m256i m_even_shift = _mm256_setr_epi64x(6, 14, 22, 30);
+  const __m256i m_odd_shift = _mm256_setr_epi64x(30, 22, 14, 6);
+  const __m256i m_right_mask = _mm256_set1_epi32(0xFFFFu);
+  const __m256i m_left_mask = _mm256_set1_epi32(0x3FFF0000u);
+
   public:
     /**
      * @brief Setup and configure the AVX pipelines.
