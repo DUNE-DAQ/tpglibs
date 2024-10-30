@@ -92,7 +92,8 @@ class TPGPipeline {
 
   protected:
     /** @brief The on-going ADC integral for channels that are considered active. */
-    signal_t m_adc_integral{};
+    signal_t m_adc_integral_lo{};
+    signal_t m_adc_integral_hi{};
     /** @brief The ADC peak for channels that are considered active. */
     signal_t m_adc_peak{};
     /** @brief The time over threshold for channels that are considered active. */
