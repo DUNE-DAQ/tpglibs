@@ -42,10 +42,9 @@ class TPGPipeline {
     virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
-      int16_t plane_numbers[16];
       for (int i = 0; i < 16; i++) {
         m_channels[i] = channel_plane_numbers[i].first;
-        plane_numbers[i] = channel_plane_numbers[i].second;
+        m_plane_numbers[i] = channel_plane_numbers[i].second;
       }
 
       for (const auto& name_config : configs) {
@@ -53,7 +52,7 @@ class TPGPipeline {
         std::shared_ptr<processor_t> processor = m_factory->create_processor(name_config.first);
 
         // Configure it.
-        processor->configure(name_config.second, plane_numbers);
+        processor->configure(name_config.second, m_plane_numbers);
 
         // If it's the first one, make it the head.
         if (!prev_processor) {
@@ -90,6 +89,14 @@ class TPGPipeline {
     /** @brief Pure virtual function that will generate TPs given a mask to draw from. */
     virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> generate_tps(const signal_t& tp_mask) = 0;
 
+    /** @brief Set the time over threshold minimum values. */
+    virtual void set_tot_minima(const std::vector<uint16_t>& tot_minima) {
+      int idx = 0;
+      for (auto tot_minimum : tot_minima) {
+        m_tot_minima[idx++] = tot_minimum;
+      }
+    }
+
   protected:
     /** @brief The on-going ADC integral for channels that are considered active. */
     signal_t m_adc_integral_lo{};
@@ -102,6 +109,10 @@ class TPGPipeline {
     signal_t m_time_peak{};
     /** @brief Detector channel numbers for the 16 channels that are being processed. */
     int16_t m_channels[16];
+    /** @brief Detector plane numbers for the 16 channels that are being processed. */
+    int16_t m_plane_numbers[16];
+    /** @brief The time over threshold minimum that a TP from plane `i` must have. */
+    uint16_t m_tot_minima[3];
     /** @brief Processor factory singleton. */
     std::shared_ptr<AbstractFactory<processor_t>> m_factory = AbstractFactory<processor_t>::get_instance();
     /** @brief Processor head to start from. */

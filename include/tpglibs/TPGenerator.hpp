@@ -27,6 +27,7 @@ class TPGenerator {
   uint8_t m_num_pipelines = 0;  // Gets set inside configure.
   std::vector<AVXPipeline> m_tpg_pipelines;
   int m_sample_tick_difference;
+  std::vector<uint16_t> m_tot_minima{1,1,1};  // Defaults to 1 for all planes.
 
   public:
     /**
@@ -39,6 +40,13 @@ class TPGenerator {
     void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                    const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers,
                    const int sample_tick_difference);
+
+    /**
+     * @brief Set the minimum time over threshold for a TP according to plane.
+     *
+     * @param tot_minima TPs from plane `i` will have at least `tot_minima[i]` value for its time_over_threshold.
+     */
+    void set_tot_minima(const std::vector<uint16_t>& tot_minima);
 
     /**
      * @brief Driving function for the TPG.
