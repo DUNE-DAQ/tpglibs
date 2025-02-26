@@ -77,8 +77,6 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
     tp.channel             = m_channels[i];
     tp.time_peak           = tp_time_peak[i];
     tp.time_over_threshold = tp_tot[i];              // TOT was incremented by 1 in AVX. Need to convert in TPGenerator.hpp.
-    tp.type                = tp.Type::kTPC;
-    tp.algorithm           = tp.Algorithm::kUnknown; // TODO: Choose a separate way to represent the mixed processors.
 
     // time_start is handled at the next level up, since it is aware of the true and relative times.
     tps.push_back(tp);
