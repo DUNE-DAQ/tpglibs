@@ -12,6 +12,7 @@
 #include "tpglibs/AbstractFactory.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
+#include "trgdataformats/Types.hpp"
 
 #include <nlohmann/json.hpp>
 #include <vector>
@@ -39,7 +40,7 @@ class TPGPipeline {
      * @param configs Vector of processors and configurations to be used.
      * @param channel_plane_numbers Vector of channel numbers and their plane numbers.
      */
-    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
+    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
       for (int i = 0; i < 16; i++) {
@@ -108,7 +109,7 @@ class TPGPipeline {
     /** @brief The time for a channel's ADC peak. */
     signal_t m_time_peak{};
     /** @brief Detector channel numbers for the 16 channels that are being processed. */
-    int16_t m_channels[16];
+    dunedaq::trgdataformats::channel_t m_channels[16];
     /** @brief Detector plane numbers for the 16 channels that are being processed. */
     int16_t m_plane_numbers[16];
     /** @brief The time over threshold minimum that a TP from plane `i` must have. */

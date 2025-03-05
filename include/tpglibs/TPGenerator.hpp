@@ -11,6 +11,8 @@
 
 #include "tpglibs/AVXPipeline.hpp"
 
+#include "trgdataformats/Types.hpp"
+
 #include <utility>
 
 namespace tpglibs {
@@ -38,7 +40,7 @@ class TPGenerator {
      * @param sample_tick_difference Number of ticks between time samples in expected data frames.
      */
     void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
-                   const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers,
+                   const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
                    const int sample_tick_difference);
 
     /**

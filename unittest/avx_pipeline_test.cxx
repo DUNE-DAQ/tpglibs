@@ -11,6 +11,8 @@
 
 #include "tpglibs/AVXPipeline.hpp"
 
+#include "trgdataformats/Types.hpp"
+
 #include <boost/test/unit_test.hpp>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -38,22 +40,23 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
 
   AVXPipeline pipeline = AVXPipeline();
 
-  std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers = {{  0, 0},
-                                                                    { 10, 0},
-                                                                    { 20, 0},
-                                                                    { 30, 0},
-                                                                    { 40, 0},
-                                                                    {100, 1},
-                                                                    {110, 1},
-                                                                    {120, 1},
-                                                                    {130, 1},
-                                                                    {140, 1},
-                                                                    {200, 2},
-                                                                    {210, 2},
-                                                                    {220, 2},
-                                                                    {230, 2},
-                                                                    {240, 2},
-                                                                    {250, 2}};
+  std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>
+    channel_plane_numbers = {{  0, 0},
+                             { 10, 0},
+                             { 20, 0},
+                             { 30, 0},
+                             { 40, 0},
+                             {100, 1},
+                             {110, 1},
+                             {120, 1},
+                             {130, 1},
+                             {140, 1},
+                             {200, 2},
+                             {210, 2},
+                             {220, 2},
+                             {230, 2},
+                             {240, 2},
+                             {250, 2}};
 
   // Horrendous brackets.
   std::vector<std::pair<std::string, nlohmann::json>> configs = {
