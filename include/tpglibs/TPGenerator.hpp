@@ -86,7 +86,6 @@ class TPGenerator {
           __m256i expanded_subframe = expand_frame(regi);
           std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
 
-          // Need to insert all the TPs while scaling and shifting time_start and time_peak.
           for (auto tp : tps) {
             tp.time_start = (t - tp.samples_over_threshold) * m_sample_tick_difference + timestamp;
             tp_aggr.push_back(tp);

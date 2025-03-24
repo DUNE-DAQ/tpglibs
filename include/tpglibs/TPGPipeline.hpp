@@ -106,8 +106,8 @@ class TPGPipeline {
     signal_t m_adc_peak{};
     /** @brief The samples over threshold for channels that are considered active. */
     signal_t m_samples_over_threshold{};
-    /** @brief The time for a channel's ADC peak. */
-    signal_t m_time_peak{};
+    /** @brief The number of samples from `time_start` to the ADC peak. */
+    signal_t m_samples_to_peak{};
     /** @brief Detector channel numbers for the 16 channels that are being processed. */
     dunedaq::trgdataformats::channel_t m_channels[16];
     /** @brief Detector plane numbers for the 16 channels that are being processed. */
