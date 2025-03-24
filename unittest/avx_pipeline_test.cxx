@@ -81,10 +81,10 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     }
   };
 
-  std::vector<uint16_t> tot_minima = {1,1,1};
+  std::vector<uint16_t> sot_minima = {1,1,1};
 
   pipeline.configure(configs, channel_plane_numbers);
-  pipeline.set_tot_minima(tot_minima);
+  pipeline.set_sot_minima(sot_minima);
 
   // ADC peak should max at 1600 for all channels.
   bool adc_peak_at_1600 = true;

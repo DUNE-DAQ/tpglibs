@@ -22,14 +22,14 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
     auto begin_channel_plane = channel_plane_numbers.begin() + p*m_num_channels_per_pipeline;
     auto end_channel_plane = begin_channel_plane + m_num_channels_per_pipeline;
     new_pipe.configure(configs, std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
-    new_pipe.set_tot_minima(m_tot_minima);
+    new_pipe.set_sot_minima(m_sot_minima);
     m_tpg_pipelines.push_back(new_pipe);
   }
 }
 
 void
-TPGenerator::set_tot_minima(const std::vector<uint16_t>& tot_minima) {
-  m_tot_minima = tot_minima;
+TPGenerator::set_sot_minima(const std::vector<uint16_t>& sot_minima) {
+  m_sot_minima = sot_minima;
 }
 
 __m256i

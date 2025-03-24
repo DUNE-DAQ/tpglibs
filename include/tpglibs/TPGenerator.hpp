@@ -29,7 +29,7 @@ class TPGenerator {
   uint8_t m_num_pipelines = 0;  // Gets set inside configure.
   std::vector<AVXPipeline> m_tpg_pipelines;
   int m_sample_tick_difference;
-  std::vector<uint16_t> m_tot_minima{1,1,1};  // Defaults to 1 for all planes.
+  std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
 
   public:
     /**
@@ -44,11 +44,11 @@ class TPGenerator {
                    const int sample_tick_difference);
 
     /**
-     * @brief Set the minimum time over threshold for a TP according to plane.
+     * @brief Set the minimum samples over threshold for a TP according to plane.
      *
-     * @param tot_minima TPs from plane `i` will have at least `tot_minima[i]` value for its time_over_threshold.
+     * @param sot_minima TPs from plane `i` will have at least `sot_minima[i]` value for its samples_over_threshold.
      */
-    void set_tot_minima(const std::vector<uint16_t>& tot_minima);
+    void set_sot_minima(const std::vector<uint16_t>& sot_minima);
 
     /**
      * @brief Driving function for the TPG.
@@ -88,7 +88,7 @@ class TPGenerator {
 
           // Need to insert all the TPs while scaling and shifting time_start and time_peak.
           for (auto tp : tps) {
-            tp.time_start = (t - tp.time_over_threshold) * m_sample_tick_difference + timestamp;
+            tp.time_start = (t - tp.samples_over_threshold) * m_sample_tick_difference + timestamp;
             tp_aggr.push_back(tp);
           }
           cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
