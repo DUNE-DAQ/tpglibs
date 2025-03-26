@@ -12,6 +12,7 @@
 #include "tpglibs/AbstractFactory.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
+#include "trgdataformats/Types.hpp"
 
 #include <nlohmann/json.hpp>
 #include <vector>
@@ -39,7 +40,7 @@ class TPGPipeline {
      * @param configs Vector of processors and configurations to be used.
      * @param channel_plane_numbers Vector of channel numbers and their plane numbers.
      */
-    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<int16_t, int16_t>> channel_plane_numbers) {
+    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
       for (int i = 0; i < 16; i++) {
@@ -89,11 +90,11 @@ class TPGPipeline {
     /** @brief Pure virtual function that will generate TPs given a mask to draw from. */
     virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> generate_tps(const signal_t& tp_mask) = 0;
 
-    /** @brief Set the time over threshold minimum values. */
-    virtual void set_tot_minima(const std::vector<uint16_t>& tot_minima) {
+    /** @brief Set the samples over threshold minimum values. */
+    virtual void set_sot_minima(const std::vector<uint16_t>& sot_minima) {
       int idx = 0;
-      for (auto tot_minimum : tot_minima) {
-        m_tot_minima[idx++] = tot_minimum;
+      for (auto sot_minimum : sot_minima) {
+        m_sot_minima[idx++] = sot_minimum;
       }
     }
 
@@ -103,16 +104,16 @@ class TPGPipeline {
     signal_t m_adc_integral_hi{};
     /** @brief The ADC peak for channels that are considered active. */
     signal_t m_adc_peak{};
-    /** @brief The time over threshold for channels that are considered active. */
-    signal_t m_time_over_threshold{};
-    /** @brief The time for a channel's ADC peak. */
-    signal_t m_time_peak{};
+    /** @brief The samples over threshold for channels that are considered active. */
+    signal_t m_samples_over_threshold{};
+    /** @brief The number of samples from `time_start` to the ADC peak. */
+    signal_t m_samples_to_peak{};
     /** @brief Detector channel numbers for the 16 channels that are being processed. */
-    int16_t m_channels[16];
+    dunedaq::trgdataformats::channel_t m_channels[16];
     /** @brief Detector plane numbers for the 16 channels that are being processed. */
     int16_t m_plane_numbers[16];
-    /** @brief The time over threshold minimum that a TP from plane `i` must have. */
-    uint16_t m_tot_minima[3];
+    /** @brief The samples over threshold minimum that a TP from plane `i` must have. */
+    uint16_t m_sot_minima[3];
     /** @brief Processor factory singleton. */
     std::shared_ptr<AbstractFactory<processor_t>> m_factory = AbstractFactory<processor_t>::get_instance();
     /** @brief Processor head to start from. */
