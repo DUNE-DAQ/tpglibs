@@ -8,17 +8,17 @@ add_compile_options(-O2)
 
 set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake)
 
-find_package(daq-cmake REQUIRED)
+#find_package(daq-cmake REQUIRED)
 
-daq_setup_environment()
+#daq_setup_environment()
 
-find_package(fmt REQUIRED)
-find_package(nlohmann_json REQUIRED)
-find_package(detdataformats REQUIRED)
-find_package(fddetdataformats REQUIRED)
-find_package(trgdataformats REQUIRED)
+#find_package(fmt REQUIRED)
+#find_package(nlohmann_json REQUIRED)
+#find_package(detdataformats REQUIRED)
+#find_package(fddetdataformats REQUIRED)
+#find_package(trgdataformats REQUIRED)
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+#find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 ##############################################################################
 
@@ -30,13 +30,23 @@ endif()
 
 ##############################################################################
 
-daq_add_library( *.cpp  LINK_LIBRARIES nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt )
+# Find all headers and implementation files
+include(cmake/SourcesAndHeaders.cmake)
 
-daq_add_python_bindings(*.cpp LINK_LIBRARIES ${PROJECT_NAME})
+add_library(tpglibs SHARED ${sources} ${headers})
 
-daq_add_unit_test(avx_factory_test LINK_LIBRARIES tpglibs)
-daq_add_unit_test(avx_generator_test LINK_LIBRARIES tpglibs)
-daq_add_unit_test(avx_pipeline_test LINK_LIBRARIES tpglibs)
-daq_add_unit_test(avx_processors_test LINK_LIBRARIES tpglibs)
+target_include_directories(tpglibs PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/tpglibs/include>
+	$<INSTALL_INTERFACE:include>
+)
 
-daq_install()
+#daq_add_library( *.cpp  LINK_LIBRARIES nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt )
+
+#daq_add_python_bindings(*.cpp LINK_LIBRARIES ${PROJECT_NAME})
+
+#daq_add_unit_test(avx_factory_test LINK_LIBRARIES tpglibs)
+#daq_add_unit_test(avx_generator_test LINK_LIBRARIES tpglibs)
+#daq_add_unit_test(avx_pipeline_test LINK_LIBRARIES tpglibs)
+#daq_add_unit_test(avx_processors_test LINK_LIBRARIES tpglibs)
+
+#daq_install()

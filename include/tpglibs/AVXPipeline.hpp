@@ -46,7 +46,7 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
      *  @param tp_mask A vector mask of channels that have completed TPs.
      *  @return A vector of completed TPs.
      */
-    std::vector<dunedaq::trgdataformats::TriggerPrimitive> generate_tps(const __m256i& tp_mask) override;
+    std::vector<TriggerPrimitive> generate_tps(const __m256i& tp_mask) override;
 };
 #pragma GCC diagnostic pop
 

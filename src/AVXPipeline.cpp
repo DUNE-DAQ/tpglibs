@@ -51,7 +51,7 @@ AVXPipeline::check_for_tps(const __m256i& tp_mask) {
   return !_mm256_testz_si256(tp_mask, _mm256_set1_epi16(-1));
 }
 
-std::vector<dunedaq::trgdataformats::TriggerPrimitive>
+std::vector<TriggerPrimitive>
 AVXPipeline::generate_tps(const __m256i& tp_mask) {
   // Mask everything that's relevant.
   __m256i samples_over_threshold = _mm256_blendv_epi8(_mm256_setzero_si256(), m_samples_over_threshold, tp_mask);
@@ -68,10 +68,10 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(tp_adc_peak), adc_peak);
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(tp_samples_to_peak), samples_to_peak);
 
-  std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps;
+  std::vector<TriggerPrimitive> tps;
   for (int i = 0; i < 16; i++) {
     if (tp_sot[i] < m_sot_minima[m_plane_numbers[i]]) continue;  // Don't track short TPs.
-    dunedaq::trgdataformats::TriggerPrimitive tp;
+    TriggerPrimitive tp;
     tp.adc_integral        = uint32_t(tp_integral_lo[i]) + (uint32_t(tp_integral_hi[i]) << 16);
     tp.adc_peak            = tp_adc_peak[i];
     tp.channel             = m_channels[i];

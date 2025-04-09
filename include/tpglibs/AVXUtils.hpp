@@ -7,8 +7,8 @@
  */
 
 #include <immintrin.h>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
+//#include <fmt/core.h>
+//#include <fmt/ranges.h>
 
 #include <array>
 
@@ -47,7 +47,15 @@ inline void _mm256_print_epi16(const __m256i& input) {
   std::array<int16_t, 16> prints;
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(prints.begin()), input);
 
-  fmt::print("{}", prints);
+  //fmt::print("{}", prints);
+  std::cout << "{";
+  for (size_t i = 0; i < prints.size(); ++i) {
+      std::cout << prints[i];
+      if (i != prints.size() - 1) {
+          std::cout << ", ";
+      }
+  }
+  std::cout << "}" << std::endl;  
 }
 
 } // namespace tpglibs

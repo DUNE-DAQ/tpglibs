@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   }
 
   // Lazy with the channel-plane assignments.
-  std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers =
+  std::vector<std::pair<channel_t, int16_t>> channel_plane_numbers =
           {{ 0, 0}, { 1, 0}, { 2, 0}, { 3, 0}, { 4, 0}, { 5, 0}, { 6, 0}, { 7, 0}, { 8, 0}, { 9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0},
            {16, 1}, {17, 1}, {18, 1}, {19, 1}, {20, 1}, {21, 1}, {22, 1}, {23, 1}, {24, 1}, {25, 1}, {26, 1}, {27, 1}, {28, 1}, {29, 1}, {30, 1}, {31, 1},
            {32, 2}, {33, 2}, {34, 2}, {35, 2}, {36, 2}, {37, 2}, {38, 2}, {39, 2}, {40, 2}, {41, 2}, {42, 2}, {43, 2}, {44, 2}, {45, 2}, {46, 2}, {47, 2},
@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   TPGenerator tpg;
   constexpr int sample_tick_difference = 1; // Arbitrary choice for this test. Live has been 32 (2024-08-15).
   tpg.configure(configs, channel_plane_numbers, sample_tick_difference);
-
-  std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = tpg(&frame);
+  
+  std::vector<TriggerPrimitive> tps = tpg(&frame);
 
   int16_t min_peak = INT16_MAX;
   size_t tp_count = tps.size();

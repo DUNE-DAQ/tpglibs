@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
 
   AVXPipeline pipeline = AVXPipeline();
 
-  std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>
+  std::vector<std::pair<channel_t, int16_t>>
     channel_plane_numbers = {{  0, 0},
                              { 10, 0},
                              { 20, 0},
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   bool adc_peak_at_1600 = true;
 
   for (const __m256i& signal : signals) {
-    std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = pipeline.process(signal);
+    std::vector<TriggerPrimitive> tps = pipeline.process(signal);
     if (tps.empty()) continue;
 
     for (auto tp : tps) {

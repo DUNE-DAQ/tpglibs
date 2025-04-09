@@ -11,8 +11,8 @@
 
 #include "tpglibs/AbstractFactory.hpp"
 
-#include "trgdataformats/TriggerPrimitive.hpp"
-#include "trgdataformats/Types.hpp"
+#include "tpglibs/TriggerPrimitive.hpp"
+#include "tpglibs/Types.hpp"
 
 #include <nlohmann/json.hpp>
 #include <vector>
@@ -40,7 +40,7 @@ class TPGPipeline {
      * @param configs Vector of processors and configurations to be used.
      * @param channel_plane_numbers Vector of channel numbers and their plane numbers.
      */
-    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers) {
+    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<channel_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
       for (int i = 0; i < 16; i++) {
@@ -71,10 +71,10 @@ class TPGPipeline {
     /**
      * @brief Process a signal through the pipeline.
      */
-    virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> process(const signal_t& signal) {
+    virtual std::vector<TriggerPrimitive> process(const signal_t& signal) {
       signal_t tp_mask = save_state(m_processor_head->process(signal));
 
-      std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps;
+      std::vector<TriggerPrimitive> tps;
       if (check_for_tps(tp_mask))
         tps = generate_tps(tp_mask);
 
@@ -88,7 +88,7 @@ class TPGPipeline {
     virtual signal_t save_state(const signal_t& processed_signal) = 0;
 
     /** @brief Pure virtual function that will generate TPs given a mask to draw from. */
-    virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> generate_tps(const signal_t& tp_mask) = 0;
+    virtual std::vector<TriggerPrimitive> generate_tps(const signal_t& tp_mask) = 0;
 
     /** @brief Set the samples over threshold minimum values. */
     virtual void set_sot_minima(const std::vector<uint16_t>& sot_minima) {
@@ -109,7 +109,7 @@ class TPGPipeline {
     /** @brief The number of samples from `time_start` to the ADC peak. */
     signal_t m_samples_to_peak{};
     /** @brief Detector channel numbers for the 16 channels that are being processed. */
-    dunedaq::trgdataformats::channel_t m_channels[16];
+    channel_t m_channels[16];
     /** @brief Detector plane numbers for the 16 channels that are being processed. */
     int16_t m_plane_numbers[16];
     /** @brief The samples over threshold minimum that a TP from plane `i` must have. */

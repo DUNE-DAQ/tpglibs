@@ -12,16 +12,18 @@ namespace tpglibs {
 
 void
 TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
-                       const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
-                       const int sample_tick_difference) {
+                       const std::vector<std::pair<channel_t, int16_t>> channel_plane_numbers,
+                       const int sample_tick_difference,
+                       const bool expand_frames) {
   m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;
   m_sample_tick_difference = sample_tick_difference;
-
+  m_expand_frames = expand_frames;
+  
   for (int p = 0; p < m_num_pipelines; p++) {
     AVXPipeline new_pipe = AVXPipeline();
     auto begin_channel_plane = channel_plane_numbers.begin() + p*m_num_channels_per_pipeline;
     auto end_channel_plane = begin_channel_plane + m_num_channels_per_pipeline;
-    new_pipe.configure(configs, std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
+    new_pipe.configure(configs, std::vector<std::pair<channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
     new_pipe.set_sot_minima(m_sot_minima);
     m_tpg_pipelines.push_back(new_pipe);
   }

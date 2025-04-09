@@ -11,7 +11,7 @@
 
 #include "tpglibs/AVXPipeline.hpp"
 
-#include "trgdataformats/Types.hpp"
+#include "tpglibs/Types.hpp"
 
 #include <utility>
 
@@ -30,6 +30,7 @@ class TPGenerator {
   std::vector<AVXPipeline> m_tpg_pipelines;
   int m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
+  bool m_expand_frames;
 
   public:
     /**
@@ -38,10 +39,12 @@ class TPGenerator {
      * @param configs A vector of pairs: AVX pipeline to use and its configuration.
      * @param channel_plane_numbers A vector of channel numbers and their plane numbers.
      * @param sample_tick_difference Number of ticks between time samples in expected data frames.
+     * @param expand_frames Whether expansion should be performed on each frame.
      */
     void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
-                   const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
-                   const int sample_tick_difference);
+                   const std::vector<std::pair<channel_t, int16_t>> channel_plane_numbers,
+                   const int sample_tick_difference,
+                   const bool expand_frames);
 
     /**
      * @brief Set the minimum samples over threshold for a TP according to plane.
@@ -59,9 +62,9 @@ class TPGenerator {
      * @return A vector of TPs.
      */
     template <typename T>
-    std::vector<dunedaq::trgdataformats::TriggerPrimitive> operator()(const T* frame) {
+    std::vector<TriggerPrimitive> operator()(const T* frame) {
       // Max number of TPs for a channel: number of time samples / 2.
-      std::vector<dunedaq::trgdataformats::TriggerPrimitive> tp_aggr;
+      std::vector<TriggerPrimitive> tp_aggr;
       tp_aggr.reserve(T::s_num_channels * T::s_time_samples_per_frame / 2);
 
       const typename T::word_t (*words_ptr)[T::s_bits_per_adc] = frame->adc_words;
@@ -75,16 +78,16 @@ class TPGenerator {
 
         // Loop in pipelines.
         for (int p = 0; p < m_num_pipelines; p++) {
-          if (p == m_num_pipelines - 1)
+          if (m_expand_frames && p == m_num_pipelines - 1)
             cursor -= 4; // Take a step of 32 bit backwards for the last sub-frame.
 
           __m256i regi = _mm256_lddqu_si256((__m256i*)cursor);
 
-          if (p == m_num_pipelines - 1) // Permute the row order to use the same operation.
+          if (m_expand_frames && p == m_num_pipelines - 1) // Permute the row order to use the same operation.
             regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
 
-          __m256i expanded_subframe = expand_frame(regi);
-          std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
+          __m256i expanded_subframe = m_expand_frames ? expand_frame(regi) : regi;
+          std::vector<TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
 
           for (auto tp : tps) {
             tp.time_start = (t - tp.samples_over_threshold) * m_sample_tick_difference + timestamp;
