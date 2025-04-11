@@ -1,13 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(tpglibs VERSION 1.0.1)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(-O2)
-
-set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake)
-
 find_package(daq-cmake REQUIRED)
 
 daq_setup_environment()
