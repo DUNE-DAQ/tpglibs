@@ -78,7 +78,7 @@ class TPGenerator {
           if (p == m_num_pipelines - 1)
             cursor -= 4; // Take a step of 32 bit backwards for the last sub-frame.
 
-          __m256i regi = _mm256_lddqu_si256((__m256i*)cursor);
+          __m256i regi = _mm256_loadu_si256((__m256i*)cursor);
 
           if (p == m_num_pipelines - 1) // Permute the row order to use the same operation.
             regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));

@@ -27,8 +27,8 @@ void AVXRunSumProcessor::configure(const nlohmann::json& config, const int16_t* 
     scale_factors[i] = config_scale[plane_numbers[i]];
   }
 
-  m_memory_factor = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(memory_factors));
-  m_scale_factor = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(scale_factors));
+  m_memory_factor = _mm256_loadu_si256(reinterpret_cast<__m256i*>(memory_factors));
+  m_scale_factor = _mm256_loadu_si256(reinterpret_cast<__m256i*>(scale_factors));
 }
 
 __m256i AVXRunSumProcessor::process(const __m256i& signal) {
