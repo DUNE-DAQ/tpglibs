@@ -37,7 +37,8 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
      *  @return The input signal minus the estimated pedestal.
      */
     __m256i process(const __m256i& signal) override;
-
+    
+    std::vector<MetricItem<signal_type_t>> get_processor_metrics(const int16_t processor_id) const override;
     /** @brief Configure the accumulation limit according to plane number.
      *
      *  @param config JSON config for the accumulation limits per plane.

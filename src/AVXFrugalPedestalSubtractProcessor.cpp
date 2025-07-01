@@ -16,6 +16,20 @@ void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config,
   m_accum_limit = config["accum_limit"];
 }
 
+std::vector<MetricItem<__m256i>> AVXFrugalPedestalSubtractProcessor::get_processor_metrics(const int16_t processor_id) const { 
+  std::vector<MetricItem<__m256i>> items;
+  
+   MetricItem<__m256i> i1;
+   i1.processor_id = processor_id;
+   i1.pipeline_id = -1; // placeholder
+   i1.metric_id = 0; // local counter
+   i1.valueptr = std::make_unique<__m256i>(m_pedestal);
+ 
+   items.push_back(std::move(i1));
+
+   return items;
+}
+
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);
