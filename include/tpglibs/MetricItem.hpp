@@ -2,9 +2,9 @@
 #pragma once
 #include <cstdint>
 #include <memory>
-template<class T> // type of signal
 namespace tpglibs {
 
+template<class T> // type of signal
 struct metric_item {
   int16_t processor_id;
   int16_t pipeline_id;
