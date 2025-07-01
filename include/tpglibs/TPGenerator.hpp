@@ -10,6 +10,7 @@
 #define TPGLIBS_TPGENERATOR_HPP_
 
 #include "tpglibs/AVXPipeline.hpp"
+#include "tpglibs/MetricItem.hpp"
 
 #include "trgdataformats/Types.hpp"
 
@@ -49,6 +50,11 @@ class TPGenerator {
      * @param sot_minima TPs from plane `i` will have at least `sot_minima[i]` value for its samples_over_threshold.
      */
     void set_sot_minima(const std::vector<uint16_t>& sot_minima);
+    
+    /**
+     * @brief Function to pass buffer pointer and metric item map to Pipelines.
+     */    
+    void propagate_metric_table(const std::unordered_map<MetricKey, __m256i*>& table); 
 
     /**
      * @brief Driving function for the TPG.
