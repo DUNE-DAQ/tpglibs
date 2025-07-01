@@ -5,7 +5,7 @@
 namespace tpglibs {
 
 template<class T> // type of signal
-struct metric_item {
+struct MetricItem {
   int16_t processor_id;
   int16_t pipeline_id;
   int16_t metric_id;

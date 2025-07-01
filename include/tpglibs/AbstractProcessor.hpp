@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <memory>
+#include "tpglibs/MetricItem.hpp"
+#include <vector>
 
 namespace tpglibs {
 
@@ -32,12 +34,17 @@ class AbstractProcessor {
 
     /** @brief Pure virtual function that will configure the processor using plane numbers. */
     virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
-
+    
+    /** @brief Function that will return metrics of processor in a vector */
+    virtual std::vector<MetricItem<signal_type_t>> get_processor_metrics(const int16_t processor_id) const {
+    return {}; // By default nothing is collected
+  } 
+    
     /** @brief Setter for next processor. */
     void set_next_processor(std::shared_ptr<AbstractProcessor<T>> next_processor) {
       m_next_processor = next_processor;
     }
-
+    
     /** @brief Simple signal pass-through. */
     virtual T process(const T& signal) {
       if (m_next_processor) {
