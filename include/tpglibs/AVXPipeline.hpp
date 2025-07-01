@@ -33,6 +33,9 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
      *  @return A vector mask of channels that have completed TPs.
      */
     __m256i save_state(const __m256i& processed_signal) override;
+    
+    /** @brief Poll processors for metric, then fill into buffer. */
+    void get_pipeline_metrics(const std::unordered_map<tpglibs::MetricKey, __m256i*>& table) override;
 
     /** @brief Check a channel mask for any TPs that need to be created.
      *

@@ -43,6 +43,11 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
   return new_tps;
 }
 
+/** @brief Poll processors for metric, then fill into buffer. */
+void AVXPipeline::get_pipeline_metrics(const std::unordered_map<tpglibs::MetricKey, __m256i*>& table) {
+
+}
+
 bool
 AVXPipeline::check_for_tps(const __m256i& tp_mask) {
   // tp_mask & 0xFFFF = 0 -> tp_mask == 0.

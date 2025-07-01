@@ -10,6 +10,7 @@
 #define TPGLIBS_TPGPIPELINE_HPP_
 
 #include "tpglibs/AbstractFactory.hpp"
+#include "tpglibs/MetricItem.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
 #include "trgdataformats/Types.hpp"
@@ -67,7 +68,10 @@ class TPGPipeline {
         prev_processor = processor;
       }
     }
-
+    
+    /** @brief Poll processors for metric, then fill into buffer. */
+    virtual void get_pipeline_metrics(const std::unordered_map<tpglibs::MetricKey, signal_t*>& table) = 0;
+    
     /**
      * @brief Process a signal through the pipeline.
      */
