@@ -44,7 +44,7 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
 }
 
 /** @brief Poll processors for metric, then fill into buffer. */
-void AVXPipeline::get_pipeline_metrics(const std::unordered_map<tpglibs::MetricKey, __m256i*>& table, int16_t pipeline_id) {
+void AVXPipeline::get_pipeline_metrics(std::unordered_map<tpglibs::MetricKey, tpglibs::ChannelAwareSignalPointer<__m256i>>& table, int16_t pipeline_id) {
   // grab current head
   std::shared_ptr<AbstractProcessor<__m256i>> curr = m_processor_head;
 
@@ -54,19 +54,21 @@ void AVXPipeline::get_pipeline_metrics(const std::unordered_map<tpglibs::MetricK
   while (curr) { // while not null
   
     auto metric_items = curr->get_processor_metrics(proc_id_ctr);
-  
+    
+    int16_t channel_idx = 0;
     for (auto& item : metric_items) {
       MetricKey mkey;
-      // from our key to look up address table
+      // form our key to look up address table
       mkey.processor_id = item.processor_id;
       mkey.pipeline_id = pipeline_id; // The pipeline knows where it is
       mkey.metric_id = metric_item_ctr++; // increase absolute id by 1
       
-      // Now we look up the table for address
-      auto address = table.at(mkey);
-      
-      // Finally, fill our obtained metric into the slot
-      *address = *item.valueptr;
+      // Finally, fill a pointer to our metric
+      tpglibs::ChannelAwareSignalPointer<__m256i> ptr;
+      ptr.channel_number = m_channels[channel_idx];
+      ptr.index = channel_idx++;
+
+      table[mkey] = ptr;
     }
 
     // move to the next

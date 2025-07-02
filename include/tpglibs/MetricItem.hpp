@@ -5,6 +5,8 @@
 #include <tuple>
 #include <functional>
 
+#include "trgdataformats/Types.hpp"
+
 namespace tpglibs {
 
 template<class T> // type of signal
@@ -12,7 +14,7 @@ struct MetricItem {
   int16_t processor_id;
   int16_t pipeline_id;
   int16_t metric_id;
-  std::unique_ptr<T> valueptr;
+  std::shared_ptr<T> valueptr;
 };
 
 struct MetricKey {
@@ -25,7 +27,14 @@ bool operator==(MetricKey const& o) const noexcept {
   }
 };
 
+template<class T> 
+struct ChannelAwareSignalPointer {
 
+  dunedaq::trgdataformats::channel_t channel_number;
+  int16_t index; //For example, 0-16 index for int16 in an __m256i
+  std::shared_ptr<T> valueptr;
+
+};
 
 }//tpglibs
 

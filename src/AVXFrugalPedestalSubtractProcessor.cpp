@@ -23,7 +23,7 @@ std::vector<MetricItem<__m256i>> AVXFrugalPedestalSubtractProcessor::get_process
    i1.processor_id = processor_id;
    i1.pipeline_id = -1; // placeholder
    i1.metric_id = 0; // local counter
-   i1.valueptr = std::make_unique<__m256i>(m_pedestal);
+   i1.valueptr = std::make_shared<__m256i>(m_pedestal);
  
    items.push_back(std::move(i1));
 
