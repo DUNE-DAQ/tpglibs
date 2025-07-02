@@ -12,6 +12,8 @@
 #include "tpglibs/TPGPipeline.hpp"
 #include "tpglibs/AVXFactory.hpp"
 
+#include "tpglibs/AbstractProcessor.hpp"
+
 namespace tpglibs {
 
 #pragma GCC diagnostic push
@@ -34,16 +36,19 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
      */
     __m256i save_state(const __m256i& processed_signal) override;
     
-    /** @brief Poll processors for metric, then fill into buffer. */
-    void get_pipeline_metrics(const std::unordered_map<tpglibs::MetricKey, __m256i*>& table) override;
-
     /** @brief Check a channel mask for any TPs that need to be created.
      *
      *  @param tp_mask A vector mask of channels that have completed TPs.
      *  @return True if at least 1 channel has a completed TP. False otherwise.
      */
     bool check_for_tps(const __m256i& tp_mask) override;
-
+    
+    /** @Poll each processor for metric, save them into buffer.
+     * 
+     *  @param table map from metric keys to slot in buffer.
+     */
+    void get_pipeline_metrics(const std::unordered_map<MetricKey, __m256i*>& table) override;
+    
     /** @brief Finalize the details of the completed TPs and send out.
      *
      *  @param tp_mask A vector mask of channels that have completed TPs.

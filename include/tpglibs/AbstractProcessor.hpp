@@ -46,8 +46,8 @@ class AbstractProcessor {
     }
     
     /** @brief Getter for next processor. */
-    std::shared_ptr<AbstractProcessor<T>>  get_next_processor() {
-    return m_next_processor;
+    std::shared_ptr<AbstractProcessor<T>> get_next_processor() {
+      return m_next_processor;
     } 
     
     /** @brief Simple signal pass-through. */

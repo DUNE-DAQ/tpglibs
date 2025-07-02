@@ -11,7 +11,6 @@
 
 #include "tpglibs/AbstractFactory.hpp"
 #include "tpglibs/MetricItem.hpp"
-#include "tpglibs/AbstractProcessor.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
 #include "trgdataformats/Types.hpp"
@@ -71,17 +70,7 @@ class TPGPipeline {
     }
     
     /** @brief Poll processors for metric, then fill into buffer. */
-    virtual void get_pipeline_metrics(const std::unordered_map<tpglibs::MetricKey, signal_t*>& table) {
-    
-      // get the head of processors
-      std::shared_ptr<AbstractProcessor<signal_t>> curr_processor = m_processor_head; 
-    
-      while (curr_processor){
-
-	curr_processor = curr_processor->get_next_processor();
-      
-      } 
-    }
+    virtual void get_pipeline_metrics(const std::unordered_map<tpglibs::MetricKey, signal_t*>& table) = 0;
     
     /**
      * @brief Process a signal through the pipeline.
