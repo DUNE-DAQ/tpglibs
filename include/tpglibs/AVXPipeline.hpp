@@ -46,8 +46,9 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
     /** @Poll each processor for metric, save them into buffer.
      * 
      *  @param table map from metric keys to slot in buffer.
+     *  @param pipeline_id id of this pipeline.
      */
-    void get_pipeline_metrics(const std::unordered_map<MetricKey, __m256i*>& table) override;
+    void get_pipeline_metrics(const std::unordered_map<MetricKey, __m256i*>& table, int16_t pipeline_id) override;
     
     /** @brief Finalize the details of the completed TPs and send out.
      *

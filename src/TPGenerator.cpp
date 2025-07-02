@@ -27,6 +27,11 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   }
 }
 
+void TPGenerator::propagate_metric_table(const std::unordered_map<MetricKey, __m256i*>& table) {
+  
+
+}
+
 void
 TPGenerator::set_sot_minima(const std::vector<uint16_t>& sot_minima) {
   m_sot_minima = sot_minima;
