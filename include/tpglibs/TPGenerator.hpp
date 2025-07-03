@@ -54,7 +54,7 @@ class TPGenerator {
     /**
      * @brief Function to pass buffer pointer and metric item map to Pipelines.
      */    
-    void propagate_metric_table(std::unordered_map<MetricBufferKey, ChannelAwareSignalPointer<__m256i>>& table); 
+    void propagate_metric_table(std::unordered_map<MetricBufferKey, IndexAwareSignalPointer<__m256i>>& table); 
 
     /**
      * @brief Driving function for the TPG.

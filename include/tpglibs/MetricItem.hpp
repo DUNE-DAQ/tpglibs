@@ -28,9 +28,8 @@ bool operator==(MetricKey const& o) const noexcept {
 };
 
 template<class T> 
-struct ChannelAwareSignalPointer {
+struct IndexAwareSignalPointer {
 
-  dunedaq::trgdataformats::channel_t channel_number;
   int16_t index; //For example, 0-16 index for int16 in an __m256i
   std::shared_ptr<T> valueptr;
 

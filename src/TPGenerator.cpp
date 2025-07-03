@@ -27,7 +27,7 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   }
 }
 
-void TPGenerator::propagate_metric_table(std::unordered_map<MetricBufferKey, ChannelAwareSignalPointer<__m256i>>& table) {
+void TPGenerator::propagate_metric_table(std::unordered_map<MetricBufferKey, IndexAwareSignalPointer<__m256i>>& table) {
    // issue command to for each pipeline to poll for metric
   for (int p = 0; p < m_num_pipelines; p++)
   {

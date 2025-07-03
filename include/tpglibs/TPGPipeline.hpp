@@ -70,7 +70,7 @@ class TPGPipeline {
     }
     
     /** @brief Poll processors for metric, then fill into buffer. */
-    virtual void get_pipeline_metrics(std::unordered_map<tpglibs::MetricBufferKey, tpglibs::ChannelAwareSignalPointer<signal_t>>& table, int16_t pipeline_id) = 0;
+    virtual void get_pipeline_metrics(std::unordered_map<tpglibs::MetricBufferKey, tpglibs::IndexAwareSignalPointer<signal_t>>& table, int16_t pipeline_id) = 0;
     
     /**
      * @brief Process a signal through the pipeline.
