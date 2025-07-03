@@ -12,6 +12,7 @@
 #include "tpglibs/AVXRunSumProcessor.hpp"
 #include "tpglibs/AVXAbsRunSumProcessor.hpp"
 #include "tpglibs/AVXThresholdProcessor.hpp"
+#include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <fmt/core.h>
@@ -24,6 +25,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   std::shared_ptr<AVXProcessor> thresholds = std::make_shared<AVXThresholdProcessor>();
   std::shared_ptr<AVXProcessor> abs_rs = std::make_shared<AVXAbsRunSumProcessor>();
   std::shared_ptr<AVXProcessor> rs = std::make_shared<AVXRunSumProcessor>();
+  std::shared_ptr<AVXProcessor> fps = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
 
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
@@ -40,10 +42,12 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     {"memory_factor_plane2", 8},
     {"scale_factor_plane0", 5},
     {"scale_factor_plane1", 5},
-    {"scale_factor_plane2", 5}
+    {"scale_factor_plane2", 5},
+    {"accum_limit", 42}
   };
   abs_rs->configure(rs_config, plane_numbers);
   rs->configure(rs_config, plane_numbers);
+  fps->configure(rs_config, plane_numbers);
 
   // Arbitrary input choices. Set so RS resets to 0.
   __m256i input0 = _mm256_set_epi16(-1600, 1500, -1400, 1300, -1200, 1100, -1000,  900,
@@ -61,15 +65,22 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   __m256i avx_rs_output = rs->process(input0);
   avx_rs_output = rs->process(input1);
   avx_rs_output = rs->process(input2);
+  __m256i avx_fps_output = fps->process(input0);
+  avx_fps_output = fps->process(input1);
+  avx_fps_output = fps->process(input2);
 
-  int16_t abs_output[16], thr_output[16], rs_output[16];
+  int16_t abs_output[16], thr_output[16], rs_output[16], fps_output[16];
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(&abs_output), avx_abs_output);
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(&thr_output), avx_thr_output);
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(&rs_output),  avx_rs_output);
+  _mm256_storeu_si256(reinterpret_cast<__m256i*>(&fps_output),  avx_fps_output);
+
+  auto avx_fps_metrics = fps->get_processor_metrics(0);
 
   bool same_abs = true;
   bool same_thr = true;
   bool same_rs  = true;
+  bool not_empty_metric = true;
 
   int16_t expected_abs[16] = { 144,  288,  432,  576,  720,  864, 1008, 1152,
                               1296, 1440, 1584, 1728, 1872, 2016, 2160, 2304};
@@ -80,6 +91,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     if (expected_abs[i] != abs_output[i]) same_abs = false;
     if (expected_thr[i] != thr_output[i]) same_thr = false;
     if (expected_rs[i] != rs_output[i]) same_rs = false;
+    if (avx_fps_metrics.empty()) not_empty_metric = false;
   }
 
 //  fmt::print("AbsRS: [{:5}]\n", fmt::join(abs_output, ","));
@@ -89,6 +101,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(same_abs);
   BOOST_TEST(same_thr);
   BOOST_TEST(same_rs);
+  BOOST_TEST(not_empty_metric);
 }
 
 } // namespace tpglibs
