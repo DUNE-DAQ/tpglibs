@@ -17,6 +17,8 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
+#include <iostream>
+
 namespace tpglibs {
 
 BOOST_AUTO_TEST_CASE(test_macro_overview)
@@ -101,7 +103,99 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     }
   }
 
+  // ---------------------------
+  // Test for metric collection at AVXPipeline
+
+  std::vector<std::pair<std::string, nlohmann::json>> configs2 = {
+    {
+      "AVXFrugalPedestalSubtractProcessor",
+      {
+        {"accum_limit", 42}
+      }
+    }
+  };
+
+  AVXPipeline pipeline2 = AVXPipeline();
+
+  pipeline2.configure(configs2, channel_plane_numbers);
+  pipeline2.set_sot_minima(sot_minima);
+
+  std::unordered_map<tpglibs::MetricBufferKey, tpglibs::IndexAwareSignalPointer<__m256i>> table;
+
+  for (size_t cnum = 0; cnum < 16; cnum++) {
+    MetricBufferKey key;
+    key.channel_number = channel_plane_numbers[cnum].first;
+    key.metric_id = 0;
+    key.pipeline_id = 0;
+    key.processor_id = 0;
+
+    tpglibs::IndexAwareSignalPointer<__m256i> ptr;
+    ptr.index = -1;
+    ptr.valueptr = nullptr;
+
+    table[key] = ptr;
+  }
+
+  for (const __m256i& signal : signals) {
+    std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = pipeline2.process(signal);
+    if (tps.empty()) continue;
+  }
+
+  pipeline2.get_pipeline_metrics(table, 0);
+
+  bool pointers_are_not_null = true;
+  bool index_are_assigned = true;
+
+  // std::cout << "--- Metrics Table Contents ---\n";
+
+  // for (const auto& kv : table) {
+  //     const auto& key = kv.first;
+  //     const auto& ptr = kv.second;
+  //     std::cout << "Key(channel=" << key.channel_number
+  //               << ", metric=" << key.metric_id
+  //               << ", pipeline=" << key.pipeline_id
+  //               << ", processor=" << key.processor_id
+  //               << ")  ";
+
+  //     std::cout << "index=" << ptr.index << "  ";
+
+  //     if (ptr.valueptr) {
+  //       int16_t vals[16];
+  //       _mm256_storeu_si256(reinterpret_cast<__m256i*>(vals), *ptr.valueptr);
+  //       std::cout << "values=[";
+  //       for (int i = 0; i < 16; ++i) {
+  //         std::cout << vals[i] << (i + 1 < 16 ? "," : "");
+  //       }
+  //       std::cout << "]";
+  //     } else {
+  //       std::cout << "valueptr=null";
+  //     }
+  //     std::cout << "\n";
+  // }
+  // std::cout << "------------------------------\n";
+
+  for (size_t cnum = 0; cnum < 16; cnum++) {
+    MetricBufferKey key;
+    key.channel_number = channel_plane_numbers[cnum].first;
+    key.metric_id = 0;
+    key.pipeline_id = 0;
+    key.processor_id = 0;
+
+    auto ptr = table.at(key);
+
+    if (ptr.index == -1) {
+      index_are_assigned = false;
+        std::cout<<std::to_string(ptr.index)<<std::endl;
+    }
+
+    if (ptr.valueptr == nullptr) {
+      pointers_are_not_null = false;
+    }
+  }
+
   BOOST_TEST(adc_peak_at_1600);
+  BOOST_TEST(index_are_assigned);
+  BOOST_TEST(pointers_are_not_null);
 }
 
 } // namespace tpglibs

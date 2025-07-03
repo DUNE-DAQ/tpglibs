@@ -55,20 +55,22 @@ void AVXPipeline::get_pipeline_metrics(std::unordered_map<tpglibs::MetricBufferK
   
     auto metric_items = curr->get_processor_metrics(proc_id_ctr);
     
-    int16_t channel_idx = 0;
     for (auto& item : metric_items) {
-      MetricBufferKey mkey;
-      // form our key to look up address table
-      mkey.processor_id = item.processor_id;
-      mkey.pipeline_id = pipeline_id; // The pipeline knows where it is
-      mkey.metric_id = metric_item_ctr++; // increase absolute id by 1
-      mkey.channel_number = m_channels[channel_idx];
-      // Finally, fill a pointer to our metric
-      tpglibs::IndexAwareSignalPointer<__m256i> ptr;
-      ptr.index = channel_idx++;
-      ptr.valueptr = item.valueptr; // pass the pointer to AVX upstream      
+      for (size_t chnum = 0; chnum < 16; chnum++) {
+        MetricBufferKey mkey;
+        // form our key to look up address table
+        mkey.processor_id = item.processor_id;
+        mkey.pipeline_id = pipeline_id; // The pipeline knows where it is
+        mkey.metric_id = metric_item_ctr; // increase absolute id by 1
+        mkey.channel_number = m_channels[chnum];
+        // Finally, fill a pointer to our metric
+        tpglibs::IndexAwareSignalPointer<__m256i> ptr;
+        ptr.index = chnum;
+        ptr.valueptr = item.valueptr; // pass the pointer to AVX upstream      
 
-      table[mkey] = ptr;
+        table[mkey] = ptr;
+      }
+      metric_item_ctr++;
     }
 
     // move to the next
