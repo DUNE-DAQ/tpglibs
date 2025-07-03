@@ -75,12 +75,14 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(&rs_output),  avx_rs_output);
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(&fps_output),  avx_fps_output);
 
-  auto avx_fps_metrics = fps->get_processor_metrics(0);
+  auto avx_fps_metrics = fps->get_processor_metrics(5);
 
   bool same_abs = true;
   bool same_thr = true;
   bool same_rs  = true;
   bool not_empty_metric = true;
+  bool fps_correct_id = true;
+  bool fps_not_null_ptr = true;
 
   int16_t expected_abs[16] = { 144,  288,  432,  576,  720,  864, 1008, 1152,
                               1296, 1440, 1584, 1728, 1872, 2016, 2160, 2304};
@@ -92,6 +94,9 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     if (expected_thr[i] != thr_output[i]) same_thr = false;
     if (expected_rs[i] != rs_output[i]) same_rs = false;
     if (avx_fps_metrics.empty()) not_empty_metric = false;
+    if (avx_fps_metrics[0].metric_id != 0) fps_correct_id = false;
+    if (avx_fps_metrics[0].processor_id != 5) fps_correct_id = false;
+    if (avx_fps_metrics[0].valueptr == nullptr) fps_not_null_ptr = false;
   }
 
 //  fmt::print("AbsRS: [{:5}]\n", fmt::join(abs_output, ","));
@@ -102,6 +107,8 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(same_thr);
   BOOST_TEST(same_rs);
   BOOST_TEST(not_empty_metric);
+  BOOST_TEST(fps_correct_id);
+  BOOST_TEST(fps_not_null_ptr);
 }
 
 } // namespace tpglibs
