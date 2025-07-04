@@ -112,6 +112,18 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
       {
         {"accum_limit", 42}
       }
+    },
+    {
+      "AVXFrugalPedestalSubtractProcessor",
+      {
+        {"accum_limit", 42}
+      }
+    },
+    {
+      "AVXFrugalPedestalSubtractProcessor",
+      {
+        {"accum_limit", 42}
+      }
     }
   };
 
@@ -123,17 +135,19 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   std::unordered_map<tpglibs::MetricBufferKey, tpglibs::IndexAwareSignalPointer<__m256i>> table;
 
   for (size_t cnum = 0; cnum < 16; cnum++) {
-    MetricBufferKey key;
-    key.channel_number = channel_plane_numbers[cnum].first;
-    key.metric_id = 0;
-    key.pipeline_id = 0;
-    key.processor_id = 0;
+    for (int16_t mid = 0; mid < 3; mid++) {
+      MetricBufferKey key;
+      key.channel_number = channel_plane_numbers[cnum].first;
+      key.metric_id = mid; // There are three processors each with one metric
+      key.pipeline_id = 0;
+      key.processor_id = mid;
 
-    tpglibs::IndexAwareSignalPointer<__m256i> ptr;
-    ptr.index = -1;
-    ptr.valueptr = nullptr;
+      tpglibs::IndexAwareSignalPointer<__m256i> ptr;
+      ptr.index = -1;
+      ptr.valueptr = nullptr;
 
-    table[key] = ptr;
+      table[key] = ptr;
+    }
   }
 
   for (const __m256i& signal : signals) {
@@ -146,50 +160,52 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   bool pointers_are_not_null = true;
   bool index_are_assigned = true;
 
-  // std::cout << "--- Metrics Table Contents ---\n";
+  std::cout << "--- Metrics Table Contents ---\n";
 
-  // for (const auto& kv : table) {
-  //     const auto& key = kv.first;
-  //     const auto& ptr = kv.second;
-  //     std::cout << "Key(channel=" << key.channel_number
-  //               << ", metric=" << key.metric_id
-  //               << ", pipeline=" << key.pipeline_id
-  //               << ", processor=" << key.processor_id
-  //               << ")  ";
+  for (const auto& kv : table) {
+      const auto& key = kv.first;
+      const auto& ptr = kv.second;
+      std::cout << "Key(channel=" << key.channel_number
+                << ", metric=" << key.metric_id
+                << ", pipeline=" << key.pipeline_id
+                << ", processor=" << key.processor_id
+                << ")  ";
 
-  //     std::cout << "index=" << ptr.index << "  ";
+      std::cout << "index=" << ptr.index << "  ";
 
-  //     if (ptr.valueptr) {
-  //       int16_t vals[16];
-  //       _mm256_storeu_si256(reinterpret_cast<__m256i*>(vals), *ptr.valueptr);
-  //       std::cout << "values=[";
-  //       for (int i = 0; i < 16; ++i) {
-  //         std::cout << vals[i] << (i + 1 < 16 ? "," : "");
-  //       }
-  //       std::cout << "]";
-  //     } else {
-  //       std::cout << "valueptr=null";
-  //     }
-  //     std::cout << "\n";
-  // }
-  // std::cout << "------------------------------\n";
+      if (ptr.valueptr) {
+        int16_t vals[16];
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(vals), *ptr.valueptr);
+        std::cout << "values=[";
+        for (int i = 0; i < 16; ++i) {
+          std::cout << vals[i] << (i + 1 < 16 ? "," : "");
+        }
+        std::cout << "]";
+      } else {
+        std::cout << "valueptr=null";
+      }
+      std::cout << "\n";
+  }
+  std::cout << "------------------------------\n";
 
   for (size_t cnum = 0; cnum < 16; cnum++) {
-    MetricBufferKey key;
-    key.channel_number = channel_plane_numbers[cnum].first;
-    key.metric_id = 0;
-    key.pipeline_id = 0;
-    key.processor_id = 0;
+    for (int16_t mid = 0; mid < 3; mid++) {
+      MetricBufferKey key;
+      key.channel_number = channel_plane_numbers[cnum].first;
+      key.metric_id = 0;
+      key.pipeline_id = 0;
+      key.processor_id = 0;
 
-    auto ptr = table.at(key);
+      auto ptr = table.at(key);
 
-    if (ptr.index == -1) {
-      index_are_assigned = false;
+      if (ptr.index == -1) {
+        index_are_assigned = false;
         std::cout<<std::to_string(ptr.index)<<std::endl;
-    }
+      } 
 
-    if (ptr.valueptr == nullptr) {
-      pointers_are_not_null = false;
+      if (ptr.valueptr == nullptr) {
+        pointers_are_not_null = false;
+      }
     }
   }
 

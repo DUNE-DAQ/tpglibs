@@ -74,7 +74,7 @@ void AVXPipeline::get_pipeline_metrics(std::unordered_map<tpglibs::MetricBufferK
     }
 
     // move to the next
-    curr = m_processor_head->get_next_processor();
+    curr = curr->get_next_processor();
     proc_id_ctr ++;
   }
 }
