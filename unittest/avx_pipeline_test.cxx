@@ -159,6 +159,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
 
   bool pointers_are_not_null = true;
   bool index_are_assigned = true;
+  bool correct_pedestal = true; // This is dependent on initialization value in Processor
 
   std::cout << "--- Metrics Table Contents ---\n";
 
@@ -205,6 +206,16 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
 
       if (ptr.valueptr == nullptr) {
         pointers_are_not_null = false;
+        correct_pedestal = false;
+      } else {
+        int16_t vals[16];
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(vals), *ptr.valueptr);
+
+        for (auto& val : vals) {
+          if (val != 16384) { // Because we initialize at 0x4000
+            correct_pedestal = false;
+          } 
+        }
       }
     }
   }
@@ -212,6 +223,7 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(adc_peak_at_1600);
   BOOST_TEST(index_are_assigned);
   BOOST_TEST(pointers_are_not_null);
+  BOOST_TEST(correct_pedestal);
 }
 
 } // namespace tpglibs
