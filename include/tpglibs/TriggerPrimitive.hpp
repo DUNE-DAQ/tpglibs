@@ -53,6 +53,19 @@
      , adc_integral(0)
      , adc_peak(0)
    {}
+
+    bool operator==(const TriggerPrimitive& other) const
+    {
+      return version == other.version &&
+        flag == other.flag &&
+        detid == other.detid &&
+        channel == other.channel &&
+        samples_over_threshold == other.samples_over_threshold &&
+        time_start == other.time_start &&
+        samples_to_peak == other.samples_to_peak &&
+        adc_integral == other.adc_integral &&
+        adc_peak == other.adc_peak;
+    }
  };
  
  } // namespace tpglibs
