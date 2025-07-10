@@ -62,19 +62,21 @@ class TPGenerator {
      * @return A vector of TPs.
      */
     template <typename T>
-    std::vector<TriggerPrimitive> operator()(const T* frame) {
+    void operator()(const T* frame) {
       // Max number of TPs for a channel: number of time samples / 2.
-      std::vector<TriggerPrimitive> tp_aggr;
-      tp_aggr.reserve(T::s_num_channels * T::s_time_samples_per_frame / 2);
+      //std::vector<TriggerPrimitive> tp_aggr;
+      //tp_aggr.reserve(T::s_num_channels * T::s_time_samples_per_frame / 2);
 
-      const typename T::word_t (*words_ptr)[T::s_bits_per_adc] = frame->adc_words;
+      const int bits_per_adc = m_expand_frames ? T::s_bits_per_adc : 16;
+
+      const typename T::word_t* words_ptr = reinterpret_cast<const typename T::word_t*>(frame->adc_words);
       const uint64_t timestamp = frame->get_timestamp();
 
-      const int register_alignment = T::s_bits_per_adc * m_num_channels_per_pipeline;
+      const int register_alignment = bits_per_adc * m_num_channels_per_pipeline;
       // Loop in time.
       for (int t = 0; t < T::s_time_samples_per_frame; t++) {
-        const typename T::word_t *time_sample = *(words_ptr + t);
-        char* cursor = (char*) time_sample; // Need to walk in terms of bytes/bits.
+        const typename T::word_t* time_sample = words_ptr + t * bits_per_adc;
+        char* cursor = reinterpret_cast<char*>(const_cast<typename T::word_t*>(time_sample)); // Need to walk in terms of bytes/bits.
 
         // Loop in pipelines.
         for (int p = 0; p < m_num_pipelines; p++) {
@@ -87,22 +89,23 @@ class TPGenerator {
             regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
 
           __m256i expanded_subframe = m_expand_frames ? expand_frame(regi) : regi;
-          std::vector<TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
+                    
+          /*std::vector<TriggerPrimitive> tps = */m_tpg_pipelines[p].process(expanded_subframe);
 
-          for (auto tp : tps) {
-            tp.time_start = (t - tp.samples_over_threshold) * m_sample_tick_difference + timestamp;
-            tp_aggr.push_back(tp);
-          }
+          //for (auto tp : tps) {
+          //  tp.time_start = (t - tp.samples_over_threshold) * m_sample_tick_difference + timestamp;
+          //  //tp_aggr.push_back(tp);
+          //}
           cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
         }
       }
 
-      return tp_aggr;
+      //return tp_aggr;
     }
 
   private:
     __m256i expand_frame(const __m256i& regi); /// @brief Expansion from 14-bit signals to 16-bit.
-    __m256i old_expand_frame(const __m256i& regi); /// @brief Legacy expansion function.
+    __m256i old_expand_frame(const __m256i& regi); /// @brief Legacy expansion function. 
 };
 
 } // namespace tpglibs
