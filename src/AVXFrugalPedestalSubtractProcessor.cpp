@@ -16,14 +16,10 @@ void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config,
   m_accum_limit = config["accum_limit"];
 }
 
-std::vector<MetricItem<__m256i>> AVXFrugalPedestalSubtractProcessor::get_processor_metrics(const int16_t processor_id) { 
-   std::vector<MetricItem<__m256i>> items;
+std::vector<std::shared_ptr<__m256i>> AVXFrugalPedestalSubtractProcessor::get_processor_metrics() { 
+   std::vector<std::shared_ptr<__m256i>> items;
   
-   MetricItem<__m256i> i1;
-   i1.processor_id = processor_id;
-   i1.pipeline_id = -1; // placeholder
-   i1.metric_id = 0; // local counter
-   i1.valueptr = std::make_shared<__m256i>(m_pedestal);
+   auto i1 = std::make_shared<__m256i>(m_pedestal);
  
    items.push_back(std::move(i1));
 

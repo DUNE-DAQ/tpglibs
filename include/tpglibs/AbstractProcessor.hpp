@@ -36,7 +36,7 @@ class AbstractProcessor {
     virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
     
     /** @brief Function that will return metrics of processor in a vector */
-    virtual std::vector<MetricItem<T>> get_processor_metrics(const int16_t) {
+    virtual std::vector<std::shared_ptr<T>> get_processor_metrics() {
       return {}; // By default nothing is collected
     } 
     

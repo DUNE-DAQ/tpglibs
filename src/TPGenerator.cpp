@@ -27,15 +27,15 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   }
 }
 
-void TPGenerator::propagate_metric_table(std::unordered_map<MetricBufferKey, IndexAwareSignalPointer<__m256i>>& table) {
-   // issue command to for each pipeline to poll for metric
-    int16_t pipeline_id = 0;
-    if (m_tpg_pipelines.empty()) {return;} //nothing there yet
+// void TPGenerator::propagate_metric_table(std::unordered_map<MetricBufferKey, IndexAwareSignalPointer<__m256i>>& table) {
+//    // issue command to for each pipeline to poll for metric
+//     int16_t pipeline_id = 0;
+//     if (m_tpg_pipelines.empty()) {return;} //nothing there yet
 
-    for (auto& pipe: m_tpg_pipelines) {
-      pipe.get_pipeline_metrics(table, pipeline_id++);
-    }
-}
+//     for (auto& pipe: m_tpg_pipelines) {
+//       pipe.get_pipeline_metrics(table, pipeline_id++);
+//     }
+// }
 
 void
 TPGenerator::set_sot_minima(const std::vector<uint16_t>& sot_minima) {

@@ -44,40 +44,40 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
 }
 
 /** @brief Poll processors for metric, then fill into buffer. */
-void AVXPipeline::get_pipeline_metrics(std::unordered_map<tpglibs::MetricBufferKey, tpglibs::IndexAwareSignalPointer<__m256i>>& table, int16_t pipeline_id) {
-  // grab current head
-  std::shared_ptr<AbstractProcessor<__m256i>> curr = m_processor_head;
+// void AVXPipeline::get_pipeline_metrics(std::unordered_map<tpglibs::MetricBufferKey, tpglibs::IndexAwareSignalPointer<__m256i>>& table, int16_t pipeline_id) {
+//   // grab current head
+//   std::shared_ptr<AbstractProcessor<__m256i>> curr = m_processor_head;
 
-  int16_t proc_id_ctr = 0;
-  int16_t metric_item_ctr = 0;
+//   int16_t proc_id_ctr = 0;
+//   int16_t metric_item_ctr = 0;
 
-  while (curr) { // while not null
+//   while (curr) { // while not null
   
-    auto metric_items = curr->get_processor_metrics(proc_id_ctr);
+//     auto metric_items = curr->get_processor_metrics(proc_id_ctr);
     
-    for (auto& item : metric_items) {
-      for (size_t chnum = 0; chnum < 16; chnum++) {
-        MetricBufferKey mkey;
-        // form our key to look up address table
-        mkey.processor_id = item.processor_id;
-        mkey.pipeline_id = pipeline_id; // The pipeline knows where it is
-        mkey.metric_id = metric_item_ctr; // increase absolute id by 1
-        mkey.channel_number = m_channels[chnum];
-        // Finally, fill a pointer to our metric
-        tpglibs::IndexAwareSignalPointer<__m256i> ptr;
-        ptr.index = chnum;
-        ptr.valueptr = item.valueptr; // pass the pointer to AVX upstream      
+//     for (auto& item : metric_items) {
+//       for (size_t chnum = 0; chnum < 16; chnum++) {
+//         MetricBufferKey mkey;
+//         // form our key to look up address table
+//         mkey.processor_id = item.processor_id;
+//         mkey.pipeline_id = pipeline_id; // The pipeline knows where it is
+//         mkey.metric_id = metric_item_ctr; // increase absolute id by 1
+//         mkey.channel_number = m_channels[chnum];
+//         // Finally, fill a pointer to our metric
+//         tpglibs::IndexAwareSignalPointer<__m256i> ptr;
+//         ptr.index = chnum;
+//         ptr.valueptr = item.valueptr; // pass the pointer to AVX upstream      
 
-        table[mkey] = ptr;
-      }
-      metric_item_ctr++;
-    }
+//         table[mkey] = ptr;
+//       }
+//       metric_item_ctr++;
+//     }
 
-    // move to the next
-    curr = curr->get_next_processor();
-    proc_id_ctr ++;
-  }
-}
+//     // move to the next
+//     curr = curr->get_next_processor();
+//     proc_id_ctr ++;
+//   }
+// }
 
 bool
 AVXPipeline::check_for_tps(const __m256i& tp_mask) {

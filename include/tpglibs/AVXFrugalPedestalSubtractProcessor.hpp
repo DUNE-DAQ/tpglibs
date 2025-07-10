@@ -39,10 +39,9 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     __m256i process(const __m256i& signal) override;
     
     /** @brief Produce processor metrics.
-     *  @param processor_id id of this processor
-     *  @returns a vector of metric items
+     *  @returns metrics from this processor
      */
-    std::vector<MetricItem<__m256i>> get_processor_metrics(const int16_t processor_id) override;
+    std::vector<std::shared_ptr<__m256i>> get_processor_metrics() override;
     
     /** @brief Configure the accumulation limit according to plane number.
      *
