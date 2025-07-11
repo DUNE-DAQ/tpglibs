@@ -27,6 +27,26 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   }
 }
 
+std::vector<TPGenerator::pipeline_metric_t> TPGenerator::get_metrics(size_t n_metrics) 
+{
+  // First we create the full collection table 
+  std::vector<TPGenerator::pipeline_metric_t> full_table(
+    m_num_pipelines, TPGenerator::pipeline_metric_t(
+      m_num_channels_per_pipeline, std::vector<int16_t>(
+        n_metrics, 0
+      )
+  ));
+
+  // Then we dispatch slices of the full table to the pipelines
+  if (m_tpg_pipelines.empty()) {return full_table;} // safeguard
+
+  size_t pipeline_index = 0;
+  for (auto & pipe: m_tpg_pipelines) {
+    pipe.collect_pipeline_metrics(full_table[pipeline_index++]);
+  }
+
+  return full_table;
+}
 // void TPGenerator::propagate_metric_table(std::unordered_map<MetricBufferKey, IndexAwareSignalPointer<__m256i>>& table) {
 //    // issue command to for each pipeline to poll for metric
 //     int16_t pipeline_id = 0;

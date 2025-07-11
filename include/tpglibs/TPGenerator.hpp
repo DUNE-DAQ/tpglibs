@@ -32,6 +32,8 @@ class TPGenerator {
   int m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
 
+  using pipeline_metric_t = std::vector<std::vector<int16_t>>;
+
   public:
     /**
      * @brief Setup and configure the AVX pipelines.
@@ -53,9 +55,10 @@ class TPGenerator {
     
     /**
      * @brief Function to pass buffer pointer and metric item map to Pipelines.
+     * 
+     * @param n_metrics the number of metrics to collect as predefined in configuration
      */    
-    // void propagate_metric_table(std::unordered_map<MetricBufferKey, IndexAwareSignalPointer<__m256i>>& table); 
-
+    std::vector<pipeline_metric_t> get_metrics(size_t n_metrics);
     /**
      * @brief Driving function for the TPG.
      *
