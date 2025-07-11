@@ -52,26 +52,26 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     }
   };
 
-  // std::vector<std::pair<std::string, nlohmann::json>> configs_pedestal = {
-  //   {
-  //     "AVXFrugalPedestalSubtractProcessor",
-  //     {
-  //       {"accum_limit", 42}
-  //     }
-  //   },
-  //   {
-  //     "AVXFrugalPedestalSubtractProcessor",
-  //     {
-  //       {"accum_limit", 42}
-  //     }
-  //   },
-  //   {
-  //     "AVXFrugalPedestalSubtractProcessor",
-  //     {
-  //       {"accum_limit", 42}
-  //     }
-  //   }
-  // };
+  std::vector<std::pair<std::string, nlohmann::json>> configs_pedestal = {
+    {
+      "AVXFrugalPedestalSubtractProcessor",
+      {
+        {"accum_limit", 42}
+      }
+    },
+    {
+      "AVXFrugalPedestalSubtractProcessor",
+      {
+        {"accum_limit", 42}
+      }
+    },
+    {
+      "AVXFrugalPedestalSubtractProcessor",
+      {
+        {"accum_limit", 42}
+      }
+    }
+  };
 
   TPGenerator tpg;
   constexpr int sample_tick_difference = 1; // Arbitrary choice for this test. Live has been 32 (2024-08-15).
@@ -89,85 +89,30 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(tp_count == 600);
   BOOST_TEST(min_peak > 200);  // Truly it should depend on the plane, so this is naive.
 
-  // TPGenerator tpg_pedestal;
-  // tpg_pedestal.configure(configs_pedestal, channel_plane_numbers, sample_tick_difference);
+  TPGenerator tpg_pedestal;
+  tpg_pedestal.configure(configs_pedestal, channel_plane_numbers, sample_tick_difference);
 
-  // tps = tpg_pedestal(&frame);
+  auto all_metrics = tpg_pedestal.get_metrics(3); // each pedestal has 1 metric, each pipeline then has 3
 
-  // std::unordered_map<tpglibs::MetricBufferKey, tpglibs::IndexAwareSignalPointer<__m256i>> table;
+  bool all_values_correct = true;
+  bool channel_id_correct = true;
+  bool dimension_correct = true;
 
-  // for (size_t cnum = 0; cnum < 16; cnum++) {
-  //   for (int16_t pid = 0; pid < 4; pid++) {
-  //     for (int16_t mid = 0; mid < 3; mid++) {
-  //       MetricBufferKey key;
-  //       key.channel_number = channel_plane_numbers[pid*16 + cnum].first;
-  //       key.metric_id = mid; // There are three processors each with one metric
-  //       key.pipeline_id = pid;
-  //       key.processor_id = mid;
+  if (all_metrics.size() * all_metrics[0].size() * all_metrics[0][0].size() != 4 * 16 * 3) {
+    dimension_correct = false;
+  }
 
-  //       tpglibs::IndexAwareSignalPointer<__m256i> ptr;
-  //       ptr.index = -1;
-  //       ptr.valueptr = nullptr;
+  for (size_t pid = 0; pid < 4; pid++) {
+    for (size_t cid = 0; cid < 16; cid++) {
+      for (size_t mid = 0; mid < 3; mid ++) {
+        if (all_metrics[pid][cid][mid] != 16384) {
+          all_values_correct = false;
+        }
+      }
+    }
+  }
 
-  //       table[key] = ptr;
-  //     }
-  //   }
-  // }
-
-  // tpg_pedestal.propagate_metric_table(table);
-
-  // std::cout << "--- Metrics Table Contents ---\n";
-
-  // for (const auto& kv : table) {
-  //     const auto& key = kv.first;
-  //     const auto& ptr = kv.second;
-  //     std::cout << "Key(channel=" << key.channel_number
-  //               << ", metric=" << key.metric_id
-  //               << ", pipeline=" << key.pipeline_id
-  //               << ", processor=" << key.processor_id
-  //               << ")  ";
-
-  //     std::cout << "index=" << ptr.index << "  ";
-
-  //     if (ptr.valueptr) {
-  //       int16_t vals[16];
-  //       _mm256_storeu_si256(reinterpret_cast<__m256i*>(vals), *ptr.valueptr);
-  //       std::cout << "values=[";
-  //       for (int i = 0; i < 16; ++i) {
-  //         std::cout << vals[i] << (i + 1 < 16 ? "," : "");
-  //       }
-  //       std::cout << "]";
-  //     } else {
-  //       std::cout << "valueptr=null";
-  //     }
-  //     std::cout << "\n";
-  // }
-  // std::cout << "------------------------------\n";
-
-  // bool all_set_to_values = true;
-
-  // for (size_t cnum = 0; cnum < 16; cnum++) {
-  //   for (int16_t pid = 0; pid < 4; pid++) {
-  //     for (int16_t mid = 0; mid < 3; mid++) {
-  //       MetricBufferKey key;
-  //       key.channel_number = channel_plane_numbers[pid*16 + cnum].first;
-  //       key.metric_id = mid; // There are three processors each with one metric
-  //       key.pipeline_id = pid;
-  //       key.processor_id = mid;
-
-  //       auto ptr = table.at(key);
-
-  //       if (ptr.index == -1) {
-  //         all_set_to_values = false;
-  //       }
-  //       if (ptr.valueptr == nullptr) {
-  //         all_set_to_values = false;
-  //       }
-  //     }
-  //   }
-  // }
-
-  // BOOST_TEST(all_set_to_values);
+  BOOST_TEST(all_values_correct);
 }
 
 } // namespace tpglibs
