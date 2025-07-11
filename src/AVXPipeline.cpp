@@ -44,8 +44,31 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
 }
 
 /** @brief Poll processors for metric, then fill into buffer. */
-void AVXPipeline::collect_pipeline_metrics(std::vector<std::shared_ptr<__m256i>> table) {
-  
+void AVXPipeline::collect_pipeline_metrics(std::vector<std::vector<int16_t>>& table) {
+  // grab current head
+  std::shared_ptr<AbstractProcessor<__m256i>> curr = m_processor_head;
+
+  size_t metric_item_index = 0;
+
+  while (curr) {
+    // put pointer to metric 
+    auto metric_items = curr->get_processor_metrics();
+
+    for (auto& item_ptr : metric_items) {
+      // cast __m256i to int16_t here
+
+      int16_t vals[16];
+      _mm256_storeu_si256(reinterpret_cast<__m256i*>(vals), *item_ptr);
+
+      for (size_t cid = 0; cid < 16; cid++) {
+        table[cid][metric_item_index] = vals[cid];
+      }
+    }
+
+    metric_item_index++;
+
+    curr = curr->get_next_processor();
+  }
 }
 // void AVXPipeline::get_pipeline_metrics(std::unordered_map<tpglibs::MetricBufferKey, tpglibs::IndexAwareSignalPointer<__m256i>>& table, int16_t pipeline_id) {
 //   // grab current head

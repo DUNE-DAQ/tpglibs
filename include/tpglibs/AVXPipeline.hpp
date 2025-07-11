@@ -47,7 +47,7 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
      * 
      *  @param table vector containing pointers to buffer
      */
-    void collect_pipeline_metrics(std::vector<std::shared_ptr<__m256i>> table) override;
+    void collect_pipeline_metrics(std::vector<std::vector<int16_t>>& table) override;
     
     /** @brief Finalize the details of the completed TPs and send out.
      *
