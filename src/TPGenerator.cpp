@@ -31,7 +31,7 @@ std::vector<TPGenerator::pipeline_metric_t> TPGenerator::get_metrics(size_t n_me
 {
   // First we create the full collection table 
   std::vector<TPGenerator::pipeline_metric_t> full_table(
-    m_num_pipelines, TPGenerator::pipeline_metric_t(
+    m_tpg_pipelines.size(), TPGenerator::pipeline_metric_t(
       m_num_channels_per_pipeline, std::vector<int16_t>(
         n_metrics, 0
       )
