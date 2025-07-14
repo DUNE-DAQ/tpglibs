@@ -17,6 +17,11 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;
   m_sample_tick_difference = sample_tick_difference;
 
+  // Re-configuring should reset the state, so remove old pipelines.
+  if (!m_tpg_pipelines.empty()) {
+    m_tpg_pipelines.clear();
+  }
+
   for (int p = 0; p < m_num_pipelines; p++) {
     AVXPipeline new_pipe = AVXPipeline();
     auto begin_channel_plane = channel_plane_numbers.begin() + p*m_num_channels_per_pipeline;
