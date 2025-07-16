@@ -46,4 +46,13 @@ __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   return AVXProcessor::process(_mm256_sub_epi16(signal, m_pedestal));
 }
 
+
+void AVXFrugalPedestalSubtractProcessor::store_processor_metrics() {
+  // Extract 64-bit lanes from the 256-bit pedestal vector
+  m_pedestal_metric.field0 = _mm256_extract_epi64(m_pedestal, 0);
+  m_pedestal_metric.field1 = _mm256_extract_epi64(m_pedestal, 1);
+  m_pedestal_metric.field2 = _mm256_extract_epi64(m_pedestal, 2);
+  m_pedestal_metric.field3 = _mm256_extract_epi64(m_pedestal, 3);
+}
+
 } // namespace tpglibs

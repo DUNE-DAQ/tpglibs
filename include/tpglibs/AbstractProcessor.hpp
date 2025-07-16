@@ -45,6 +45,9 @@ class AbstractProcessor {
       }
       return signal;
     }
+
+    /** @brief Store processor-specific metrics; default does nothing. */
+    virtual void store_processor_metrics() {}
 };
 
 } // namespace tpglibs

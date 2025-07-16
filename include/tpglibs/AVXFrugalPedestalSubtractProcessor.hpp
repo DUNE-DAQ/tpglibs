@@ -7,6 +7,7 @@
  */
 
 #include "tpglibs/AVXFactory.hpp"
+#include "tpglibs/ProcessorMetricMemory.hpp"
 
 #ifndef TPGLIBS_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGLIBS_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
@@ -44,6 +45,13 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
      *  @param plane_numbers Array of plane numbers. Gives the channels to apply the accumulation limit.
      */
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+
+    
+    /** @brief Store processor-specific metrics by extracting current pedestal values. */
+    void store_processor_metrics() override;
+
+  private:
+    ProcessorMetricMemory m_pedestal_metric;
 };
 
 } // namespace tpglibs
