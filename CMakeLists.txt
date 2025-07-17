@@ -25,7 +25,7 @@ endif()
 
 daq_add_library( *.cpp  LINK_LIBRARIES nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt )
 
-daq_add_python_bindings(*.cpp LINK_LIBRARIES ${PROJECT_NAME})
+daq_add_python_bindings(*.cpp)
 
 daq_add_unit_test(avx_factory_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(avx_generator_test LINK_LIBRARIES tpglibs)
