@@ -7,10 +7,28 @@
  */
 
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
+#include "tpglibs/ProcessorMetricArray.hpp"
+#include <mm_malloc.h>
 
 namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXFrugalPedestalSubtractProcessor", AVXFrugalPedestalSubtractProcessor)
+
+AVXFrugalPedestalSubtractProcessor::AVXFrugalPedestalSubtractProcessor() {
+  // Initialize the static arrays in metric store buffer
+  for (auto& buf : m_metric_store_buffers) {
+    buf.m_size = 2; // Storing m_pedetal and m_acuum for this type of processor
+    buf.m_data = static_cast<__m256i*>(
+      _mm_malloc(buf.m_size * sizeof(__m256i), alignof(__m256i))
+    );
+  }
+}
+
+AVXFrugalPedestalSubtractProcessor::~AVXFrugalPedestalSubtractProcessor() noexcept {
+  for (auto buf : m_metric_store_buffers) {
+    _mm_free(buf.m_data);
+  }
+}
 
 void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   m_accum_limit = config["accum_limit"];
@@ -46,13 +64,27 @@ __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   return AVXProcessor::process(_mm256_sub_epi16(signal, m_pedestal));
 }
 
+void AVXFrugalPedestalSubtractProcessor::save_metric_to_store_buffer() {
+  // Store is expected to happen at a much higher frequency than read, for example,
+  // can be store after each processing
+  // Therefore, "save" should have no interrupt or wait
+  auto free_ptr = m_active_buffer.load(std::memory_order_acquire);
+  // write to free buffer
+  
+  free_ptr->m_data[0] = m_pedestal;
+  free_ptr->m_data[1] = m_accum;
+}
 
-void AVXFrugalPedestalSubtractProcessor::store_processor_metrics() {
-  // Extract 64-bit lanes from the 256-bit pedestal vector
-  m_pedestal_metric.field0 = _mm256_extract_epi64(m_pedestal, 0);
-  m_pedestal_metric.field1 = _mm256_extract_epi64(m_pedestal, 1);
-  m_pedestal_metric.field2 = _mm256_extract_epi64(m_pedestal, 2);
-  m_pedestal_metric.field3 = _mm256_extract_epi64(m_pedestal, 3);
+ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metric_store_buffer() {
+  // "read" is expected to happen at a much lower frequency than store
+  // Therefore, the responsibility to switch buffers given to it
+
+  auto active_buffer_curr = m_active_buffer.load(std::memory_order_acquire);
+  m_active_buffer.store(active_buffer_curr == &m_metric_store_buffers[0] ? &m_metric_store_buffers[1] : &m_metric_store_buffers[0], std::memory_order_release);
+
+  // after the switch, the processor should be writing into the backup buffer now, we can safely readout its value
+
+  return *active_buffer_curr;
 }
 
 } // namespace tpglibs

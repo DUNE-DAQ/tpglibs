@@ -7,7 +7,9 @@
  */
 
 #include "tpglibs/AVXFactory.hpp"
-#include "tpglibs/ProcessorMetricMemory.hpp"
+#include "tpglibs/ProcessorMetricArray.hpp"
+#include <atomic>
+#include <memory>
 
 #ifndef TPGLIBS_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGLIBS_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
@@ -31,7 +33,17 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     /** @brief Count limit before committing to a pedestal shift. */
     int16_t m_accum_limit{10};
 
+  private:
+    ProcessorMetricArray<__m256i> m_metric_store_buffers[2]{};
+    // Initialize always to buffer 0 to make it safe, always points to one of buffer 0 and 1
+    std::atomic<ProcessorMetricArray<__m256i>*> m_active_buffer = &m_metric_store_buffers[0];
+
   public:
+    /** @brief Allocate and initialize dual buffers */
+    AVXFrugalPedestalSubtractProcessor();
+    /** @brief Release buffer memory */
+    ~AVXFrugalPedestalSubtractProcessor() noexcept;
+
     /** @brief Estimate the pedestal using the given signal and subtract.
      *
      *  @param signal A vector of channel signals.
@@ -46,12 +58,14 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
      */
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 
-    
-    /** @brief Store processor-specific metrics by extracting current pedestal values. */
-    void store_processor_metrics() override;
+    /** @brief Save metrics to store buffer. */
+    void save_metric_to_store_buffer() override;
 
-  private:
-    ProcessorMetricMemory m_pedestal_metric;
+    /** @brief Read metrics from store buffer. */
+    ProcessorMetricArray<__m256i> read_from_metric_store_buffer() override;
+
+    
+
 };
 
 } // namespace tpglibs

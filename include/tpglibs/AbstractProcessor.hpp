@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <memory>
+#include "tpglibs/ProcessorMetricArray.hpp"
 
 namespace tpglibs {
 
@@ -46,8 +47,13 @@ class AbstractProcessor {
       return signal;
     }
 
-    /** @brief Store processor-specific metrics; default does nothing. */
-    virtual void store_processor_metrics() {}
+    /** @brief Save metrics to store buffer; default does nothing. */
+    virtual void save_metric_to_store_buffer() {}
+
+    /** @brief Read metrics from store buffer; default empty. */
+    virtual ProcessorMetricArray<signal_type_t> read_from_metric_store_buffer() {
+      return {};
+    }
 };
 
 } // namespace tpglibs
