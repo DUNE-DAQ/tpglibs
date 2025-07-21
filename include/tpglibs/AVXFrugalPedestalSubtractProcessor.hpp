@@ -23,6 +23,8 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
   protected:
     /** @brief Vector of estimated pedestals for each channel. */
     __m256i m_pedestal = _mm256_set1_epi16(0x4000);  // Set initial start to 14-bit max. Prevents garbage TPs at start.
+    /** @brief Reset initial start to first ADC signal on each channel. */
+    bool m_pedestal_reinitialize = true; // 
 
     /** @brief Vector of counts that a channel's signal was above or below m_pedestal. */
     __m256i m_accum = _mm256_setzero_si256();

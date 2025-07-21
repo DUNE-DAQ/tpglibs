@@ -17,6 +17,12 @@ void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config,
 }
 
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
+  // Set initial start to 14-bit max. Prevents garbage TPs at start. Howerver
+  if (m_pedestal_reinitialize == true) {
+    m_pedestal = signal;
+    m_pedestal_reinitialize = false;
+  }
+  
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);
   __m256i is_lt = _mm256_cmpgt_epi16(m_pedestal, signal);
