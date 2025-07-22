@@ -7,17 +7,45 @@
  */
 
 #include "tpglibs/ProcessorMetricCollector.hpp"
+#include <unordered_map>
+#include <vector>
+#include <string>
 
 namespace tpglibs {
 
-ProcessorMetricCollector::ProcessorMetricCollector(const std::vector<std::string>& configs,
-                                                   const std::vector<int16_t>& channel_plane_numbers,
-                                                   uint8_t num_pipelines)
-  : m_processor_metric_information_table(),
-    m_processor_metric_collection_table(),
-    m_signal_collect(false)
+
+ // Idealy this exists at config level. Hardcoded here for now
+std::unordered_map<std::string, std::vector<std::string>> processor_name_to_metrics_map = {
+  {"AVXFrugalPedestalSubtractProcessor", {"m_pedestal", "m_accum"}}
+};
+
+void ProcessorMetricCollector::attach_processor(AbstractProcessor<__m256i>& processor) {
+  // Attach a processor to be observed (collected) by this
+  m_attached_processors[m_attach_counter] = &processor;
+}
+
+void ProcessorMetricCollector::configure(const std::vector<std::pair<std::string, nlohmann::json>> configs,
+                                         const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
+                                         uint8_t num_pipelines)
 {
+  m_signal_collect = false;
+  m_attach_counter = 0;
+
+  // create a fixed size array for reference to all the processors
+  // configs are pairs of (processor name, specific configs)
+  size_t n_processors = configs.size();
+  m_attached_processors = std::make_unique<AbstractProcessor<__m256i>*[]>(n_processors * num_pipelines);
+
   // Constructor stub: initialize collector with configs and channel_plane_numbers
+
+  m_processor_metric_table = {};
+
+  // Initialize empty table, containing the information regarding metric of each processor
+
+  for (size_t i = 0; i < n_processors * num_pipelines; i++) {
+    m_processor_metric_table[i] = ProcessorMetricInformation{0, nullptr, 0};
+  }
+
 }
 
 void ProcessorMetricCollector::collect_metrics_from_attached_processors() {
@@ -35,7 +63,7 @@ void ProcessorMetricCollector::signal_collect() {
 
 void ProcessorMetricCollector::run() {
   // TODO: main loop for metric collection thread
-  std::thread reader_thread([this]() {
+  m_collector_thread = std::thread([this]() {
     while (!this->m_stop_flag.load(std::memory_order_acquire)) {
       if (this->m_signal_collect.load(std::memory_order_acquire)) {
         // If this is signaled to collect metrics
@@ -48,7 +76,6 @@ void ProcessorMetricCollector::run() {
       }
     }
   });
-  reader_thread.detach();
 }
 
 std::map<int16_t, std::vector<ProcessorMetricInformation>>
@@ -60,6 +87,9 @@ ProcessorMetricCollector::get_retrieved_processor_metrics() const {
 void ProcessorMetricCollector::stop() {
   // TODO: stop the collection thread
   m_stop_flag.store(true, std::memory_order_release);
+  if (m_collector_thread.joinable()) {
+    m_collector_thread.join();
+  }
 }
 
 } // namespace tpglibs

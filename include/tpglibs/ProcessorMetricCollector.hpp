@@ -17,20 +17,25 @@
 #include <cstdint>
 #include <immintrin.h>
 #include <string>
+#include <nlohmann/json.hpp>
+
+#include <tpglibs/AbstractProcessor.hpp>
+#include "trgdataformats/Types.hpp"
 
 namespace tpglibs {
 
 struct ProcessorMetricInformation {
   int16_t m_pipeline_id;
-  std::vector<std::string> m_names_of_metrics;
+  std::shared_ptr<std::string> m_names_of_metrics;
   size_t m_number_of_metrics;
 };
 
 class ProcessorMetricCollector {
 public:
-  ProcessorMetricCollector(const std::vector<std::string>& configs,
-                           const std::vector<int16_t>& channel_plane_numbers,
-                           uint8_t num_pipelines);
+  void attach_processor(AbstractProcessor<__m256i>& processor);
+  void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs,
+                 const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
+                 uint8_t num_pipelines);
   void collect_metrics_from_attached_processors();
   void cast_metrics_from_raw_type();
   void signal_collect();
@@ -39,12 +44,15 @@ public:
   void stop();
 
 private:
+  std::unique_ptr<AbstractProcessor<__m256i>*[]> m_attached_processors;
+
   std::map<int16_t, ProcessorMetricInformation> m_processor_metric_table;
   std::vector<ProcessorMetricInformation> m_processor_metric_information_table;
   std::vector<__m256i> m_processor_metric_collection_table;
   std::atomic<bool> m_signal_collect{false};
   std::thread m_collector_thread;
   std::atomic<bool> m_stop_flag{false};
+  size_t m_attach_counter;
 };
 
 } // namespace tpglibs
