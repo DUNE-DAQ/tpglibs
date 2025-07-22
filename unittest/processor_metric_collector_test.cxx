@@ -10,6 +10,8 @@
 #define FMT_HEADER_ONLY
 #include <boost/test/unit_test.hpp>
 #include "trgdataformats/Types.hpp"
+#include "tpglibs/AVXProcessor.hpp"
+#include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
 
 #include "tpglibs/ProcessorMetricCollector.hpp"
 
@@ -41,6 +43,22 @@ namespace tpglibs {
     ProcessorMetricCollector collector;
 
     collector.configure(configs, channel_plane_numbers, 4);
+
+    std::string proc_name = "AVXFrugalPedestalSubtractProcessor";
+
+    std::shared_ptr<AVXProcessor> pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
+
+    collector.attach_processor(*pc.get(), proc_name, 1);
+
+    auto processors = collector._get_attached_processors();
+
+    BOOST_TEST(processors[0] != nullptr);
+    BOOST_TEST(processors[1] == nullptr);
+
+    auto info = collector._get_processor_metric_table();
+
+    BOOST_TEST(info[0].m_pipeline_id == 1);
+    BOOST_TEST(info[0].m_names_of_metrics.size() == 2);
 
     // Launch run loop in background
     collector.run();

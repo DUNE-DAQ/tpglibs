@@ -19,9 +19,28 @@ std::unordered_map<std::string, std::vector<std::string>> processor_name_to_metr
   {"AVXFrugalPedestalSubtractProcessor", {"m_pedestal", "m_accum"}}
 };
 
-void ProcessorMetricCollector::attach_processor(AbstractProcessor<__m256i>& processor) {
+void ProcessorMetricCollector::attach_processor(AbstractProcessor<__m256i>& processor, std::string processor_type_name,
+                                                size_t pipeline_id) {
   // Attach a processor to be observed (collected) by this
   m_attached_processors[m_attach_counter] = &processor;
+
+  // Look up and fill in information about this processor: its pipeline belonging and what is collected
+  auto metrics = processor_name_to_metrics_map[processor_type_name];
+  auto metric_info = ProcessorMetricInformation();
+  metric_info.m_names_of_metrics = metrics;
+  metric_info.m_pipeline_id = pipeline_id;
+  // store this info
+  m_processor_metric_table[m_attach_counter] = metric_info;
+
+  m_attach_counter++;
+}
+
+std::shared_ptr<AbstractProcessor<__m256i>*[]> ProcessorMetricCollector::_get_attached_processors() {
+  return m_attached_processors;
+}
+
+std::map<int16_t, ProcessorMetricInformation> ProcessorMetricCollector::_get_processor_metric_table() {
+  return m_processor_metric_table;
 }
 
 void ProcessorMetricCollector::configure(const std::vector<std::pair<std::string, nlohmann::json>> configs,
@@ -43,7 +62,7 @@ void ProcessorMetricCollector::configure(const std::vector<std::pair<std::string
   // Initialize empty table, containing the information regarding metric of each processor
 
   for (size_t i = 0; i < n_processors * num_pipelines; i++) {
-    m_processor_metric_table[i] = ProcessorMetricInformation{0, nullptr, 0};
+    m_processor_metric_table[i] = ProcessorMetricInformation{0, {}};
   }
 
 }
