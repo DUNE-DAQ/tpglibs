@@ -71,17 +71,29 @@ void AVXFrugalPedestalSubtractProcessor::save_metric_to_store_buffer() {
   auto free_ptr = m_active_buffer.load(std::memory_order_acquire);
   // write to free buffer
   
+  //set seq
+  seq.fetch_add(1, std::memory_order_relaxed);
+  
   free_ptr->m_data[0] = m_pedestal;
   free_ptr->m_data[1] = m_accum;
+
+  //set seq to indicate write end
+  seq.fetch_add(1, std::memory_order_release);
 }
 
 ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metric_store_buffer() {
   // "read" is expected to happen at a much lower frequency than store
   // Therefore, the responsibility to switch buffers given to it
 
-  auto active_buffer_curr = m_active_buffer.load(std::memory_order_acquire);
-  m_active_buffer.store(active_buffer_curr == &m_metric_store_buffers[0] ? &m_metric_store_buffers[1] : &m_metric_store_buffers[0], std::memory_order_release);
-
+  uint16_t start, end;
+  ProcessorMetricArray<__m256i>* active_buffer_curr;
+  do {
+    start = seq.load(std::memory_order_acquire);
+    if (start & 1) continue; // If odd, then writer is currently writing
+    active_buffer_curr = m_active_buffer.load(std::memory_order_acquire);
+    m_active_buffer.store(active_buffer_curr == &m_metric_store_buffers[0] ? &m_metric_store_buffers[1] : &m_metric_store_buffers[0], std::memory_order_release);
+    end = seq.load(std::memory_order_acquire);
+  } while (start != end);
   // after the switch, the processor should be writing into the backup buffer now, we can safely readout its value
 
   return *active_buffer_curr;

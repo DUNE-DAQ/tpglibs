@@ -38,6 +38,8 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     // Initialize always to buffer 0 to make it safe, always points to one of buffer 0 and 1
     std::atomic<ProcessorMetricArray<__m256i>*> m_active_buffer = &m_metric_store_buffers[0];
 
+    std::atomic<uint16_t>seq{0};
+
   public:
     /** @brief Allocate and initialize dual buffers */
     AVXFrugalPedestalSubtractProcessor();
@@ -63,8 +65,6 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
 
     /** @brief Read metrics from store buffer. */
     ProcessorMetricArray<__m256i> read_from_metric_store_buffer() override;
-
-    
 
 };
 
