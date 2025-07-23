@@ -7,6 +7,8 @@
  */
 
 #include "tpglibs/ProcessorMetricCollector.hpp"
+#include "tpglibs/ProcessorMetricArray.hpp"
+#include "tpglibs/AbstractProcessor.hpp"
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -17,7 +19,7 @@ namespace tpglibs {
 template class ProcessorMetricCollector<__m256i>;
 
 template<typename signal_t>
-std::shared_ptr<AbstractProcessor<signal_t>*[]> ProcessorMetricCollector<signal_t>::_get_attached_processors() {
+std::vector<AbstractProcessor<signal_t>*> ProcessorMetricCollector<signal_t>::_get_attached_processors() {
   return m_attached_processors;
 }
 
@@ -37,7 +39,7 @@ void ProcessorMetricCollector<signal_t>::configure(const std::vector<std::pair<s
   // create a fixed size array for reference to all the processors
   // configs are pairs of (processor name, specific configs)
   size_t n_processors = configs.size();
-  m_attached_processors = std::make_unique<AbstractProcessor<signal_t>*[]>(n_processors * num_pipelines);
+  m_attached_processors = std::vector<AbstractProcessor<signal_t>*>(n_processors * num_pipelines);
 
   // Constructor stub: initialize collector with configs and channel_plane_numbers
 
@@ -55,7 +57,15 @@ void ProcessorMetricCollector<signal_t>::configure(const std::vector<std::pair<s
 
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::collect_metrics_from_attached_processors() {
-  // TODO: collect metrics from attached processors
+  size_t proc_id = 0;
+  for (auto processor_ptr : m_attached_processors) {
+    if (!processor_ptr) continue;
+    ProcessorMetricArray items = processor_ptr->read_from_metric_store_buffer();
+    for (size_t i = 0; i < items.m_size; i++) {
+      m_processor_metric_collection_table[proc_id][i] = items.m_data[i];
+    }
+    proc_id++;
+  }
 }
 
 template<typename signal_t>
@@ -66,6 +76,7 @@ void ProcessorMetricCollector<signal_t>::cast_metrics_from_raw_type() {
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::signal_collect() {
   // TODO: signal that a collection cycle should occur
+  collect_metrics_from_attached_processors();
   m_signal_collect.store(true, std::memory_order_release);
 }
 
@@ -88,10 +99,10 @@ void ProcessorMetricCollector<signal_t>::run() {
 }
 
 template<typename signal_t>
-std::map<int16_t, std::vector<ProcessorMetricInformation>>
+std::vector<std::vector<signal_t>> 
 ProcessorMetricCollector<signal_t>::get_retrieved_processor_metrics() const {
   // TODO: return collected metrics
-  return {};
+  return m_processor_metric_collection_table;
 }
 
 template<typename signal_t>

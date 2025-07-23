@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 #include "trgdataformats/Types.hpp"
 #include "tpglibs/AVXProcessor.hpp"
+#include <iostream>
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
 
 #include "tpglibs/ProcessorMetricCollector.hpp"
@@ -48,6 +49,14 @@ namespace tpglibs {
 
     std::shared_ptr<AVXProcessor> pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
 
+    int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+
+    nlohmann::json pc_config = {
+      {"accum_limit", 42}
+    };
+
+    pc->configure(pc_config, plane_numbers);
+
     collector.attach_processor(*pc.get(), proc_name, 1);
 
     auto processors = collector._get_attached_processors();
@@ -60,6 +69,9 @@ namespace tpglibs {
     BOOST_TEST(info[0].m_pipeline_id == 1);
     BOOST_TEST(info[0].m_names_of_metrics.size() == 2);
 
+    // simulate a metric store in processor
+    pc->save_metric_to_store_buffer();
+
     // Launch run loop in background
     collector.run();
 
@@ -70,11 +82,23 @@ namespace tpglibs {
 
     collector.signal_collect();
 
-    // Retrieve metrics (stub returns empty)
-    auto metrics = collector.get_retrieved_processor_metrics();
-
     // Stop collector and join thread
     collector.stop();
+
+    auto metrics = collector.get_retrieved_processor_metrics();
+
+    BOOST_TEST(metrics.size() == 1); // collecting from one processor
+    BOOST_TEST(metrics[0].size() == 2); // collecting m_accum and m_pedestal
+
+    int16_t out0[16], out1[16];
+    _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out0), metrics[0][0]);
+    _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out1), metrics[0][1]);
+
+    for (size_t i  = 0; i < 16; i++) {
+      BOOST_TEST(out0[i] == 16384);
+      BOOST_TEST(out1[i] == 0);
+    }
+
   }
 
 } // tpglibs

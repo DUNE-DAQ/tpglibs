@@ -55,6 +55,10 @@ public:
     // store this info
     m_processor_metric_table[m_attach_counter] = metric_info;
 
+    // Then instantiate the space for storing collected metrics
+    // Preallocated to preconfigured number of metrics
+    m_processor_metric_collection_table.push_back(std::vector<signal_t>(metrics.size()));
+
     m_attach_counter++;
   }
 
@@ -62,17 +66,19 @@ public:
                  const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
                  uint8_t num_pipelines);
 
-  std::shared_ptr<AbstractProcessor<signal_t>*[]> _get_attached_processors();
+  // These are method just for debug and tests
+  std::vector<AbstractProcessor<signal_t>*> _get_attached_processors();
   std::map<int16_t, ProcessorMetricInformation> _get_processor_metric_table();
+
   void collect_metrics_from_attached_processors();
   void cast_metrics_from_raw_type();
   void signal_collect();
   void run();  // main loop on its dedicated thread
-  std::map<int16_t, std::vector<ProcessorMetricInformation>> get_retrieved_processor_metrics() const;
+  std::vector<std::vector<signal_t>> get_retrieved_processor_metrics() const;
   void stop();
 
 private:
-  std::shared_ptr<AbstractProcessor<signal_t>*[]> m_attached_processors;
+  std::vector<AbstractProcessor<signal_t>*> m_attached_processors;
   std::map<int16_t, ProcessorMetricInformation> m_processor_metric_table;
   std::vector<std::vector<signal_t>> m_processor_metric_collection_table;
   
