@@ -66,6 +66,9 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     /** @brief Read metrics from store buffer. */
     ProcessorMetricArray<__m256i> read_from_metric_store_buffer() override;
 
+    /** @brief Register this processor with the metric collector. */
+    void attach_to_metric_collector(ProcessorMetricCollector<__m256i>& collector, size_t pipeline_id) override;
+
 };
 
 } // namespace tpglibs

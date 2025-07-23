@@ -99,4 +99,9 @@ ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metr
   return *active_buffer_curr;
 }
 
+void AVXFrugalPedestalSubtractProcessor::attach_to_metric_collector(ProcessorMetricCollector<__m256i>& collector, size_t pipeline_id) {
+  std::string proc_name = "AVXFrugalPedestalSubtractProcessor";
+  collector.attach_processor(*this, proc_name, pipeline_id);
+}
+
 } // namespace tpglibs

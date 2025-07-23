@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <memory>
 #include "tpglibs/ProcessorMetricArray.hpp"
+#include "tpglibs/ProcessorMetricCollector.hpp"
 
 namespace tpglibs {
 
@@ -53,6 +54,12 @@ class AbstractProcessor {
     /** @brief Read metrics from store buffer; default empty. */
     virtual ProcessorMetricArray<signal_type_t> read_from_metric_store_buffer() {
       return {};
+    }
+
+    /** @brief Register this processor with the metric collector. */
+    virtual void attach_to_metric_collector(ProcessorMetricCollector<signal_type_t>& collector, size_t pipeline_id) {
+      std::string proc_name = "AbstractProcessor";
+      collector.attach_processor(*this, proc_name, pipeline_id);
     }
 };
 
