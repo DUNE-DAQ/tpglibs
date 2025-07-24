@@ -46,12 +46,16 @@ void ProcessorMetricCollector<signal_t>::configure(const std::vector<std::pair<s
   size_t n_processors = configs.size();
   m_attached_processors = std::vector<AbstractProcessor<signal_t>*>(n_processors * num_pipelines);
 
-  // Constructor stub: initialize collector with configs and channel_plane_numbers
-
   m_processor_metric_table = std::vector<ProcessorMetricInformation>(n_processors * num_pipelines, ProcessorMetricInformation{0, {}});
 
   m_processor_metric_collection_table = {};
 
+  m_channel_numbers = std::vector<dunedaq::trgdataformats::channel_t>(channel_plane_numbers.size(), 0);
+
+  for (size_t i = 0; i < channel_plane_numbers.size(); i++) {
+    m_channel_numbers[i] = channel_plane_numbers[i].first;
+    m_metrics[m_channel_numbers[i]] = std::vector<std::pair<std::string, int16_t>>();
+  }
 }
 
 template<typename signal_t>
@@ -97,12 +101,15 @@ void ProcessorMetricCollector<signal_t>::run() {
       if (this->m_signal_collect.load(std::memory_order_acquire)) {
         // If this is signaled to collect metrics
         this->collect_metrics_from_attached_processors();
-        this->cast_metrics_from_raw_type();
 
+        this->m_signal_collect.store(false, std::memory_order_release);
         // After collection, we reset the collect flag to false.
         // Note that when signal_collect() is called at a far higher rate then possible, ultimately collection
         // happens at the highest possible rate, not necessarily the set rate
-        this->m_signal_collect.store(false, std::memory_order_release);
+
+        // perform any post processings on the collected metrics as needed
+        this->cast_metrics_from_raw_type();
+        this->convert_into_channel_metric_value();
       }
     }
   });
@@ -110,7 +117,7 @@ void ProcessorMetricCollector<signal_t>::run() {
 
 template<typename signal_t>
 std::vector<std::vector<signal_t>> 
-ProcessorMetricCollector<signal_t>::get_retrieved_processor_metrics() const {
+ProcessorMetricCollector<signal_t>::_get_retrieved_processor_metrics() const {
   // TODO: return collected metrics
   return m_processor_metric_collection_table;
 }
@@ -122,6 +129,27 @@ void ProcessorMetricCollector<signal_t>::stop() {
   if (m_collector_thread.joinable()) {
     m_collector_thread.join();
   }
+}
+
+template<typename signal_t>
+void ProcessorMetricCollector<signal_t>::convert_into_channel_metric_value() {
+  std::vector<int16_t> mcount(m_channel_numbers.size(), 0);
+
+  for (size_t pid = 0; pid < m_processor_casted_data_table.size(); pid++) {
+    for (size_t mid = 0; mid < m_processor_casted_data_table[pid].size(); mid++) {
+      for (size_t cid = 0; cid < m_processor_casted_data_table[pid][mid].size(); cid++) {
+        auto mnames = m_processor_metric_table[pid].m_names_of_metrics;
+        m_metrics[m_channel_numbers[cid]][mcount[cid]].second = m_processor_casted_data_table[pid][mid][cid];
+        m_metrics[m_channel_numbers[cid]][mcount[cid]].first = m_processor_metric_table[pid].m_names_of_metrics[mid];
+        mcount[cid]++;
+      }
+    }
+  }
+}
+
+template<typename signal_t>
+std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> ProcessorMetricCollector<signal_t>::get_metrics() {
+  return m_metrics;
 }
 
 } // namespace tpglibs

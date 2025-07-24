@@ -61,6 +61,13 @@ public:
     // Preallocated to preconfigured number of metrics
     m_processor_metric_collection_table.push_back(std::vector<signal_t>(metrics.size()));
 
+    for (size_t i = 0; i < m_metrics.size(); i++) {
+      for (size_t j = 0; j < metrics.size(); j++) {
+        // Record metric name and initial value 0 for this channel
+        m_metrics[m_channel_numbers[i]].emplace_back(metrics[j], int16_t{0});
+      }
+    }
+
     m_attach_counter++;
   }
 
@@ -73,18 +80,25 @@ public:
   std::vector<ProcessorMetricInformation> _get_processor_metric_table();
   std::vector<std::vector<std::vector<int16_t>>> _get_processor_casted_data_table();
 
-  void collect_metrics_from_attached_processors();
-  void cast_metrics_from_raw_type();
   void signal_collect();
   void run();  // main loop on its dedicated thread
-  std::vector<std::vector<signal_t>> get_retrieved_processor_metrics() const;
+  std::vector<std::vector<signal_t>> _get_retrieved_processor_metrics() const;
+  std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> get_metrics();
   void stop();
 
 private:
+  void cast_metrics_from_raw_type();
+  void collect_metrics_from_attached_processors();
+  void convert_into_channel_metric_value();
+
   std::vector<AbstractProcessor<signal_t>*> m_attached_processors;
   std::vector<ProcessorMetricInformation> m_processor_metric_table;
   std::vector<std::vector<std::vector<int16_t>>> m_processor_casted_data_table;
   std::vector<std::vector<signal_t>> m_processor_metric_collection_table;
+
+  std::vector<dunedaq::trgdataformats::channel_t> m_channel_numbers;
+
+  std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> m_metrics;
   
   std::atomic<bool> m_signal_collect{false};
   std::thread m_collector_thread;

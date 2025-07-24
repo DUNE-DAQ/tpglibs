@@ -92,7 +92,7 @@ namespace tpglibs {
     // Stop collector and join thread
     collector.stop();
 
-    auto metrics = collector.get_retrieved_processor_metrics();
+    auto metrics = collector._get_retrieved_processor_metrics();
 
     BOOST_TEST(metrics.size() == 1); // collecting from one processor
     BOOST_TEST(metrics[0].size() == 2); // collecting m_accum and m_pedestal
@@ -210,7 +210,7 @@ namespace tpglibs {
 
     // test for values
 
-    auto metrics = collector.get_retrieved_processor_metrics();
+    auto metrics = collector._get_retrieved_processor_metrics();
 
     BOOST_TEST(metrics.size() == 2); // collecting from one processor
     BOOST_TEST(metrics[0].size() == 2); // collecting m_accum and m_pedestal
@@ -220,7 +220,7 @@ namespace tpglibs {
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out0), metrics[0][0]);
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out1), metrics[0][1]);
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       BOOST_TEST(out0[i] == 16384);
       BOOST_TEST(out1[i] == 0);
     }
@@ -228,7 +228,7 @@ namespace tpglibs {
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out0), metrics[1][0]);
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out1), metrics[1][1]);
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       // the second processor sees pedestal 0
       BOOST_TEST(out0[i] == 0);
       BOOST_TEST(out1[i] == 0);
@@ -236,12 +236,12 @@ namespace tpglibs {
 
     auto casted_table = collector._get_processor_casted_data_table();
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       BOOST_TEST(casted_table[0][0][i] == 16384);
       BOOST_TEST(casted_table[0][1][i] == 0);
     }
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       // the second processor sees pedestal 0
       BOOST_TEST(casted_table[1][0][i] == 0);
       BOOST_TEST(casted_table[1][1][i] == 0);
@@ -335,7 +335,7 @@ namespace tpglibs {
     collector.stop();
     // test for values
 
-    auto metrics = collector.get_retrieved_processor_metrics();
+    auto metrics = collector._get_retrieved_processor_metrics();
 
     BOOST_TEST(metrics.size() == 2); // collecting from one processor
     BOOST_TEST(metrics[0].size() == 2); // collecting m_accum and m_pedestal
@@ -345,7 +345,7 @@ namespace tpglibs {
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out0), metrics[0][0]);
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out1), metrics[0][1]);
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       BOOST_TEST(out0[i] == 16384);
       BOOST_TEST(out1[i] == 0);
     }
@@ -353,23 +353,181 @@ namespace tpglibs {
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out0), metrics[1][0]);
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out1), metrics[1][1]);
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       BOOST_TEST(out0[i] == 16384);
       BOOST_TEST(out1[i] == 0);
     }
 
     auto casted_table = collector._get_processor_casted_data_table();
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       BOOST_TEST(casted_table[0][0][i] == 16384);
       BOOST_TEST(casted_table[0][1][i] == 0);
     }
 
-    for (size_t i  = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
       BOOST_TEST(casted_table[1][0][i] == 16384);
       BOOST_TEST(casted_table[1][1][i] == 0);
     }
 
+    auto fmetrics = collector.get_metrics();
+
+    for (size_t c = 0; c < channel_plane_numbers.size(); c++) {
+      auto ch = channel_plane_numbers[c].first;
+      BOOST_TEST(fmetrics[ch].size() == 4);
+      for (size_t i = 0; i < fmetrics[ch].size(); i++) {
+        if (fmetrics[ch][i].first == "m_pedestal") {
+          BOOST_TEST(fmetrics[ch][i].second == 16384);
+        } else if (fmetrics[ch][i].first == "m_accum")
+        {
+          BOOST_TEST(fmetrics[ch][i].second == 0);
+        } else {
+          BOOST_TEST(false);
+        }
+      } 
+    }
+  }
+
+  BOOST_AUTO_TEST_CASE(test_processor_metric_collector_pipeline_test_processor_without_metric) {
+    // Sanity test: create, run, signal, get metrics, and stop
+    std::vector<std::pair<std::string, nlohmann::json>> configs = {
+      {
+        "AVXFrugalPedestalSubtractProcessor",
+        {
+          {"accum_limit", 42},
+          {"metric_collect_data_sample_rate", 1024}
+        }
+      },
+      {
+        "AVXRunSumProcessor",
+        {
+          {"memory_factor_plane0", 10},
+          {"memory_factor_plane1", 10},
+          {"memory_factor_plane2", 10},
+          {"scale_factor_plane0", 10},
+          {"scale_factor_plane1", 10},
+          {"scale_factor_plane2", 10},
+        }
+      },
+      {
+        "AVXFrugalPedestalSubtractProcessor",
+        {
+          {"accum_limit", 42},
+          {"metric_collect_data_sample_rate", 1024}
+        }
+      },
+    };
+
+    // Lazy with the channel-plane assignments.
+    std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>
+    channel_plane_numbers = {{  0, 0},
+                             { 10, 0},
+                             { 20, 0},
+                             { 30, 0},
+                             { 40, 0},
+                             {100, 1},
+                             {110, 1},
+                             {120, 1},
+                             {130, 1},
+                             {140, 1},
+                             {200, 2},
+                             {210, 2},
+                             {220, 2},
+                             {230, 2},
+                             {240, 2},
+                             {250, 2}};
+
+    ProcessorMetricCollector<__m256i> collector;
+
+    AVXPipeline pipeline = AVXPipeline();
+    std::vector<uint16_t> sot_minima = {1,1,1};
+
+    collector.configure(configs, channel_plane_numbers, 1);
+
+    pipeline.configure(configs, channel_plane_numbers);
+    pipeline.set_sot_minima(sot_minima);
+
+    pipeline.attach_to_metric_collector(collector, 1);
+
+    auto attached_processors = collector._get_attached_processors();
+    
+    BOOST_TEST(attached_processors.size() == 3);
+    BOOST_TEST(attached_processors[0] != nullptr);
+    BOOST_TEST(attached_processors[1] != nullptr);
+    BOOST_TEST(attached_processors[2] != nullptr);
+
+    auto info = collector._get_processor_metric_table();
+
+    BOOST_TEST(info[0].m_names_of_metrics[0] == "m_pedestal");
+    BOOST_TEST(info[0].m_names_of_metrics[1] == "m_accum");
+    BOOST_TEST(info[0].m_pipeline_id == 1);
+
+    BOOST_TEST(info[1].m_names_of_metrics.size() == 0);
+
+    BOOST_TEST(info[2].m_names_of_metrics[0] == "m_pedestal");
+    BOOST_TEST(info[2].m_names_of_metrics[1] == "m_accum");
+    BOOST_TEST(info[2].m_pipeline_id == 1);
+
+    __m256i input = _mm256_set1_epi16(0x4000);
+    // Launch pipeline processing in a separate thread
+    for (auto & proc: attached_processors) {
+      proc->save_metric_to_store_buffer();
+    }
+
+    collector.run();
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // Trigger metric collect
+
+    collector.signal_collect();
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // Stop collector and join thread
+    collector.stop();
+    // test for values
+
+    auto metrics = collector._get_retrieved_processor_metrics();
+
+    BOOST_TEST(metrics.size() == 3);
+    BOOST_TEST(metrics[0].size() == 2); // collecting m_accum and m_pedestal
+    BOOST_TEST(metrics[1].size() == 0); // collecting m_accum and m_pedestal
+    BOOST_TEST(metrics[2].size() == 2); // collecting m_accum and m_pedestal
+
+    int16_t out0[16], out1[16];
+    _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out0), metrics[0][0]);
+    _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out1), metrics[0][1]);
+
+    for (size_t i = 0; i < 16; i++) {
+      BOOST_TEST(out0[i] == 16384);
+      BOOST_TEST(out1[i] == 0);
+    }
+
+    _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out0), metrics[2][0]);
+    _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out1), metrics[2][1]);
+
+    for (size_t i = 0; i < 16; i++) {
+      BOOST_TEST(out0[i] == 16384);
+      BOOST_TEST(out1[i] == 0);
+    }
+
+    auto fmetrics = collector.get_metrics();
+
+    for (size_t c = 0; c < channel_plane_numbers.size(); c++) {
+      auto ch = channel_plane_numbers[c].first;
+      BOOST_TEST(fmetrics[ch].size() == 4);
+      for (size_t i = 0; i < fmetrics[ch].size(); i++) {
+        if (fmetrics[ch][i].first == "m_pedestal") {
+          BOOST_TEST(fmetrics[ch][i].second == 16384);
+        } else if (fmetrics[ch][i].first == "m_accum")
+        {
+          BOOST_TEST(fmetrics[ch][i].second == 0);
+        } else {
+          BOOST_TEST(false);
+        }
+      } 
+    }
   }
 
 } // tpglibs
