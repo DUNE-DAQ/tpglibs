@@ -71,13 +71,10 @@ template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::cast_metrics_from_raw_type() {
   for (size_t i = 0; i < m_processor_metric_collection_table.size(); i++) {
     auto raw = m_processor_metric_collection_table[i];
-    std::cout<<"raw size"<<raw.size()<<std::endl;
     for (size_t j = 0; j < raw.size(); j++) {
       int16_t out[16];
       _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out), raw[j]);
       for (size_t k = 0; k < 16; k++) {
-        std::cout<<i<<j<<k<<std::endl;
-        std::cout<<out[k]<<std::endl;
         m_processor_casted_data_table[i][j][k] = out[k];
       }
     }
