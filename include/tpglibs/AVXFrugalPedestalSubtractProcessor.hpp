@@ -33,6 +33,10 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     /** @brief Count limit before committing to a pedestal shift. */
     int16_t m_accum_limit{10};
 
+    /** @ Adjustable rate of storing metric to buffer, in terms of number of time process happens (time sample rate) */
+    int64_t m_rate{1024};
+    uint64_t m_samples{0};
+
   private:
     ProcessorMetricArray<__m256i> m_metric_store_buffers[2]{};
     // Initialize always to buffer 0 to make it safe, always points to one of buffer 0 and 1
@@ -66,9 +70,7 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     /** @brief Read metrics from store buffer. */
     ProcessorMetricArray<__m256i> read_from_metric_store_buffer() override;
 
-    /** @brief Register this processor with the metric collector. */
-    void attach_to_metric_collector(ProcessorMetricCollector<__m256i>& collector, size_t pipeline_id) override;
-
+    std::string get_name() override;
 };
 
 } // namespace tpglibs

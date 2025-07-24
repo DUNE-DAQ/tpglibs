@@ -32,9 +32,14 @@ AVXFrugalPedestalSubtractProcessor::~AVXFrugalPedestalSubtractProcessor() noexce
 
 void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   m_accum_limit = config["accum_limit"];
+  if (config.contains("metric_collect_data_sample_rate")) m_rate = config["metric_collect_data_sample_rate"];
 }
 
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
+  // save metric
+
+  if (m_samples++ % m_rate == 0) save_metric_to_store_buffer();
+
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);
   __m256i is_lt = _mm256_cmpgt_epi16(m_pedestal, signal);
@@ -99,9 +104,8 @@ ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metr
   return *active_buffer_curr;
 }
 
-void AVXFrugalPedestalSubtractProcessor::attach_to_metric_collector(ProcessorMetricCollector<__m256i>& collector, size_t pipeline_id) {
-  std::string proc_name = "AVXFrugalPedestalSubtractProcessor";
-  collector.attach_processor(*this, proc_name, pipeline_id);
+std::string AVXFrugalPedestalSubtractProcessor::get_name() {
+  return "AVXFrugalPedestalSubtractProcessor";
 }
 
 } // namespace tpglibs
