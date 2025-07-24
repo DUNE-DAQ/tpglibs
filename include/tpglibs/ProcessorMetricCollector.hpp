@@ -49,11 +49,13 @@ public:
 
     // Look up and fill in information about this processor: its pipeline belonging and what is collected
     auto metrics = processor_name_to_metrics_map[processor_type_name];
-    auto metric_info = ProcessorMetricInformation();
-    metric_info.m_names_of_metrics = metrics;
-    metric_info.m_pipeline_id = pipeline_id;
-    // store this info
-    m_processor_metric_table[m_attach_counter] = metric_info;
+    m_processor_metric_table[m_attach_counter].m_names_of_metrics = metrics;
+    m_processor_metric_table[m_attach_counter].m_pipeline_id = pipeline_id;
+
+    m_processor_casted_data_table.emplace_back(
+        metrics.size(),
+        std::vector<int16_t>(16)
+    );
 
     // Then instantiate the space for storing collected metrics
     // Preallocated to preconfigured number of metrics
@@ -68,7 +70,8 @@ public:
 
   // These are method just for debug and tests
   std::vector<AbstractProcessor<signal_t>*> _get_attached_processors();
-  std::map<int16_t, ProcessorMetricInformation> _get_processor_metric_table();
+  std::vector<ProcessorMetricInformation> _get_processor_metric_table();
+  std::vector<std::vector<std::vector<int16_t>>> _get_processor_casted_data_table();
 
   void collect_metrics_from_attached_processors();
   void cast_metrics_from_raw_type();
@@ -79,13 +82,14 @@ public:
 
 private:
   std::vector<AbstractProcessor<signal_t>*> m_attached_processors;
-  std::map<int16_t, ProcessorMetricInformation> m_processor_metric_table;
+  std::vector<ProcessorMetricInformation> m_processor_metric_table;
+  std::vector<std::vector<std::vector<int16_t>>> m_processor_casted_data_table;
   std::vector<std::vector<signal_t>> m_processor_metric_collection_table;
   
   std::atomic<bool> m_signal_collect{false};
   std::thread m_collector_thread;
   std::atomic<bool> m_stop_flag{false};
-  size_t m_attach_counter;
+  size_t m_attach_counter = 0;
 };
 
 } // namespace tpglibs

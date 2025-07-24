@@ -14,7 +14,10 @@
 #include <iostream>
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
 
+
 #include "tpglibs/ProcessorMetricCollector.hpp"
+#include <thread>
+#include <chrono>
 
 namespace tpglibs {
   
@@ -75,9 +78,9 @@ namespace tpglibs {
     // Launch run loop in background
     collector.run();
 
-    // Trigger some signal collects
-    collector.signal_collect();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
+    // Trigger some signal collects
     collector.signal_collect();
 
     collector.signal_collect();
@@ -97,6 +100,13 @@ namespace tpglibs {
     for (size_t i  = 0; i < 16; i++) {
       BOOST_TEST(out0[i] == 16384);
       BOOST_TEST(out1[i] == 0);
+    }
+
+    auto casted_table = collector._get_processor_casted_data_table();
+
+    for (size_t i  = 0; i < 16; i++) {
+      BOOST_TEST(casted_table[0][0][i] == 16384);
+      BOOST_TEST(casted_table[0][1][i] == 0);
     }
 
   }

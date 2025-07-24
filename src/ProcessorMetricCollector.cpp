@@ -24,8 +24,13 @@ std::vector<AbstractProcessor<signal_t>*> ProcessorMetricCollector<signal_t>::_g
 }
 
 template<typename signal_t>
-std::map<int16_t, ProcessorMetricInformation> ProcessorMetricCollector<signal_t>::_get_processor_metric_table() {
+std::vector<ProcessorMetricInformation> ProcessorMetricCollector<signal_t>::_get_processor_metric_table() {
   return m_processor_metric_table;
+}
+
+template<typename signal_t>
+std::vector<std::vector<std::vector<int16_t>>> ProcessorMetricCollector<signal_t>::_get_processor_casted_data_table() {
+  return m_processor_casted_data_table;
 }
 
 template<typename signal_t>
@@ -43,13 +48,7 @@ void ProcessorMetricCollector<signal_t>::configure(const std::vector<std::pair<s
 
   // Constructor stub: initialize collector with configs and channel_plane_numbers
 
-  m_processor_metric_table = {};
-
-  // Initialize empty table, containing the information regarding metric of each processor
-
-  for (size_t i = 0; i < n_processors * num_pipelines; i++) {
-    m_processor_metric_table[i] = ProcessorMetricInformation{0, {}};
-  }
+  m_processor_metric_table = std::vector<ProcessorMetricInformation>(n_processors * num_pipelines, ProcessorMetricInformation{0, {}});
 
   m_processor_metric_collection_table = {};
 
@@ -70,14 +69,27 @@ void ProcessorMetricCollector<signal_t>::collect_metrics_from_attached_processor
 
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::cast_metrics_from_raw_type() {
-  // TODO: cast raw metrics to useful format
+  for (size_t i = 0; i < m_processor_metric_collection_table.size(); i++) {
+    auto raw = m_processor_metric_collection_table[i];
+    std::cout<<"raw size"<<raw.size()<<std::endl;
+    for (size_t j = 0; j < raw.size(); j++) {
+      int16_t out[16];
+      _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out), raw[j]);
+      for (size_t k = 0; k < 16; k++) {
+        std::cout<<i<<j<<k<<std::endl;
+        std::cout<<out[k]<<std::endl;
+        m_processor_casted_data_table[i][j][k] = out[k];
+      }
+    }
+  }
 }
 
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::signal_collect() {
   // TODO: signal that a collection cycle should occur
-  collect_metrics_from_attached_processors();
   m_signal_collect.store(true, std::memory_order_release);
+  // this->collect_metrics_from_attached_processors();
+  // this->cast_metrics_from_raw_type();
 }
 
 template<typename signal_t>
@@ -88,6 +100,7 @@ void ProcessorMetricCollector<signal_t>::run() {
       if (this->m_signal_collect.load(std::memory_order_acquire)) {
         // If this is signaled to collect metrics
         this->collect_metrics_from_attached_processors();
+        this->cast_metrics_from_raw_type();
 
         // After collection, we reset the collect flag to false.
         // Note that when signal_collect() is called at a far higher rate then possible, ultimately collection
