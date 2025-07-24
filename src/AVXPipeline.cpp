@@ -6,6 +6,7 @@
  * received with this code.
  */
 #include "tpglibs/AVXPipeline.hpp"
+#include <atomic>
 
 namespace tpglibs {
 
@@ -52,7 +53,7 @@ AVXPipeline::check_for_tps(const __m256i& tp_mask) {
 }
 
 void
-AVXPipeline::generate_tps(const __m256i& tp_mask) {
+AVXPipeline::generate_tps(const __m256i& tp_mask, std::vector<std::atomic<int>>* tp_count_per_channel) {
   // Mask everything that's relevant.
   __m256i samples_over_threshold = _mm256_blendv_epi8(_mm256_setzero_si256(), m_samples_over_threshold, tp_mask);
   __m256i adc_integral_lo = _mm256_blendv_epi8(_mm256_setzero_si256(), m_adc_integral_lo, tp_mask);
@@ -68,7 +69,7 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(tp_adc_peak), adc_peak);
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(tp_samples_to_peak), samples_to_peak);
 
-  //std::vector<TriggerPrimitive> tps;
+  //std::vector<TriggerPrimitive> tps;  
   for (int i = 0; i < 16; i++) {
     if (tp_sot[i] < m_sot_minima[m_plane_numbers[i]]) continue;  // Don't track short TPs.
     TriggerPrimitive tp;
@@ -77,6 +78,8 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
     tp.channel             = m_channels[i];
     tp.samples_to_peak     = tp_samples_to_peak[i];
     tp.samples_over_threshold = tp_sot[i];
+
+    (*tp_count_per_channel)[tp.channel]++;
 
     // time_start is handled at the next level up, since it is aware of the true and relative times.
     //tps.push_back(tp);

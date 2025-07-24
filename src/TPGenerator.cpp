@@ -14,10 +14,12 @@ void
 TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                        const std::vector<std::pair<channel_t, int16_t>> channel_plane_numbers,
                        const int sample_tick_difference,
-                       const bool expand_frames) {
+                       const bool expand_frames,
+                       std::vector<std::atomic<int>>* tp_count_per_channel) {
   m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;
   m_sample_tick_difference = sample_tick_difference;
   m_expand_frames = expand_frames;
+  m_tp_count_per_channel = tp_count_per_channel;
   
   for (int p = 0; p < m_num_pipelines; p++) {
     AVXPipeline new_pipe = AVXPipeline();

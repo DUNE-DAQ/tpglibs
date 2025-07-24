@@ -31,6 +31,7 @@ class TPGenerator {
   int m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
   bool m_expand_frames;
+  std::vector<std::atomic<int>>* m_tp_count_per_channel;
 
   public:
     /**
@@ -44,7 +45,8 @@ class TPGenerator {
     void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                    const std::vector<std::pair<channel_t, int16_t>> channel_plane_numbers,
                    const int sample_tick_difference,
-                   const bool expand_frames);
+                   const bool expand_frames,
+                   std::vector<std::atomic<int>>* tp_count_per_channel);
 
     /**
      * @brief Set the minimum samples over threshold for a TP according to plane.
@@ -89,8 +91,7 @@ class TPGenerator {
             regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
 
           __m256i expanded_subframe = m_expand_frames ? expand_frame(regi) : regi;
-                    
-          /*std::vector<TriggerPrimitive> tps = */m_tpg_pipelines[p].process(expanded_subframe);
+          /*std::vector<TriggerPrimitive> tps = */m_tpg_pipelines[p].process(expanded_subframe, m_tp_count_per_channel);
 
           //for (auto tp : tps) {
           //  tp.time_start = (t - tp.samples_over_threshold) * m_sample_tick_difference + timestamp;

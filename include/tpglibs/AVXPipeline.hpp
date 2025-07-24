@@ -46,7 +46,7 @@ class AVXPipeline : public TPGPipeline<AVXProcessor, __m256i> {
      *  @param tp_mask A vector mask of channels that have completed TPs.
      *  @return A vector of completed TPs.
      */
-    void generate_tps(const __m256i& tp_mask) override;
+    void generate_tps(const __m256i& tp_mask, std::vector<std::atomic<int>>* tp_count_per_channel) override;
 };
 #pragma GCC diagnostic pop
 

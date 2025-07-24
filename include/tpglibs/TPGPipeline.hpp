@@ -71,12 +71,12 @@ class TPGPipeline {
     /**
      * @brief Process a signal through the pipeline.
      */
-    virtual void process(const signal_t& signal) {
+    virtual void process(const signal_t& signal, std::vector<std::atomic<int>>* tp_count_per_channel) {
       signal_t tp_mask = save_state(m_processor_head->process(signal));
 
       //std::vector<TriggerPrimitive> tps;
       if (check_for_tps(tp_mask))
-        /*tps = */generate_tps(tp_mask);
+        /*tps = */generate_tps(tp_mask, tp_count_per_channel);
 
       //return tps;
     }
@@ -88,7 +88,7 @@ class TPGPipeline {
     virtual signal_t save_state(const signal_t& processed_signal) = 0;
 
     /** @brief Pure virtual function that will generate TPs given a mask to draw from. */
-    virtual void generate_tps(const signal_t& tp_mask) = 0;
+    virtual void generate_tps(const signal_t& tp_mask, std::vector<std::atomic<int>>* tp_count_per_channel) = 0;
 
     /** @brief Set the samples over threshold minimum values. */
     virtual void set_sot_minima(const std::vector<uint16_t>& sot_minima) {
