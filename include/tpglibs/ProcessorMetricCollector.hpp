@@ -86,6 +86,18 @@ public:
   std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> get_metrics();
   void stop();
 
+  ProcessorMetricCollector() 
+    : m_signal_collect(false)
+    , m_stop_flag(false)
+    , m_attach_counter(0) {
+  }
+  
+  ~ProcessorMetricCollector() {
+    if (m_collector_thread.joinable()) {
+      stop();
+    }
+  }
+
 private:
   void cast_metrics_from_raw_type();
   void collect_metrics_from_attached_processors();

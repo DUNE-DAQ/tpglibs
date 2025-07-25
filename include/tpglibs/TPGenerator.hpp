@@ -9,6 +9,8 @@
 #ifndef TPGLIBS_TPGENERATOR_HPP_
 #define TPGLIBS_TPGENERATOR_HPP_
 
+#include <memory>
+#include "tpglibs/ProcessorMetricCollector.hpp"
 #include "tpglibs/AVXPipeline.hpp"
 
 #include "trgdataformats/Types.hpp"
@@ -30,6 +32,7 @@ class TPGenerator {
   std::vector<AVXPipeline> m_tpg_pipelines;
   int m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
+  void* m_processor_metric_collector;
 
   public:
     /**
@@ -49,6 +52,18 @@ class TPGenerator {
      * @param sot_minima TPs from plane `i` will have at least `sot_minima[i]` value for its samples_over_threshold.
      */
     void set_sot_minima(const std::vector<uint16_t>& sot_minima);
+
+    ~TPGenerator() {
+      if (m_processor_metric_collector != nullptr) {
+        auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(m_processor_metric_collector);
+        
+        collector->stop();
+        
+        delete collector;
+        
+        m_processor_metric_collector = nullptr;
+      }
+    }
 
     /**
      * @brief Driving function for the TPG.
