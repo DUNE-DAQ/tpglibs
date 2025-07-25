@@ -20,7 +20,9 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   // FIXME: I'm using extreme methods, but somehow any attempt of intializing a ProcessorMetricCollector<__m256i> or its ptr
   // as class variable has failed. I am resorting to this now.
   // Possibly issues with load order I assume.
+  m_processor_metric_collector = new ProcessorMetricCollector<__m256i>();
 
+  auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(m_processor_metric_collector);
   
   collector->configure(configs, channel_plane_numbers, m_num_pipelines);
 
