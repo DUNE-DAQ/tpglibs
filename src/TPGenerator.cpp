@@ -20,11 +20,10 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   // FIXME: I'm using extreme methods, but somehow any attempt of intializing a ProcessorMetricCollector<__m256i> or its ptr
   // as class variable has failed. I am resorting to this now.
   // Possibly issues with load order I assume.
-  m_processor_metric_collector = new ProcessorMetricCollector<__m256i>();
 
-  auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(m_processor_metric_collector);
-  
-  collector->configure(configs, channel_plane_numbers, m_num_pipelines);
+  auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(get_processor_metric_collector());
+
+  if (m_tpg_metric_collect_enabled) collector->configure(configs, channel_plane_numbers, m_num_pipelines);
 
   for (int p = 0; p < m_num_pipelines; p++) {
     AVXPipeline new_pipe = AVXPipeline();
@@ -34,13 +33,33 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
     new_pipe.set_sot_minima(m_sot_minima);
     m_tpg_pipelines.push_back(new_pipe);
 
-    new_pipe.attach_to_metric_collector(*collector, p);
+    if (m_tpg_metric_collect_enabled) new_pipe.attach_to_metric_collector(*collector, p);
   }
 
-  collector->run();
+  if (m_tpg_metric_collect_enabled) collector->run();
+
+}
+
+void* TPGenerator::get_processor_metric_collector() {
+  if (m_processor_metric_collector == nullptr) {
+    m_processor_metric_collector = new ProcessorMetricCollector<__m256i>();
+  }
+
+  return m_processor_metric_collector;
+}
+
+void TPGenerator::signal_metric_collection() {
+  auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(m_processor_metric_collector);
 
   collector->signal_collect();
 }
+
+std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> TPGenerator::get_processor_metrics() {
+  auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(m_processor_metric_collector);
+
+  return collector->get_metrics();
+}
+
 
 void
 TPGenerator::set_sot_minima(const std::vector<uint16_t>& sot_minima) {

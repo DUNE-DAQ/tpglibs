@@ -36,6 +36,7 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     /** @ Adjustable rate of storing metric to buffer, in terms of number of time process happens (time sample rate) */
     int64_t m_rate{1024};
     uint64_t m_samples{0};
+    bool m_collect_metric_flag{true};
 
   private:
     ProcessorMetricArray<__m256i> m_metric_store_buffers[2]{};

@@ -111,6 +111,8 @@ void ProcessorMetricCollector<signal_t>::run() {
         this->cast_metrics_from_raw_type();
         this->convert_into_channel_metric_value();
       }
+      // Yield to avoid busy spin without limiting throughput
+      std::this_thread::yield();
     }
   });
 }

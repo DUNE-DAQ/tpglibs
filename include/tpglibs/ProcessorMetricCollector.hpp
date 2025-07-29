@@ -91,12 +91,6 @@ public:
     , m_stop_flag(false)
     , m_attach_counter(0) {
   }
-  
-  ~ProcessorMetricCollector() {
-    if (m_collector_thread.joinable()) {
-      stop();
-    }
-  }
 
 private:
   void cast_metrics_from_raw_type();

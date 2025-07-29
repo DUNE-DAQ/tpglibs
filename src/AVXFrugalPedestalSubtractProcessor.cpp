@@ -33,12 +33,13 @@ AVXFrugalPedestalSubtractProcessor::~AVXFrugalPedestalSubtractProcessor() noexce
 void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   m_accum_limit = config["accum_limit"];
   if (config.contains("metric_collect_data_sample_rate")) m_rate = config["metric_collect_data_sample_rate"];
+  if (config.contains("metric_collect_toggle_state")) m_collect_metric_flag = config["metric_collect_toggle_state"];
 }
 
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   // save metric
 
-  if (m_samples++ % m_rate == 0) save_metric_to_store_buffer();
+  if (m_collect_metric_flag && m_samples++ % m_rate == 0) save_metric_to_store_buffer();
 
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);
