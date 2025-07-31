@@ -34,7 +34,7 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     int16_t m_accum_limit{10};
 
     /** @ Adjustable rate of storing metric to buffer, in terms of number of time process happens (time sample rate) */
-    int64_t m_rate{1024};
+    int64_t m_rate{512};
     uint64_t m_samples{0};
     bool m_collect_metric_flag{true};
 
@@ -67,6 +67,12 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
 
     /** @brief Save metrics to store buffer. */
     void save_metric_to_store_buffer() override;
+
+    /** @brief returns the metrics being recorded and can be read by this processor
+     * 
+     * @return a vector of two strings: m_accum and m_pedestal
+     */
+    virtual std::vector<std::string> get_metric_items() override;
 
     /** @brief Read metrics from store buffer. */
     ProcessorMetricArray<__m256i> read_from_metric_store_buffer() override;

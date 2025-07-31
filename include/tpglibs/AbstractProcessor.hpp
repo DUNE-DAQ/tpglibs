@@ -56,6 +56,11 @@ class AbstractProcessor {
       return "AbstractProcessor";
     }
 
+    /** @brief Returns the string name of metrics recorded (stored and can be read) for this processor. */
+    virtual std::vector<std::string> get_metric_items() {
+      return {};
+    }
+
     /** @brief Read metrics from store buffer; default empty. */
     virtual ProcessorMetricArray<signal_type_t> read_from_metric_store_buffer() {
       return {};
