@@ -106,7 +106,7 @@ ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metr
 }
 
 std::vector<std::string> AVXFrugalPedestalSubtractProcessor::get_metric_items() {
-  return {"m_accum", "m_pedestal"};
+  return {"m_pedestal", "m_accum"};
 }
 
 std::string AVXFrugalPedestalSubtractProcessor::get_name() {

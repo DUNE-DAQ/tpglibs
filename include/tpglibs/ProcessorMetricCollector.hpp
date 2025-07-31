@@ -15,6 +15,7 @@
 #include <vector>
 #include <thread>
 #include <atomic>
+#include <mutex>
 #include <cstdint>
 #include <string>
 #include <nlohmann/json.hpp>
@@ -31,11 +32,6 @@ struct ProcessorMetricInformation {
   std::vector<std::string> m_names_of_metrics;
 };
 
-// Idealy this exists at config level. Hardcoded here for now
-inline std::unordered_map<std::string, std::vector<std::string>> processor_name_to_metrics_map = {
-  {"AVXFrugalPedestalSubtractProcessor", {"m_pedestal", "m_accum"}}
-};
-
 template <typename T>
 class ProcessorMetricCollector {
 public:
@@ -48,7 +44,7 @@ public:
     m_attached_processors[m_attach_counter] = &processor;
 
     // Look up and fill in information about this processor: its pipeline belonging and what is collected
-    auto metrics = processor_name_to_metrics_map[processor_type_name];
+    auto metrics = processor.get_metric_items();
     m_processor_metric_table[m_attach_counter].m_names_of_metrics = metrics;
     m_processor_metric_table[m_attach_counter].m_pipeline_id = pipeline_id;
 
@@ -105,6 +101,7 @@ private:
   std::vector<dunedaq::trgdataformats::channel_t> m_channel_numbers;
 
   std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> m_metrics;
+  std::mutex m_mutex;
   
   std::atomic<bool> m_signal_collect{false};
   std::thread m_collector_thread;

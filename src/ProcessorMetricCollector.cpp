@@ -135,6 +135,7 @@ void ProcessorMetricCollector<signal_t>::stop() {
 
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::convert_into_channel_metric_value() {
+  std::scoped_lock lock(m_mutex);
   std::vector<int16_t> mcount(m_channel_numbers.size(), 0);
 
   for (size_t pid = 0; pid < m_processor_casted_data_table.size(); pid++) {
@@ -151,6 +152,7 @@ void ProcessorMetricCollector<signal_t>::convert_into_channel_metric_value() {
 
 template<typename signal_t>
 std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> ProcessorMetricCollector<signal_t>::get_metrics() {
+  std::scoped_lock lock(m_mutex);
   return m_metrics;
 }
 
