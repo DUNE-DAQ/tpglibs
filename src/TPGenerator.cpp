@@ -57,7 +57,13 @@ void TPGenerator::signal_metric_collection() {
 std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> TPGenerator::get_processor_metrics() {
   auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(m_processor_metric_collector);
 
-  return collector->get_metrics();
+  collector->lock_metric_modify();
+
+  auto metrics = collector->get_metrics();
+
+  collector->unlock_metric_modify();
+
+  return metrics;
 }
 
 

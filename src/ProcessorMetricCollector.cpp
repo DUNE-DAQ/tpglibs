@@ -74,7 +74,7 @@ void ProcessorMetricCollector<signal_t>::collect_metrics_from_attached_processor
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::cast_metrics_from_raw_type() {
   for (size_t i = 0; i < m_processor_metric_collection_table.size(); i++) {
-    auto raw = m_processor_metric_collection_table[i];
+    auto & raw = m_processor_metric_collection_table[i];
     for (size_t j = 0; j < raw.size(); j++) {
       int16_t out[16];
       _mm256_storeu_si256(reinterpret_cast<__m256i*>(&out), raw[j]);
@@ -152,8 +152,17 @@ void ProcessorMetricCollector<signal_t>::convert_into_channel_metric_value() {
 
 template<typename signal_t>
 std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> ProcessorMetricCollector<signal_t>::get_metrics() {
-  std::scoped_lock lock(m_mutex);
   return m_metrics;
+}
+
+template<typename signal_t>
+void ProcessorMetricCollector<signal_t>::lock_metric_modify() {
+  m_mutex.lock();
+}
+
+template<typename signal_t>
+void ProcessorMetricCollector<signal_t>::unlock_metric_modify() {
+  m_mutex.unlock();
 }
 
 } // namespace tpglibs

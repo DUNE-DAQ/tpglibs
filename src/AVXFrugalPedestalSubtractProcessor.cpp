@@ -74,11 +74,11 @@ void AVXFrugalPedestalSubtractProcessor::save_metric_to_store_buffer() {
   // Store is expected to happen at a much higher frequency than read, for example,
   // can be store after each processing
   // Therefore, "save" should have no interrupt or wait
-  auto free_ptr = m_active_buffer.load(std::memory_order_acquire);
-  // write to free buffer
-  
+
   //set seq
   seq.fetch_add(1, std::memory_order_relaxed);
+  auto free_ptr = m_active_buffer.load(std::memory_order_acquire);
+  // write to free buffer
   
   free_ptr->m_data[0] = m_pedestal;
   free_ptr->m_data[1] = m_accum;
@@ -88,21 +88,21 @@ void AVXFrugalPedestalSubtractProcessor::save_metric_to_store_buffer() {
 }
 
 ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metric_store_buffer() {
-  // "read" is expected to happen at a much lower frequency than store
-  // Therefore, the responsibility to switch buffers given to it
-
-  uint16_t start, end;
-  ProcessorMetricArray<__m256i>* active_buffer_curr;
+  // Wait until no write is in progress.
+  uint16_t start_seq;
   do {
-    start = seq.load(std::memory_order_acquire);
-    if (start & 1) continue; // If odd, then writer is currently writing
-    active_buffer_curr = m_active_buffer.load(std::memory_order_acquire);
-    m_active_buffer.store(active_buffer_curr == &m_metric_store_buffers[0] ? &m_metric_store_buffers[1] : &m_metric_store_buffers[0], std::memory_order_release);
-    end = seq.load(std::memory_order_acquire);
-  } while (start != end);
-  // after the switch, the processor should be writing into the backup buffer now, we can safely readout its value
+    start_seq = seq.load(std::memory_order_acquire);
+  } while (start_seq & 1); // spin if writer is mid-write
 
-  return *active_buffer_curr;
+  // Swap the active buffer so writer will go to the other one.
+  auto current_active = m_active_buffer.load(std::memory_order_acquire);
+  auto new_active = (current_active == &m_metric_store_buffers[0])
+                      ? &m_metric_store_buffers[1]
+                      : &m_metric_store_buffers[0];
+  m_active_buffer.store(new_active, std::memory_order_release);
+
+  // Now it's safe to read from the previous active buffer.
+  return *current_active;
 }
 
 std::vector<std::string> AVXFrugalPedestalSubtractProcessor::get_metric_items() {

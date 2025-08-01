@@ -88,6 +88,9 @@ public:
     , m_attach_counter(0) {
   }
 
+  void lock_metric_modify();
+  void unlock_metric_modify();
+
 private:
   void cast_metrics_from_raw_type();
   void collect_metrics_from_attached_processors();
