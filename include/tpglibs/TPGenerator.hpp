@@ -36,7 +36,7 @@ class TPGenerator {
   int m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
   void* m_processor_metric_collector = nullptr;
-  bool m_tpg_metric_collect_enabled;
+  bool m_tpg_metric_collect_enabled {false};
 
   public:
     /**
