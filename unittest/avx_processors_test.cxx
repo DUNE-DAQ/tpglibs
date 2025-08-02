@@ -101,7 +101,8 @@ BOOST_AUTO_TEST_CASE(test_avx_metric) {
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
   nlohmann::json pc_config = {
-    {"accum_limit", 42}
+    {"accum_limit", 42},
+    {"metric_collect_toggle_state", true}
   };
 
   pc->configure(pc_config, plane_numbers);
@@ -128,7 +129,7 @@ BOOST_AUTO_TEST_CASE(test_avx_metric_multithread) {
   // Set up processor and config
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
-  nlohmann::json pc_config = {{"accum_limit", 42}};
+  nlohmann::json pc_config = {{"accum_limit", 42}, {"metric_collect_toggle_state", true}};
   pc->configure(pc_config, plane_numbers);
 
   // Launch producer thread

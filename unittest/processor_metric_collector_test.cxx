@@ -58,7 +58,8 @@ namespace tpglibs {
     int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
     nlohmann::json pc_config = {
-      {"accum_limit", 42}
+      {"accum_limit", 42},
+      {"metric_collect_toggle_state", true}
     };
 
     pc->configure(pc_config, plane_numbers);
@@ -123,14 +124,16 @@ namespace tpglibs {
         "AVXFrugalPedestalSubtractProcessor",
         {
           {"accum_limit", 42},
-          {"metric_collect_data_sample_rate", 1024}
+          {"metric_collect_data_sample_rate", 1024},
+          {"metric_collect_toggle_state", true}
         }
       },
       {
         "AVXFrugalPedestalSubtractProcessor",
         {
           {"accum_limit", 42},
-          {"metric_collect_data_sample_rate", 1024}
+          {"metric_collect_data_sample_rate", 1024},
+          {"metric_collect_toggle_state", true}
         }
       },
     };
@@ -257,14 +260,16 @@ namespace tpglibs {
         "AVXFrugalPedestalSubtractProcessor",
         {
           {"accum_limit", 42},
-          {"metric_collect_data_sample_rate", 1024}
+          {"metric_collect_data_sample_rate", 1024},
+          {"metric_collect_toggle_state", true}
         }
       },
       {
         "AVXFrugalPedestalSubtractProcessor",
         {
           {"accum_limit", 42},
-          {"metric_collect_data_sample_rate", 1024}
+          {"metric_collect_data_sample_rate", 1024},
+          {"metric_collect_toggle_state", true}
         }
       },
     };
@@ -436,7 +441,8 @@ namespace tpglibs {
         "AVXFrugalPedestalSubtractProcessor",
         {
           {"accum_limit", 42},
-          {"metric_collect_data_sample_rate", 1024}
+          {"metric_collect_data_sample_rate", 1024},
+          {"metric_collect_toggle_state", true}
         }
       },
       {
@@ -454,7 +460,8 @@ namespace tpglibs {
         "AVXFrugalPedestalSubtractProcessor",
         {
           {"accum_limit", 42},
-          {"metric_collect_data_sample_rate", 1024}
+          {"metric_collect_data_sample_rate", 1024},
+          {"metric_collect_toggle_state", true}
         }
       },
     };
