@@ -57,7 +57,7 @@ public:
     // Preallocated to preconfigured number of metrics
     m_processor_metric_collection_table.push_back(std::vector<signal_t>(metrics.size()));
 
-    for (size_t i = 0; i < m_metrics.size(); i++) {
+    for (size_t i = pipeline_id*16; i < (pipeline_id+1)*16; i++) {
       for (size_t j = 0; j < metrics.size(); j++) {
         // Record metric name and initial value 0 for this channel
         m_metrics[m_channel_numbers[i]].emplace_back(metrics[j], int16_t{0});

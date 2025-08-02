@@ -76,7 +76,7 @@ void AVXFrugalPedestalSubtractProcessor::save_metric_to_store_buffer() {
   // Therefore, "save" should have no interrupt or wait
 
   //set seq
-  seq.fetch_add(1, std::memory_order_relaxed);
+  seq.fetch_add(1, std::memory_order_release);
   auto free_ptr = m_active_buffer.load(std::memory_order_acquire);
   // write to free buffer
   

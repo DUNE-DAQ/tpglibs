@@ -20,6 +20,7 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include <set>
 
 namespace tpglibs {
   
@@ -62,7 +63,7 @@ namespace tpglibs {
 
     pc->configure(pc_config, plane_numbers);
 
-    collector.attach_processor(*pc.get(), proc_name, 1);
+    collector.attach_processor(*pc.get(), proc_name, 0);
 
     auto processors = collector._get_attached_processors();
 
@@ -71,7 +72,7 @@ namespace tpglibs {
 
     auto info = collector._get_processor_metric_table();
 
-    BOOST_TEST(info[0].m_pipeline_id == 1);
+    BOOST_TEST(info[0].m_pipeline_id == 0);
     BOOST_TEST(info[0].m_names_of_metrics.size() == 2);
 
     // simulate a metric store in processor
@@ -163,7 +164,7 @@ namespace tpglibs {
     pipeline.configure(configs, channel_plane_numbers);
     pipeline.set_sot_minima(sot_minima);
 
-    pipeline.attach_to_metric_collector(collector, 1);
+    pipeline.attach_to_metric_collector(collector, 0);
 
     auto attached_processors = collector._get_attached_processors();
     
@@ -175,11 +176,11 @@ namespace tpglibs {
 
     BOOST_TEST(info[0].m_names_of_metrics[0] == "m_pedestal");
     BOOST_TEST(info[0].m_names_of_metrics[1] == "m_accum");
-    BOOST_TEST(info[0].m_pipeline_id == 1);
+    BOOST_TEST(info[0].m_pipeline_id == 0);
 
     BOOST_TEST(info[1].m_names_of_metrics[0] == "m_pedestal");
     BOOST_TEST(info[1].m_names_of_metrics[1] == "m_accum");
-    BOOST_TEST(info[1].m_pipeline_id == 1);
+    BOOST_TEST(info[1].m_pipeline_id == 0);
 
     __m256i input = _mm256_set1_epi16(0x4000);
     // Control flag to stop the pipeline thread
@@ -297,7 +298,7 @@ namespace tpglibs {
     pipeline.configure(configs, channel_plane_numbers);
     pipeline.set_sot_minima(sot_minima);
 
-    pipeline.attach_to_metric_collector(collector, 1);
+    pipeline.attach_to_metric_collector(collector, 0);
 
     auto attached_processors = collector._get_attached_processors();
     
@@ -309,11 +310,11 @@ namespace tpglibs {
 
     BOOST_TEST(info[0].m_names_of_metrics[0] == "m_pedestal");
     BOOST_TEST(info[0].m_names_of_metrics[1] == "m_accum");
-    BOOST_TEST(info[0].m_pipeline_id == 1);
+    BOOST_TEST(info[0].m_pipeline_id == 0);
 
     BOOST_TEST(info[1].m_names_of_metrics[0] == "m_pedestal");
     BOOST_TEST(info[1].m_names_of_metrics[1] == "m_accum");
-    BOOST_TEST(info[1].m_pipeline_id == 1);
+    BOOST_TEST(info[1].m_pipeline_id == 0);
 
     __m256i input = _mm256_set1_epi16(0x4000);
     // Launch pipeline processing in a separate thread
@@ -386,6 +387,46 @@ namespace tpglibs {
         }
       } 
     }
+
+    auto final_metrics = collector.get_metrics();
+
+    // verify that final_metrics has same number of keys as channel_plane_numbers and the keys are the channel numbers
+    std::set<dunedaq::trgdataformats::channel_t> expected_channels;
+    for (const auto& cp : channel_plane_numbers) {
+      expected_channels.insert(cp.first);
+    }
+    std::set<dunedaq::trgdataformats::channel_t> actual_channels;
+    for (const auto& kv : final_metrics) {
+      actual_channels.insert(kv.first);
+    }
+    BOOST_TEST(actual_channels.size() == expected_channels.size());
+    BOOST_TEST(actual_channels == expected_channels);
+
+    // For each channel key, ensure there are two m_pedestal and two m_accum entries with expected values
+    for (const auto& kv : final_metrics) {
+      const auto& vec = kv.second;
+      BOOST_TEST(vec.size() == 4);
+      int pedestal_count = 0;
+      int accum_count = 0;
+      for (const auto& metric_pair : vec) {
+        const auto& name = metric_pair.first;
+        const auto& value = metric_pair.second;
+        if (name == "m_pedestal") {
+          pedestal_count++;
+          BOOST_TEST(value == 16384);
+        } else if (name == "m_accum") {
+          accum_count++;
+          BOOST_TEST(value == 0);
+        } else {
+          // unexpected metric
+          BOOST_TEST(false);
+        }
+      }
+      BOOST_TEST(pedestal_count == 2);
+      BOOST_TEST(accum_count == 2);
+    }
+    
+    
   }
 
   BOOST_AUTO_TEST_CASE(test_processor_metric_collector_pipeline_test_processor_without_metric) {
@@ -447,7 +488,7 @@ namespace tpglibs {
     pipeline.configure(configs, channel_plane_numbers);
     pipeline.set_sot_minima(sot_minima);
 
-    pipeline.attach_to_metric_collector(collector, 1);
+    pipeline.attach_to_metric_collector(collector, 0);
 
     auto attached_processors = collector._get_attached_processors();
     
@@ -460,13 +501,13 @@ namespace tpglibs {
 
     BOOST_TEST(info[0].m_names_of_metrics[0] == "m_pedestal");
     BOOST_TEST(info[0].m_names_of_metrics[1] == "m_accum");
-    BOOST_TEST(info[0].m_pipeline_id == 1);
+    BOOST_TEST(info[0].m_pipeline_id == 0);
 
     BOOST_TEST(info[1].m_names_of_metrics.size() == 0);
 
     BOOST_TEST(info[2].m_names_of_metrics[0] == "m_pedestal");
     BOOST_TEST(info[2].m_names_of_metrics[1] == "m_accum");
-    BOOST_TEST(info[2].m_pipeline_id == 1);
+    BOOST_TEST(info[2].m_pipeline_id == 0);
 
     __m256i input = _mm256_set1_epi16(0x4000);
     // Launch pipeline processing in a separate thread

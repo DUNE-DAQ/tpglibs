@@ -49,6 +49,8 @@ void ProcessorMetricCollector<signal_t>::configure(const std::vector<std::pair<s
   m_processor_metric_table = std::vector<ProcessorMetricInformation>(n_processors * num_pipelines, ProcessorMetricInformation{0, {}});
 
   m_processor_metric_collection_table = {};
+  
+  m_processor_casted_data_table = {};
 
   m_channel_numbers = std::vector<dunedaq::trgdataformats::channel_t>(channel_plane_numbers.size(), 0);
 
@@ -140,10 +142,13 @@ void ProcessorMetricCollector<signal_t>::convert_into_channel_metric_value() {
 
   for (size_t pid = 0; pid < m_processor_casted_data_table.size(); pid++) {
     for (size_t mid = 0; mid < m_processor_casted_data_table[pid].size(); mid++) {
-      for (size_t cid = 0; cid < m_processor_casted_data_table[pid][mid].size(); cid++) {
+      auto responsible_channels_start = m_processor_metric_table[pid].m_pipeline_id * 16;
+      size_t local_cid_in_table=0;
+      for (size_t cid = responsible_channels_start; cid < responsible_channels_start + 16; cid++) {
         auto mnames = m_processor_metric_table[pid].m_names_of_metrics;
-        m_metrics[m_channel_numbers[cid]][mcount[cid]].second = m_processor_casted_data_table[pid][mid][cid];
+        m_metrics[m_channel_numbers[cid]][mcount[cid]].second = m_processor_casted_data_table[pid][mid][local_cid_in_table];
         m_metrics[m_channel_numbers[cid]][mcount[cid]].first = m_processor_metric_table[pid].m_names_of_metrics[mid];
+        local_cid_in_table++;
         mcount[cid]++;
       }
     }
