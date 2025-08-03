@@ -21,8 +21,24 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
     AVXPipeline new_pipe = AVXPipeline();
     auto begin_channel_plane = channel_plane_numbers.begin() + p*m_num_channels_per_pipeline;
     auto end_channel_plane = begin_channel_plane + m_num_channels_per_pipeline;
-    new_pipe.configure(configs, std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
+
+    // Set initial pedestals via configuration 
+    for (auto& it : configs) {
+      if (it.first == "AVXFrugalPedestalSubtractProcessor") {
+        if (it.second.contains("pedestals")) {
+	  std::vector<uint16_t> pedestals_vec;
+          it.second["pedestals"].get_to(pedestals_vec);
+          auto begin_pedestals = pedestals_vec.begin() + p*m_num_channels_per_pipeline;
+	  auto end_pedestals = begin_pedestals + m_num_channels_per_pipeline;
+	  new_pipe.set_pedestals(std::vector<uint16_t>(begin_pedestals, end_pedestals));
+        }
+      }
+    }
+    
     new_pipe.set_sot_minima(m_sot_minima);
+
+    // Configure pipeline after pedestals    
+    new_pipe.configure(configs, std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
     m_tpg_pipelines.push_back(new_pipe);
   }
 }

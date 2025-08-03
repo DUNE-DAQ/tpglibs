@@ -16,6 +16,8 @@ void NaiveFrugalPedestalSubtractProcessor::configure(const nlohmann::json& confi
   m_accum_limit = config["accum_limit"];
 }
 
+void NaiveFrugalPedestalSubtractProcessor::config_pedestals(uint16_t (&)[16]) {}
+
 NaiveFrugalPedestalSubtractProcessor::naive_array_t
 NaiveFrugalPedestalSubtractProcessor::process(const naive_array_t& signal) {
   naive_array_t subtracted_signal;

@@ -26,6 +26,8 @@ void NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t
   }
 }
 
+void NaiveRunSumProcessor::config_pedestals(uint16_t (&)[16]) {}
+
 NaiveRunSumProcessor::naive_array_t NaiveRunSumProcessor::process(const naive_array_t& signal) {
   for (int i = 0; i < 16; i++) {
     int32_t scaled_rs = _naive_div_int16(m_running_sum[i], 10);

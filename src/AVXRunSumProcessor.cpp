@@ -31,6 +31,8 @@ void AVXRunSumProcessor::configure(const nlohmann::json& config, const int16_t* 
   m_scale_factor = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(scale_factors));
 }
 
+void AVXRunSumProcessor::config_pedestals(uint16_t (&)[16]) {}
+
 __m256i AVXRunSumProcessor::process(const __m256i& signal) {
   __m256i scaled_rs = _mm256_div_epi16(m_running_sum, 10);
   scaled_rs = _mm256_mullo_epi16(scaled_rs, m_memory_factor);

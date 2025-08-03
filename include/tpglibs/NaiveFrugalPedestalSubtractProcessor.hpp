@@ -43,6 +43,12 @@ class NaiveFrugalPedestalSubtractProcessor : public NaiveProcessor {
      *  @param plane_numbers Array of plane numbers. Gives the channels to apply the accumulation limit.
      */
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+
+    /** @brief Configures the initial pedestal values per channel.
+     *
+     *  @param pedestals Array of pedestal values.
+     */
+    void config_pedestals(uint16_t (&pedestals)[16]) override;
 };
 
 } // namespace tpglibs

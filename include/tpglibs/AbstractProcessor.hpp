@@ -33,6 +33,9 @@ class AbstractProcessor {
     /** @brief Pure virtual function that will configure the processor using plane numbers. */
     virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
 
+    /** @brief Pure virtual function that will configure the processor pedestals via the configuration. */
+    virtual void config_pedestals(uint16_t (&pedestals)[16] = {}) = 0;
+
     /** @brief Setter for next processor. */
     void set_next_processor(std::shared_ptr<AbstractProcessor<T>> next_processor) {
       m_next_processor = next_processor;

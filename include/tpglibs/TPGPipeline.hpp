@@ -54,6 +54,7 @@ class TPGPipeline {
 
         // Configure it.
         processor->configure(name_config.second, m_plane_numbers);
+        processor->config_pedestals(m_pedestals);
 
         // If it's the first one, make it the head.
         if (!prev_processor) {
@@ -98,6 +99,16 @@ class TPGPipeline {
       }
     }
 
+    /** @brief Set the initial pedestal values. */
+    virtual void set_pedestals(const std::vector<uint16_t>& pedestals) {
+      int idx = 0;
+      for (auto pedestal : pedestals) {
+        m_pedestals[idx++] = pedestal;
+      }
+    }
+
+
+
   protected:
     /** @brief The on-going ADC integral for channels that are considered active. */
     signal_t m_adc_integral_lo{};
@@ -114,6 +125,8 @@ class TPGPipeline {
     int16_t m_plane_numbers[16];
     /** @brief The samples over threshold minimum that a TP from plane `i` must have. */
     uint16_t m_sot_minima[3];
+    /** @brief The initial pedestal values that a TP from channl `i` will have. */
+    uint16_t m_pedestals[16]{16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383};
     /** @brief Processor factory singleton. */
     std::shared_ptr<AbstractFactory<processor_t>> m_factory = AbstractFactory<processor_t>::get_instance();
     /** @brief Processor head to start from. */

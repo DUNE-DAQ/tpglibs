@@ -21,6 +21,8 @@ void NaiveThresholdProcessor::configure(const nlohmann::json& config, const int1
   }
 }
 
+void NaiveThresholdProcessor::config_pedestals(uint16_t (&)[16]) {}
+
 NaiveThresholdProcessor::naive_array_t NaiveThresholdProcessor::process(const naive_array_t& signal) {
   naive_array_t above_threshold;
   for (int i = 0; i < 16; i++) {

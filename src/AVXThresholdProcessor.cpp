@@ -24,6 +24,8 @@ void AVXThresholdProcessor::configure(const nlohmann::json& config, const int16_
   m_threshold = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(thresholds));
 }
 
+void AVXThresholdProcessor::config_pedestals(uint16_t (&)[16]) {}
+
 __m256i AVXThresholdProcessor::process(const __m256i& signal) {
   __m256i mask = _mm256_cmpgt_epi16(signal, m_threshold);
 
