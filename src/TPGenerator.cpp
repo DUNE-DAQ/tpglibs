@@ -17,10 +17,6 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;
   m_sample_tick_difference = sample_tick_difference;
 
-  // FIXME: I'm using extreme methods, but somehow any attempt of intializing a ProcessorMetricCollector<__m256i> or its ptr
-  // as class variable has failed. I am resorting to this now.
-  // Possibly issues with load order I assume.
-
   if (m_tpg_metric_collect_enabled) get_processor_metric_collector_ptr()->configure(configs, channel_plane_numbers, m_num_pipelines);
 
   for (int p = 0; p < m_num_pipelines; p++) {
