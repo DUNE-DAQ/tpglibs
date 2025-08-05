@@ -16,7 +16,6 @@
 #include "trgdataformats/Types.hpp"
 
 #include <utility>
-#include <memory>
 #include <unordered_map>
 
 
@@ -35,7 +34,7 @@ class TPGenerator {
   std::vector<AVXPipeline> m_tpg_pipelines;
   int m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
-  void* m_processor_metric_collector = nullptr;
+  std::shared_ptr<ProcessorMetricCollector<__m256i>> m_processor_metric_collector_ptr {nullptr};
   bool m_tpg_metric_collect_enabled {false};
 
   public:
@@ -68,6 +67,8 @@ class TPGenerator {
      */
     void* get_processor_metric_collector();
 
+    std::shared_ptr<ProcessorMetricCollector<__m256i>>  get_processor_metric_collector_ptr();
+
     void set_metric_collector_enable_state(bool state) {
       m_tpg_metric_collect_enabled = state;
     }
@@ -77,14 +78,10 @@ class TPGenerator {
     std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> get_processor_metrics();
 
     void free_metric_collector() {
-      if (m_processor_metric_collector != nullptr) {
-        auto collector = static_cast<ProcessorMetricCollector<__m256i>*>(m_processor_metric_collector);
+      if (m_processor_metric_collector_ptr != nullptr) {
+        m_processor_metric_collector_ptr->stop();
         
-        collector->stop();
-        
-        delete collector;
-        
-        m_processor_metric_collector = nullptr;
+        m_processor_metric_collector_ptr.reset();
       }
     }
 
