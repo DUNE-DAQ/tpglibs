@@ -38,7 +38,8 @@ void ProcessorMetricCollector<signal_t>::configure(const std::vector<std::pair<s
                                                    const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
                                                    uint8_t num_pipelines)
 {
-  m_signal_collect = false;
+  m_signal_collect.store(false, std::memory_order_relaxed);
+  m_first_collect.store(true, std::memory_order_relaxed);
   m_attach_counter = 0;
 
   // create a fixed size array for reference to all the processors
@@ -112,6 +113,10 @@ void ProcessorMetricCollector<signal_t>::run() {
         // perform any post processings on the collected metrics as needed
         this->cast_metrics_from_raw_type();
         this->convert_into_channel_metric_value();
+
+        if (m_first_collect.load(std::memory_order_acquire)) {
+          m_first_collect.store(false, std::memory_order_release);
+        }
       }
       // Yield to avoid busy spin without limiting throughput
       std::this_thread::yield();
@@ -133,6 +138,7 @@ void ProcessorMetricCollector<signal_t>::stop() {
   if (m_collector_thread.joinable()) {
     m_collector_thread.join();
   }
+  m_first_collect.store(false, std::memory_order_release);
 }
 
 template<typename signal_t>
@@ -157,6 +163,13 @@ void ProcessorMetricCollector<signal_t>::convert_into_channel_metric_value() {
 
 template<typename signal_t>
 std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> ProcessorMetricCollector<signal_t>::get_metrics() {
+  // If we are still waiting for the first collection, wait until it finishes to get actual collected values
+  while (m_first_collect.load(std::memory_order_acquire)) {
+    if (m_stop_flag.load(std::memory_order_acquire)) {
+      return {};
+    }
+    std::this_thread::yield();
+  }
   return m_metrics;
 }
 
