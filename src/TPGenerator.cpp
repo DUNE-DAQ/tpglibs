@@ -26,8 +26,13 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
     new_pipe.configure(configs, std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
     new_pipe.set_sot_minima(m_sot_minima);
     m_tpg_pipelines.push_back(new_pipe);
+  }
 
-    if (m_tpg_metric_collect_enabled) new_pipe.attach_to_metric_collector(*get_processor_metric_collector_ptr(), p);
+  int pipeline_id = 0;
+  for (auto& pipeline : m_tpg_pipelines) {
+    if (m_tpg_metric_collect_enabled) pipeline.attach_to_metric_collector(*get_processor_metric_collector_ptr(), pipeline_id);
+    pipeline_id++;
+    if (pipeline_id == m_num_pipelines) break; // I belive this is a current separate bug with repopulating the m_tpg_pipelines. Doing the safer treatment to take first m_num_pipelines pipelines.
   }
 
   if (m_tpg_metric_collect_enabled) get_processor_metric_collector_ptr()->run();

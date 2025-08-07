@@ -38,8 +38,21 @@ void ProcessorMetricCollector<signal_t>::configure(const std::vector<std::pair<s
                                                    const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
                                                    uint8_t num_pipelines)
 {
-  m_signal_collect = false;
+  // Stop any existing thread first - use proper synchronization
+  if (m_collector_thread.joinable()) {
+    m_stop_flag.store(true, std::memory_order_relaxed);
+    // Give the thread a chance to see the stop flag
+    std::this_thread::yield();
+    m_collector_thread.join();
+  }
+
+  // Reset all state for fresh start
+  m_signal_collect.store(false, std::memory_order_relaxed);
+  m_stop_flag.store(false, std::memory_order_relaxed);
   m_attach_counter = 0;
+
+  // Clear all data structures
+  m_metrics.clear();
 
   // create a fixed size array for reference to all the processors
   // configs are pairs of (processor name, specific configs)
@@ -98,6 +111,11 @@ void ProcessorMetricCollector<signal_t>::signal_collect() {
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::run() {
   // TODO: main loop for metric collection thread
+  // Check if thread is already running
+  if (m_collector_thread.joinable()) {
+    return; // Thread already running
+  }
+  
   m_collector_thread = std::thread([this]() {
     while (!this->m_stop_flag.load(std::memory_order_acquire)) {
       if (this->m_signal_collect.load(std::memory_order_relaxed)) {
@@ -129,7 +147,7 @@ ProcessorMetricCollector<signal_t>::_get_retrieved_processor_metrics() const {
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::stop() {
   // TODO: stop the collection thread
-  m_stop_flag.store(true, std::memory_order_release);
+  m_stop_flag.store(true, std::memory_order_relaxed);
   if (m_collector_thread.joinable()) {
     m_collector_thread.join();
   }
