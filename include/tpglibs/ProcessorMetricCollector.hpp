@@ -6,10 +6,9 @@
  * received with this code.
  */
  
-#ifndef TPGLIBS_PROCESSORMETRICCOLLECTOR_HPP_
-#define TPGLIBS_PROCESSORMETRICCOLLECTOR_HPP_
-
-#include "trgdataformats/Types.hpp"
+ #ifndef TPGLIBS_PROCESSORMETRICCOLLECTOR_HPP_
+ #define TPGLIBS_PROCESSORMETRICCOLLECTOR_HPP_
+ 
 
 #include <map>
 #include <unordered_map>
@@ -20,6 +19,8 @@
 #include <cstdint>
 #include <string>
 #include <nlohmann/json.hpp>
+
+#include "trgdataformats/Types.hpp"
 
 namespace tpglibs {
 
@@ -64,7 +65,6 @@ public:
     }
 
     m_attach_counter++;
-    m_first_collect.store(true, std::memory_order_relaxed);
   }
 
   void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs,
@@ -109,7 +109,6 @@ private:
   std::atomic<bool> m_signal_collect{false};
   std::thread m_collector_thread;
   std::atomic<bool> m_stop_flag{false};
-  std::atomic<bool> m_first_collect{true};
   size_t m_attach_counter = 0;
 };
 
