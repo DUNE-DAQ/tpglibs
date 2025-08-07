@@ -90,7 +90,7 @@ void ProcessorMetricCollector<signal_t>::cast_metrics_from_raw_type() {
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::signal_collect() {
   // TODO: signal that a collection cycle should occur
-  m_signal_collect.store(true, std::memory_order_release);
+  m_signal_collect.store(true, std::memory_order_relaxed);
   // this->collect_metrics_from_attached_processors();
   // this->cast_metrics_from_raw_type();
 }
@@ -100,11 +100,11 @@ void ProcessorMetricCollector<signal_t>::run() {
   // TODO: main loop for metric collection thread
   m_collector_thread = std::thread([this]() {
     while (!this->m_stop_flag.load(std::memory_order_acquire)) {
-      if (this->m_signal_collect.load(std::memory_order_acquire)) {
+      if (this->m_signal_collect.load(std::memory_order_relaxed)) {
         // If this is signaled to collect metrics
         this->collect_metrics_from_attached_processors();
 
-        this->m_signal_collect.store(false, std::memory_order_release);
+        this->m_signal_collect.store(false, std::memory_order_relaxed);
         // After collection, we reset the collect flag to false.
         // Note that when signal_collect() is called at a far higher rate then possible, ultimately collection
         // happens at the highest possible rate, not necessarily the set rate
