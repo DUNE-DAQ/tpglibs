@@ -73,6 +73,10 @@ class TPGenerator {
       m_tpg_metric_collect_enabled = state;
     }
 
+    bool get_metric_collector_enable_state() {
+      return m_tpg_metric_collect_enabled;
+    }
+
     void signal_metric_collection();
 
     std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> get_processor_metrics();

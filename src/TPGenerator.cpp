@@ -17,6 +17,12 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;
   m_sample_tick_difference = sample_tick_difference;
 
+  for (const auto& name_config : configs) {
+    if (name_config.second.contains("metric_collect_toggle_state") && name_config.second["metric_collect_toggle_state"] == true) {
+      m_tpg_metric_collect_enabled = true;
+    }
+  }
+
   if (m_tpg_metric_collect_enabled) get_processor_metric_collector_ptr()->configure(configs, channel_plane_numbers, m_num_pipelines);
 
   for (int p = 0; p < m_num_pipelines; p++) {
@@ -30,6 +36,7 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
 
   int pipeline_id = 0;
   for (auto& pipeline : m_tpg_pipelines) {
+    // already configured the pipeline, thus the processors as well.
     if (m_tpg_metric_collect_enabled) pipeline.attach_to_metric_collector(*get_processor_metric_collector_ptr(), pipeline_id);
     pipeline_id++;
     if (pipeline_id == m_num_pipelines) break; // I belive this is a current separate bug with repopulating the m_tpg_pipelines. Doing the safer treatment to take first m_num_pipelines pipelines.
