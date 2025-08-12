@@ -89,6 +89,7 @@ void AVXFrugalPedestalSubtractProcessor::save_metric_to_store_buffer() {
 
 ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metric_store_buffer() {
   // Wait until no write is in progress.
+  if (!m_collect_metric_flag) return {};
   uint16_t start_seq;
   do {
     start_seq = seq.load(std::memory_order_acquire);
@@ -106,6 +107,7 @@ ProcessorMetricArray<__m256i> AVXFrugalPedestalSubtractProcessor::read_from_metr
 }
 
 std::vector<std::string> AVXFrugalPedestalSubtractProcessor::get_metric_items() {
+  if (!m_collect_metric_flag) return {};
   return {"m_pedestal", "m_accum"};
 }
 
