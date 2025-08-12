@@ -109,8 +109,4 @@ std::vector<std::string> AVXFrugalPedestalSubtractProcessor::get_metric_items() 
   return {"m_pedestal", "m_accum"};
 }
 
-std::string AVXFrugalPedestalSubtractProcessor::get_name() {
-  return "AVXFrugalPedestalSubtractProcessor";
-}
-
 } // namespace tpglibs
