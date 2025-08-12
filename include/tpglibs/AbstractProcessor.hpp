@@ -51,11 +51,6 @@ class AbstractProcessor {
     /** @brief Save metrics to store buffer; default does nothing. */
     virtual void save_metric_to_store_buffer() {}
 
-    /** @brief Returns the string name of this processor, for metric collector usage */
-    virtual std::string get_name() {
-      return "AbstractProcessor";
-    }
-
     /** @brief Returns the string name of metrics recorded (stored and can be read) for this processor. */
     virtual std::vector<std::string> get_metric_items() {
       return {};
@@ -68,7 +63,7 @@ class AbstractProcessor {
 
     /** @brief Register this processor and next processor with the metric collector. */
     virtual void attach_to_metric_collector(ProcessorMetricCollector<signal_type_t>& collector, size_t pipeline_id) {
-      collector.attach_processor(*this, get_name(), pipeline_id);
+      collector.attach_processor(*this, pipeline_id);
       if (m_next_processor == nullptr) return;
       m_next_processor->attach_to_metric_collector(collector, pipeline_id);
     }

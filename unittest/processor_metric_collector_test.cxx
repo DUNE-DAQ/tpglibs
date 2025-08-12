@@ -64,7 +64,7 @@ namespace tpglibs {
 
     pc->configure(pc_config, plane_numbers);
 
-    collector.attach_processor(*pc.get(), proc_name, 0);
+    collector.attach_processor(*pc.get(), 0);
 
     auto processors = collector._get_attached_processors();
 

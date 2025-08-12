@@ -38,8 +38,7 @@ public:
 
   using signal_t = T;
 
-  void attach_processor(AbstractProcessor<signal_t>& processor, const std::string& processor_type_name,
-                        size_t pipeline_id) {
+  void attach_processor(AbstractProcessor<signal_t>& processor, size_t pipeline_id) {
     // Attach a processor to be observed (collected) by this
     m_attached_processors[m_attach_counter] = &processor;
 
