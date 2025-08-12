@@ -32,7 +32,7 @@ AVXFrugalPedestalSubtractProcessor::~AVXFrugalPedestalSubtractProcessor() noexce
 
 void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
   m_accum_limit = config["accum_limit"];
-  if (config.contains("metric_collect_data_sample_rate")) m_sample_period = config["metric_collect_data_sample_rate"];
+  if (config.contains("metric_collect_time_sample_period")) m_sample_period = config["metric_collect_time_sample_period"];
   if (config.contains("metric_collect_toggle_state")) m_collect_metric_flag = config["metric_collect_toggle_state"];
 }
 
