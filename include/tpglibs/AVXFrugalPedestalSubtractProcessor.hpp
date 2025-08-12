@@ -33,8 +33,8 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     /** @brief Count limit before committing to a pedestal shift. */
     int16_t m_accum_limit{10};
 
-    /** @ Adjustable rate of storing metric to buffer, in terms of number of time process happens (time sample rate) */
-    uint64_t m_rate{512};
+    /** @brief Adjustable period for storing metric to buffer, in terms of number of time process happens (sampling period) */
+    uint64_t m_sample_period{512};
     uint64_t m_samples{0};
     bool m_collect_metric_flag{false};
 
