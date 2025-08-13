@@ -112,6 +112,7 @@ template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::run() {
   // TODO: main loop for metric collection thread
   // Check if thread is already running
+  m_stop_flag.store(false, std::memory_order_release);
   if (m_collector_thread.joinable()) {
     return; // Thread already running
   }
