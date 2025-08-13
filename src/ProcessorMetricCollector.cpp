@@ -104,6 +104,7 @@ template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::signal_collect() {
   // TODO: signal that a collection cycle should occur
   m_signal_collect.store(true, std::memory_order_relaxed);
+  m_signal_collect.notify_one();
   // this->collect_metrics_from_attached_processors();
   // this->cast_metrics_from_raw_type();
 }
@@ -119,21 +120,27 @@ void ProcessorMetricCollector<signal_t>::run() {
   
   m_collector_thread = std::thread([this]() {
     while (!this->m_stop_flag.load(std::memory_order_acquire)) {
-      if (this->m_signal_collect.load(std::memory_order_relaxed)) {
-        // If this is signaled to collect metrics
-        this->collect_metrics_from_attached_processors();
+      // wait on collect signal
+      m_signal_collect.wait(false, std::memory_order_relaxed);
 
-        this->m_signal_collect.store(false, std::memory_order_relaxed);
-        // After collection, we reset the collect flag to false.
-        // Note that when signal_collect() is called at a far higher rate then possible, ultimately collection
-        // happens at the highest possible rate, not necessarily the set rate
+      // when woken up, check if stop flag is set
 
-        // perform any post processings on the collected metrics as needed
-        this->cast_metrics_from_raw_type();
-        this->convert_into_channel_metric_value();
+      if (this->m_stop_flag.load(std::memory_order_acquire)) {
+        break;
       }
-      // Yield to avoid busy spin without limiting throughput
-      std::this_thread::yield();
+
+      // If this is signaled to collect metrics
+      this->collect_metrics_from_attached_processors();
+
+      this->m_signal_collect.store(false, std::memory_order_relaxed);
+      // After collection, we reset the collect flag to false.
+      // Note that when signal_collect() is called at a far higher rate then possible, ultimately collection
+      // happens at the highest possible rate, not necessarily the set rate
+
+      // perform any post processings on the collected metrics as needed
+      this->cast_metrics_from_raw_type();
+      this->convert_into_channel_metric_value();
+      
     }
   });
 }
@@ -148,7 +155,14 @@ ProcessorMetricCollector<signal_t>::_get_retrieved_processor_metrics() const {
 template<typename signal_t>
 void ProcessorMetricCollector<signal_t>::stop() {
   // TODO: stop the collection thread
-  m_stop_flag.store(true, std::memory_order_relaxed);
+  m_stop_flag.store(true, std::memory_order_release);
+  m_signal_collect.store(true, std::memory_order_release);
+  // make sure stop flag is set
+  while (!this->m_stop_flag.load(std::memory_order_acquire)) {
+    std::this_thread::yield();
+  }
+  // notify the thread to wake up
+  m_signal_collect.notify_one();
   if (m_collector_thread.joinable()) {
     m_collector_thread.join();
   }
