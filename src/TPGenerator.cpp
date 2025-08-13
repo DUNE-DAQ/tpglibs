@@ -34,12 +34,13 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
     m_tpg_pipelines.push_back(new_pipe);
   }
 
+  int total_pipelines = m_tpg_pipelines.size();
+  int start_index = (total_pipelines >= m_num_pipelines) ? (total_pipelines - m_num_pipelines) : 0;
   int pipeline_id = 0;
-  for (auto& pipeline : m_tpg_pipelines) {
-    // already configured the pipeline, thus the processors as well.
+  for (int i = start_index; i < total_pipelines && pipeline_id < m_num_pipelines; ++i, ++pipeline_id) {
+    auto& pipeline = m_tpg_pipelines[i];
     if (m_tpg_metric_collect_enabled) pipeline.attach_to_metric_collector(*get_processor_metric_collector_ptr(), pipeline_id);
-    pipeline_id++;
-    if (pipeline_id == m_num_pipelines) break; // I belive this is a current separate bug with repopulating the m_tpg_pipelines. Doing the safer treatment to take first m_num_pipelines pipelines.
+    // I belive this is a current separate bug with repopulating the m_tpg_pipelines. Doing the safer treatment to take last pushed m_num_pipelines pipelines.
   }
 
   if (m_tpg_metric_collect_enabled) get_processor_metric_collector_ptr()->run();
