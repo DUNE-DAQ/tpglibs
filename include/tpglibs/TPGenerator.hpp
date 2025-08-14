@@ -9,11 +9,15 @@
 #ifndef TPGLIBS_TPGENERATOR_HPP_
 #define TPGLIBS_TPGENERATOR_HPP_
 
+#include <memory>
+#include "tpglibs/ProcessorMetricCollector.hpp"
 #include "tpglibs/AVXPipeline.hpp"
 
 #include "trgdataformats/Types.hpp"
 
 #include <utility>
+#include <unordered_map>
+
 
 namespace tpglibs {
 
@@ -30,6 +34,8 @@ class TPGenerator {
   std::vector<AVXPipeline> m_tpg_pipelines;
   int m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
+  std::shared_ptr<ProcessorMetricCollector<__m256i>> m_processor_metric_collector_ptr {nullptr};
+  bool m_tpg_metric_collect_enabled {false};
 
   public:
     /**
@@ -49,6 +55,39 @@ class TPGenerator {
      * @param sot_minima TPs from plane `i` will have at least `sot_minima[i]` value for its samples_over_threshold.
      */
     void set_sot_minima(const std::vector<uint16_t>& sot_minima);
+
+    /**
+     * @brief Lazily initialize and return the processor metric collector.
+     *
+     * If the collector has not yet been created, allocate a new
+     * ProcessorMetricCollector<__m256i> instance and store it in
+     * `m_processor_metric_collector`.
+     *
+     * @return void* Pointer to the processor metric collector instance.
+     */
+    void* get_processor_metric_collector();
+
+    std::shared_ptr<ProcessorMetricCollector<__m256i>>  get_processor_metric_collector_ptr();
+
+    void set_metric_collector_enable_state(bool state) {
+      m_tpg_metric_collect_enabled = state;
+    }
+
+    bool get_metric_collector_enable_state() {
+      return m_tpg_metric_collect_enabled;
+    }
+
+    void signal_metric_collection();
+
+    std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> get_processor_metrics();
+
+    void free_metric_collector() {
+      if (m_processor_metric_collector_ptr != nullptr) {
+        m_processor_metric_collector_ptr->stop();
+        
+        m_processor_metric_collector_ptr.reset();
+      }
+    }
 
     /**
      * @brief Driving function for the TPG.

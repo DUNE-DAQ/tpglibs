@@ -7,6 +7,9 @@
  */
 
 #include "tpglibs/AVXFactory.hpp"
+#include "tpglibs/ProcessorMetricArray.hpp"
+#include <atomic>
+#include <memory>
 
 #ifndef TPGLIBS_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGLIBS_AVXFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
@@ -30,7 +33,24 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
     /** @brief Count limit before committing to a pedestal shift. */
     int16_t m_accum_limit{10};
 
+    /** @brief Adjustable period for storing metric to buffer, in terms of number of time process happens (sampling period) */
+    uint64_t m_sample_period{512};
+    uint64_t m_samples{0};
+    bool m_collect_metric_flag{false};
+
+  private:
+    ProcessorMetricArray<__m256i> m_metric_store_buffers[2]{};
+    // Initialize always to buffer 0 to make it safe, always points to one of buffer 0 and 1
+    std::atomic<ProcessorMetricArray<__m256i>*> m_active_buffer = &m_metric_store_buffers[0];
+
+    std::atomic<uint16_t>seq{0};
+
   public:
+    /** @brief Allocate and initialize dual buffers */
+    AVXFrugalPedestalSubtractProcessor();
+    /** @brief Release buffer memory */
+    ~AVXFrugalPedestalSubtractProcessor() noexcept;
+
     /** @brief Estimate the pedestal using the given signal and subtract.
      *
      *  @param signal A vector of channel signals.
@@ -44,6 +64,18 @@ class AVXFrugalPedestalSubtractProcessor : public AVXProcessor {
      *  @param plane_numbers Array of plane numbers. Gives the channels to apply the accumulation limit.
      */
     void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+
+    /** @brief Save metrics to store buffer. */
+    void save_metric_to_store_buffer() override;
+
+    /** @brief returns the metrics being recorded and can be read by this processor
+     * 
+     * @return a vector of two strings: m_accum and m_pedestal
+     */
+    virtual std::vector<std::string> get_metric_items() override;
+
+    /** @brief Read metrics from store buffer. */
+    ProcessorMetricArray<__m256i> read_from_metric_store_buffer() override;
 };
 
 } // namespace tpglibs
