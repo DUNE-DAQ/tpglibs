@@ -31,17 +31,33 @@
       using signal_t = T;
 
       /** @brief Constructor. */
-      ProcessorInternalStateBufferManager(size_t num_buffers, size_t buffer_size);
+      ProcessorInternalStateBufferManager();
 
       /** @brief Destructor. */
       ~ProcessorInternalStateBufferManager();
 
-    protected:
+      /** @brief Write to the active buffer.
+       *
+       *  @param data The data to write.
+      */
+      void write_to_active_buffer();
+
+      /** @brief Read from the inactive buffer.
+       *
+       *  @return The data read from the inactive buffer.
+      */
+      ProcessorMetricArray<signal_t> switch_buffer_and_read();
+
       /** @brief Configure and allocate correct buffer storage given the configuration string.
        *
        *  @param registry The registry object of internal state names.
       */
-      void configure_from_registry(ProcessorInternalStateNameRegistry<signal_t>& registry);
+      void configure_from_registry(std::shared_ptr<ProcessorInternalStateNameRegistry<signal_t>> registry);
+
+      /** @brief clear all buffers and deallocate memory. */
+      void clear();
+
+    protected:
 
       /** @brief Allocate the correct size for the double buffer read and write buffers.
        *
@@ -52,22 +68,9 @@
       /** @brief Switch the active buffer. */
       void switch_active_buffer();
 
-      /** @brief Write to the active buffer.
-       *
-       *  @param data The data to write.
-      */
-      void write_to_active_buffer(std::vector<std::shared_ptr<signal_t>> data);
-
-      /** @brief Read from the inactive buffer.
-       *
-       *  @return The data read from the inactive buffer.
-      */
-      ProcessorMetricArray<signal_t> read_from_inactive_buffer();
-
-      /** @brief clear all buffers and deallocate memory. */
-      void clear();
-
     private:
+      /** @brief The vector of pointers to the internal state items. */
+      std::vector<std::shared_ptr<signal_t>> m_internal_state_item_ptrs;
 
       /** @brief The double buffers for storing the internal state data. */
       ProcessorMetricArray<signal_t> m_store_buffers[2]{};
