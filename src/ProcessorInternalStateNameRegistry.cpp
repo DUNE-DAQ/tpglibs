@@ -104,6 +104,16 @@ void ProcessorInternalStateNameRegistry<T>::clear() {
     m_requested_internal_state_names.clear();
 }
 
+template <typename T>
+std::vector<std::shared_ptr<typename ProcessorInternalStateNameRegistry<T>::signal_t>> 
+ProcessorInternalStateNameRegistry<T>::get_all_requested_internal_state_item_ptrs() {
+    std::vector<std::shared_ptr<typename ProcessorInternalStateNameRegistry<T>::signal_t>> item_ptrs;
+    for (const auto& item : m_requested_internal_state_names) {
+        item_ptrs.push_back(m_internal_state_map[item]);
+    }
+    return item_ptrs;
+}
+
 // Explicit template instantiations for common types
 template class ProcessorInternalStateNameRegistry<__m256i>;
 template class ProcessorInternalStateNameRegistry<std::array<int16_t, 16>>;

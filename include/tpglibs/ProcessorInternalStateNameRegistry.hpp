@@ -51,8 +51,6 @@
       */
       void parse_requested_internal_state_items(std::string config_string);
 
-    protected:
-
       /** @brief Register an internal state.
        *
        *  @param name The name of the internal state.
@@ -66,6 +64,14 @@
        *  @return A pointer to the internal state item.
       */
       std::shared_ptr<signal_t> get_internal_state_item_ptr(std::string name);
+
+      /** @brief Get a vector of pointers to all internal state items.
+       *
+       *  @return A vector of pointers to all internal state items.
+      */
+      std::vector<std::shared_ptr<signal_t>> get_all_requested_internal_state_item_ptrs();
+
+    protected:
 
       /** @brief Get all registered internal state names.
        *
