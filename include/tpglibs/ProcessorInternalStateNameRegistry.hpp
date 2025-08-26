@@ -45,6 +45,12 @@
       */
       std::vector<std::string> get_names_of_requested_internal_states();
 
+      /** @brief Parse the requested internal state items from a configuration string.
+       *
+       *  @param config_string The configuration string.
+      */
+      void parse_requested_internal_state_items(std::string config_string);
+
     protected:
 
       /** @brief Register an internal state.
@@ -67,12 +73,6 @@
       */
       std::vector<std::string> get_all_registered_internal_state_names();
 
-      /** @brief Parse the requested internal state items from a configuration string.
-       *
-       *  @param config_string The configuration string.
-      */
-      void parse_requested_internal_state_items(std::string config_string);
-
       /** @brief Clear the registry. */
       void clear();
 
@@ -80,11 +80,8 @@
       /** @brief Map of internal state names to pointers. */
       std::unordered_map<std::string, std::shared_ptr<signal_t>> m_internal_state_map;
 
-      /** @brief Vector of registered internal state names. */
-      std::vector<std::string> m_internal_state_names;
-
-      /** @brief Vector of all registered internal state names. */
-      std::unordered_map<std::string, std::shared_ptr<signal_t>> m_requested_internal_state_items;
+      /** @brief Vector of all requested internal state names. */
+      std::vector<std::string> m_requested_internal_state_names;
   };
 } // namespace tpglibs
  
