@@ -34,12 +34,24 @@ void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config,
   m_accum_limit = config["accum_limit"];
   if (config.contains("metric_collect_time_sample_period")) m_sample_period = config["metric_collect_time_sample_period"];
   if (config.contains("metric_collect_toggle_state")) m_collect_metric_flag = config["metric_collect_toggle_state"];
+
+  initialize_internal_state_collection();
+
+  m_internal_state_name_registry->register_internal_state("pedestal", std::make_shared<__m256i>(m_pedestal));
+  m_internal_state_name_registry->register_internal_state("accum", std::make_shared<__m256i>(m_accum));
+
+  // @FIXME temporary override before changing configs
+  m_internal_state_name_registry->parse_requested_internal_state_items("pedestal");
+  m_internal_state_buffer_manager->configure_from_registry(m_internal_state_name_registry);
 }
 
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   // save metric
 
   if (m_collect_metric_flag && m_samples++ % m_sample_period == 0) save_metric_to_store_buffer();
+
+  // @FIXME parallel call to the new structure
+  if (m_collect_metric_flag && m_samples++ % m_sample_period == 0) m_internal_state_buffer_manager->write_to_active_buffer();
 
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);

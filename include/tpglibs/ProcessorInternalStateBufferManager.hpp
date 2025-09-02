@@ -48,6 +48,9 @@
       */
       ProcessorMetricArray<signal_t> switch_buffer_and_read();
 
+      /** @brief Read from the inactive buffer and cast to std::array<int16_t, 16>. */
+      ProcessorMetricArray<std::array<int16_t, 16>> switch_buffer_and_read_casted();
+
       /** @brief Configure and allocate correct buffer storage given the configuration string.
        *
        *  @param registry The registry object of internal state names.
