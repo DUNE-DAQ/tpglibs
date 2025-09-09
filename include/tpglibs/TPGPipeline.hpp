@@ -10,6 +10,7 @@
 #define TPGLIBS_TPGPIPELINE_HPP_
 
 #include "tpglibs/AbstractFactory.hpp"
+#include "tpglibs/ProcessorMetricCollector.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
 #include "trgdataformats/Types.hpp"
@@ -96,6 +97,13 @@ class TPGPipeline {
       for (auto sot_minimum : sot_minima) {
         m_sot_minima[idx++] = sot_minimum;
       }
+    }
+
+    /** @brief Register all processors in this pipeline with the metric collector. */
+    virtual void attach_to_metric_collector(ProcessorMetricCollector<signal_t>& collector, size_t pipeline_id) {
+      if (m_processor_head == nullptr) return;
+
+      m_processor_head->attach_to_metric_collector(collector, pipeline_id);
     }
 
   protected:

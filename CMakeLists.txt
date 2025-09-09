@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(tpglibs VERSION 1.0.2)
+project(tpglibs VERSION 1.0.3)
 
 find_package(daq-cmake REQUIRED)
 
@@ -31,5 +31,6 @@ daq_add_unit_test(avx_factory_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(avx_generator_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(avx_pipeline_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(avx_processors_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(processor_metric_collector_test LINK_LIBRARIES tpglibs)
 
 daq_install()
