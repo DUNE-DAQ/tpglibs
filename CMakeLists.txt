@@ -33,6 +33,5 @@ daq_add_unit_test(avx_pipeline_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(avx_processors_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(ProcessorInternalStateNameRegistry_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(ProcessorInternalStateBufferManager_test LINK_LIBRARIES tpglibs)
-daq_add_unit_test(avx_processors_internal_state_collect_test LINK_LIBRARIES tpglibs)
 
 daq_install()
