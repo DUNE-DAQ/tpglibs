@@ -10,7 +10,6 @@
 #include <immintrin.h>
 #include <array>
 #include <cstdint>
-#include <vector>
 #include <mm_malloc.h>
 
 
@@ -83,51 +82,6 @@ ProcessorMetricArray<typename ProcessorInternalStateBufferManager<T>::signal_t> 
 
     return *current_active;
 }
-
-// Specialization for __m256i -> std::array<int16_t, 16> cast
-template <>
-ProcessorMetricArray<std::array<int16_t, 16>> ProcessorInternalStateBufferManager<__m256i>::switch_buffer_and_read_casted() {
-    // First, get the raw data using switch_buffer_and_read
-    auto raw_data = switch_buffer_and_read();
-    
-    // Use std::vector for automatic memory management
-    static std::vector<std::array<int16_t, 16>> temp_buffer;
-    temp_buffer.resize(raw_data.m_size);
-    
-    // Cast each __m256i to std::array<int16_t, 16>
-    for (size_t i = 0; i < raw_data.m_size; ++i) {
-        // Extract 16 int16_t values from __m256i
-        __m256i source = raw_data.m_data[i];
-        
-        // Use _mm256_storeu_si256 to store the data, then copy to array
-        alignas(32) int16_t temp[16];
-        _mm256_storeu_si256(reinterpret_cast<__m256i*>(temp), source);
-        
-        // Copy to the result array
-        for (int j = 0; j < 16; ++j) {
-            temp_buffer[i][j] = temp[j];
-        }
-    }
-
-    // Create result with pointer to the vector data
-    ProcessorMetricArray<std::array<int16_t, 16>> result;
-    result.m_size = raw_data.m_size;
-    result.m_data = temp_buffer.data();
-
-    return result;
-}
-
-// Specialization for std::array<int16_t, 16> -> std::array<int16_t, 16> cast (trivial)
-template <>
-ProcessorMetricArray<std::array<int16_t, 16>> ProcessorInternalStateBufferManager<std::array<int16_t, 16>>::switch_buffer_and_read_casted() {
-    // First, get the raw data using switch_buffer_and_read
-    auto raw_data = switch_buffer_and_read();
-    
-    // For std::array<int16_t, 16>, the cast is trivial - just return the data as-is
-    return raw_data;
-}
-
-
 
 template <typename T>
 void ProcessorInternalStateBufferManager<T>::clear() {
