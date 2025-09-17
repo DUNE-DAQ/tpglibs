@@ -28,7 +28,7 @@
   registry.parse_requested_internal_state_items("a");
 
   ProcessorInternalStateBufferManager<__m256i> manager;
-  manager.configure_from_registry(std::make_shared<ProcessorInternalStateNameRegistry<__m256i>>(registry));
+  manager.configure_from_registry(&registry);
   manager.write_to_active_buffer();
 
   auto b = manager.switch_buffer_and_read();
