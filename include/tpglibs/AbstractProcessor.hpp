@@ -30,8 +30,8 @@ class AbstractProcessor {
   std::shared_ptr<AbstractProcessor<T>> m_next_processor;
 
   protected:
-    std::shared_ptr<ProcessorInternalStateBufferManager<T>> m_internal_state_buffer_manager;
-    std::shared_ptr<ProcessorInternalStateNameRegistry<T>> m_internal_state_name_registry;
+    ProcessorInternalStateBufferManager<T> m_internal_state_buffer_manager;
+    ProcessorInternalStateNameRegistry<T> m_internal_state_name_registry;
 
   public:
     /** @brief Signal type to process on. General __m256i. */
@@ -39,21 +39,16 @@ class AbstractProcessor {
 
     virtual ~AbstractProcessor() = default;
 
-    std::shared_ptr<ProcessorInternalStateBufferManager<T>> _get_internal_state_buffer_manager() {
-      return m_internal_state_buffer_manager;
+    ProcessorInternalStateBufferManager<T>* _get_internal_state_buffer_manager() {
+      return &m_internal_state_buffer_manager;
     }
 
-    std::shared_ptr<ProcessorInternalStateNameRegistry<T>> _get_internal_state_name_registry() {
-      return m_internal_state_name_registry;
+    ProcessorInternalStateNameRegistry<T>* _get_internal_state_name_registry() {
+      return &m_internal_state_name_registry;
     }
 
     /** @brief Pure virtual function that will configure the processor using plane numbers. */
     virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
-
-    virtual void initialize_internal_state_collection() {
-      m_internal_state_buffer_manager = std::make_shared<ProcessorInternalStateBufferManager<T>>();
-      m_internal_state_name_registry = std::make_shared<ProcessorInternalStateNameRegistry<T>>();
-    }
 
     /** @brief Setter for next processor. */
     void set_next_processor(std::shared_ptr<AbstractProcessor<T>> next_processor) {
@@ -82,7 +77,7 @@ class AbstractProcessor {
     }
 
     virtual ProcessorMetricArray<std::array<int16_t, 16>> read_internal_states_as_integer_array() {
-      return m_internal_state_buffer_manager->switch_buffer_and_read_casted();
+      return m_internal_state_buffer_manager.switch_buffer_and_read_casted();
     }
 
     /** @brief Register this processor and next processor with the metric collector. */
