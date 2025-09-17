@@ -126,7 +126,7 @@ class TPGenerator {
           std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
 
           for (auto tp : tps) {
-            tp.time_start = (t - tp.samples_over_threshold) * m_sample_tick_difference + timestamp;
+            tp.time_start = static_cast<uint64_t>((t - tp.samples_over_threshold) * m_sample_tick_difference) + timestamp;
             tp_aggr.push_back(tp);
           }
           cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
