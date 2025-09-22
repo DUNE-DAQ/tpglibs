@@ -55,6 +55,11 @@ class AbstractProcessor {
       m_next_processor = next_processor;
     }
 
+    /** @brief Getter for next processor. */
+    std::shared_ptr<AbstractProcessor<T>> get_next_processor() {
+      return m_next_processor;
+    }
+
     /** @brief Simple signal pass-through. */
     virtual T process(const T& signal) {
       if (m_next_processor) {
