@@ -34,6 +34,14 @@
 
       /** @brief Destructor. */
       ~ProcessorInternalStateNameRegistry();
+      
+      // Delete copy constructor and copy assignment (registry shouldn't be copied)
+      ProcessorInternalStateNameRegistry(const ProcessorInternalStateNameRegistry&) = delete;
+      ProcessorInternalStateNameRegistry& operator=(const ProcessorInternalStateNameRegistry&) = delete;
+      
+      // Allow move semantics for efficiency
+      ProcessorInternalStateNameRegistry(ProcessorInternalStateNameRegistry&&) = default;
+      ProcessorInternalStateNameRegistry& operator=(ProcessorInternalStateNameRegistry&&) = default;
 
       /** @brief Get the number of requested internal states.
        *
@@ -72,6 +80,20 @@
        *  @return A vector of pointers to all internal state items.
       */
       std::vector<std::shared_ptr<signal_t>> get_all_requested_internal_state_item_ptrs();
+      
+      /** @brief Check if an internal state name is registered.
+       *
+       *  @param name The name to check.
+       *  @return True if the name is registered, false otherwise.
+      */
+      bool is_registered(const std::string& name) const;
+      
+      /** @brief Check if an internal state name is requested.
+       *
+       *  @param name The name to check.
+       *  @return True if the name is in the requested list, false otherwise.
+      */
+      bool is_requested(const std::string& name) const;
 
     protected:
 
@@ -83,6 +105,16 @@
 
       /** @brief Clear the registry. */
       void clear();
+      
+    public:
+      // Test interfaces - only for unit testing
+      #ifdef TPGLIBS_ENABLE_TEST_INTERFACES
+      void test_clear() { clear(); }
+      std::vector<std::string> test_get_all_registered_internal_state_names() { 
+        return get_all_registered_internal_state_names(); 
+      }
+      size_t test_get_map_size() const { return m_internal_state_map.size(); }
+      #endif
 
     private:
       /** @brief Map of internal state names to pointers. */
@@ -193,6 +225,21 @@
             item_ptrs.push_back(m_internal_state_map[item]);
         }
         return item_ptrs;
+    }
+    
+    template <typename T>
+    bool ProcessorInternalStateNameRegistry<T>::is_registered(const std::string& name) const {
+        return m_internal_state_map.find(name) != m_internal_state_map.end();
+    }
+    
+    template <typename T>
+    bool ProcessorInternalStateNameRegistry<T>::is_requested(const std::string& name) const {
+        for (const auto& requested_name : m_requested_internal_state_names) {
+            if (requested_name == name) {
+                return true;
+            }
+        }
+        return false;
     }
 
 } // namespace tpglibs

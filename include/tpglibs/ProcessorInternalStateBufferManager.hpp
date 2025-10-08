@@ -96,11 +96,17 @@ namespace tpglibs {
         /** @brief The active buffer for the casted data. */
         std::atomic<ProcessorMetricArray<std::array<int16_t,16>>*> m_cast_active_buffer{ &m_cast_store_buffers[0] };
         
-        /** @brief The active buffer. */
-        std::atomic<ProcessorMetricArray<signal_t>*> m_active_buffer = &m_store_buffers[0];
+        /** @brief The write buffer pointer (buffer writer currently uses). */
+        std::atomic<ProcessorMetricArray<signal_t>*> m_write_buffer = &m_store_buffers[0];
         
-        /** @brief The sequence number. */
-        std::atomic<uint16_t> m_seq{0};
+        /** @brief The read buffer pointer (buffer reader currently uses). */
+        std::atomic<ProcessorMetricArray<signal_t>*> m_read_buffer = &m_store_buffers[0];
+        
+        /** @brief The sequence number for writes (odd=writing, even=complete). */
+        std::atomic<uint16_t> m_write_seq{0};
+        
+        /** @brief The last sequence number that was read. */
+        std::atomic<uint16_t> m_last_read_seq{0};
         
         /** @brief size of each buffer. */
         size_t m_buffer_size;
@@ -122,9 +128,13 @@ namespace tpglibs {
         auto num_items = registry->get_number_of_requested_internal_states();
         allocate_buffers(num_items);
         allocate_cast_buffers(num_items);
-        // reset active buffer ptr to first buffer
-        m_active_buffer.store(&m_store_buffers[0], std::memory_order_release);
+        // Writer starts with buffer 0, reader starts with buffer 1 (they must be different!)
+        m_write_buffer.store(&m_store_buffers[0], std::memory_order_release);
+        m_read_buffer.store(&m_store_buffers[1], std::memory_order_release);
         m_cast_active_buffer.store(&m_cast_store_buffers[0], std::memory_order_release);
+        // reset sequence counters
+        m_write_seq.store(0, std::memory_order_release);
+        m_last_read_seq.store(0, std::memory_order_release);
         // obtain the pointers to the internal state items
         m_internal_state_item_ptrs = registry->get_all_requested_internal_state_item_ptrs();
     }
@@ -141,40 +151,59 @@ namespace tpglibs {
     
     template <typename T>
     void ProcessorInternalStateBufferManager<T>::switch_active_buffer() {
-        auto current_active = m_active_buffer.load(std::memory_order_acquire);
-        auto new_active = (current_active == &m_store_buffers[0])
-        ? &m_store_buffers[1]
-        : &m_store_buffers[0];
-        m_active_buffer.store(new_active, std::memory_order_release);
+        // This function is no longer used - buffer switching happens in switch_buffer_and_read
+        // by swapping read and write buffer pointers
     }
     
     template <typename T>
     void ProcessorInternalStateBufferManager<T>::write_to_active_buffer() {
-        m_seq.fetch_add(1, std::memory_order_release);
-        auto free_ptr = m_active_buffer.load(std::memory_order_acquire);
-        // write to free buffer
+        // Increment seq to indicate write start (becomes odd)
+        m_write_seq.fetch_add(1, std::memory_order_release);
         
+        auto write_ptr = m_write_buffer.load(std::memory_order_acquire);
+        
+        // Write to write buffer
         for (size_t i = 0; i < m_internal_state_item_ptrs.size(); i++) {
-            free_ptr->m_data[i] = *m_internal_state_item_ptrs[i];
+            // Check for nullptr before dereferencing (handles invalid state names)
+            if (m_internal_state_item_ptrs[i] != nullptr) {
+                write_ptr->m_data[i] = *m_internal_state_item_ptrs[i];
+            } else {
+                // If pointer is null, write a zeroed value
+                write_ptr->m_data[i] = T{};
+            }
         }
         
-        //set seq to indicate write end
-        m_seq.fetch_add(1, std::memory_order_release);
+        // Increment seq to indicate write complete (becomes even)
+        m_write_seq.fetch_add(1, std::memory_order_release);
     }
     
     template <typename T>
     ProcessorMetricArray<typename ProcessorInternalStateBufferManager<T>::signal_t> ProcessorInternalStateBufferManager<T>::switch_buffer_and_read() {
-        // Basic stub - return default constructed object
-        uint16_t start_seq;
-        
+        // Wait until no write is in progress
+        uint16_t current_write_seq;
         do {
-            start_seq = m_seq.load(std::memory_order_acquire);
-        } while (start_seq & 1); // spin if writer is mid-write
+            current_write_seq = m_write_seq.load(std::memory_order_acquire);
+        } while (current_write_seq & 1); // spin if writer is mid-write (odd seq number)
         
-        auto current_active = m_active_buffer.load(std::memory_order_acquire);
-        switch_active_buffer();
+        // Check if there's new data since last read
+        uint16_t last_read = m_last_read_seq.load(std::memory_order_acquire);
         
-        return *current_active;
+        if (current_write_seq != last_read && current_write_seq > 0) {
+            // New data available - swap the buffers between reader and writer
+            auto current_read = m_read_buffer.load(std::memory_order_acquire);
+            auto current_write = m_write_buffer.load(std::memory_order_acquire);
+            
+            // Swap: reader gets what writer just finished, writer gets what reader was using
+            m_read_buffer.store(current_write, std::memory_order_release);
+            m_write_buffer.store(current_read, std::memory_order_release);
+            
+            // Update last read sequence
+            m_last_read_seq.store(current_write_seq, std::memory_order_release);
+        }
+        
+        // Return data from read buffer
+        auto read_ptr = m_read_buffer.load(std::memory_order_acquire);
+        return *read_ptr;
     }
     
     template<>

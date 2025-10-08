@@ -58,6 +58,20 @@ void TPGenerator::signal_metric_collection() {
   get_processor_metric_collector_ptr()->signal_collect();
 }
 
+std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> TPGenerator::get_all_processor_references_with_pipeline_index() {
+  std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> processor_references;
+  int total_pipelines = m_tpg_pipelines.size();
+  int start_index = (total_pipelines >= m_num_pipelines) ? (total_pipelines - m_num_pipelines) : 0;
+  int pipeline_id = 0;
+  for (int i = start_index; i < total_pipelines && pipeline_id < m_num_pipelines; ++i, ++pipeline_id) {
+    // @FIXME Restore to simple treatment, when repeated add of pipelines is fixed.
+    for (auto& processor : m_tpg_pipelines[i].get_all_processor_references()) {
+      processor_references.push_back(std::make_pair(processor, pipeline_id));
+    }
+  }
+  return processor_references;
+}
+
 std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> TPGenerator::get_processor_metrics() {
   get_processor_metric_collector_ptr()->lock_metric_modify();
 
