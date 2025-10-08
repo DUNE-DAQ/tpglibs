@@ -9,12 +9,13 @@
 #ifndef TPGLIBS_TPGENERATOR_HPP_
 #define TPGLIBS_TPGENERATOR_HPP_
 
-#include <memory>
 #include "tpglibs/ProcessorMetricCollector.hpp"
 #include "tpglibs/AVXPipeline.hpp"
+#include "tpglibs/AbstractProcessor.hpp"
 
 #include "trgdataformats/Types.hpp"
 
+#include <memory>
 #include <utility>
 #include <unordered_map>
 
@@ -76,6 +77,14 @@ class TPGenerator {
     bool get_metric_collector_enable_state() {
       return m_tpg_metric_collect_enabled;
     }
+
+    /**
+     * @brief Return reference to all processors, under all pipelines, where 
+     * the index of the pipeline is tagged along with the reference.
+     *
+     * @return A vector of all processor references.
+     */
+    std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> get_all_processor_references_with_pipeline_index();
 
     void signal_metric_collection();
 
