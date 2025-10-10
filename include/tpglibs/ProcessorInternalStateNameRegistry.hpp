@@ -53,7 +53,7 @@
        *
        *  @return The names of the requested internal states.
       */
-      std::vector<std::string> get_names_of_requested_internal_states();
+      std::vector<std::string> get_names_of_requested_internal_states() const;
 
       /** @brief Parse the requested internal state items from a configuration string.
        *
@@ -141,7 +141,7 @@
     }
 
     template <typename T>
-    std::vector<std::string> ProcessorInternalStateNameRegistry<T>::get_names_of_requested_internal_states() {
+    std::vector<std::string> ProcessorInternalStateNameRegistry<T>::get_names_of_requested_internal_states() const {
         return m_requested_internal_state_names;
     }
 
