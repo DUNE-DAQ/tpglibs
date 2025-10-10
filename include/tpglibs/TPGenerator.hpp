@@ -9,7 +9,6 @@
 #ifndef TPGLIBS_TPGENERATOR_HPP_
 #define TPGLIBS_TPGENERATOR_HPP_
 
-#include "tpglibs/ProcessorMetricCollector.hpp"
 #include "tpglibs/AVXPipeline.hpp"
 #include "tpglibs/AbstractProcessor.hpp"
 
@@ -35,8 +34,6 @@ class TPGenerator {
   std::vector<AVXPipeline> m_tpg_pipelines;
   float m_sample_tick_difference;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
-  std::shared_ptr<ProcessorMetricCollector<__m256i>> m_processor_metric_collector_ptr {nullptr};
-  bool m_tpg_metric_collect_enabled {false};
 
   public:
     /**
@@ -58,45 +55,12 @@ class TPGenerator {
     void set_sot_minima(const std::vector<uint16_t>& sot_minima);
 
     /**
-     * @brief Lazily initialize and return the processor metric collector.
-     *
-     * If the collector has not yet been created, allocate a new
-     * ProcessorMetricCollector<__m256i> instance and store it in
-     * `m_processor_metric_collector`.
-     *
-     * @return void* Pointer to the processor metric collector instance.
-     */
-    void* get_processor_metric_collector();
-
-    std::shared_ptr<ProcessorMetricCollector<__m256i>>  get_processor_metric_collector_ptr();
-
-    void set_metric_collector_enable_state(bool state) {
-      m_tpg_metric_collect_enabled = state;
-    }
-
-    bool get_metric_collector_enable_state() {
-      return m_tpg_metric_collect_enabled;
-    }
-
-    /**
      * @brief Return reference to all processors, under all pipelines, where 
      * the index of the pipeline is tagged along with the reference.
      *
      * @return A vector of all processor references.
      */
     std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> get_all_processor_references_with_pipeline_index();
-
-    void signal_metric_collection();
-
-    std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> get_processor_metrics();
-
-    void free_metric_collector() {
-      if (m_processor_metric_collector_ptr != nullptr) {
-        m_processor_metric_collector_ptr->stop();
-        
-        m_processor_metric_collector_ptr.reset();
-      }
-    }
 
     /**
      * @brief Driving function for the TPG.
