@@ -64,12 +64,19 @@ class AbstractProcessor {
       m_collect_internal_state_flag = config.value("metric_collect_toggle_state", false);
       m_sample_period = config.value("metric_collect_time_sample_period", 1);
       
-      if (config.contains("requested_internal_states")) {
-        m_internal_state_name_registry.parse_requested_internal_state_items(config["requested_internal_states"]);
-      } else {
-        m_internal_state_name_registry.parse_requested_internal_state_items("");
+      if (m_collect_internal_state_flag) {
+        if (config.contains("requested_internal_states")) {
+          m_internal_state_name_registry.parse_requested_internal_state_items(config["requested_internal_states"]);
+        } else {
+          m_internal_state_name_registry.parse_requested_internal_state_items("");
+        }
+        
+        // Only configure if we actually have states to collect
+        auto num_items = m_internal_state_name_registry.get_number_of_requested_internal_states();
+        if (num_items > 0) {
+          m_internal_state_buffer_manager.configure_from_registry(&m_internal_state_name_registry);
+        }
       }
-      m_internal_state_buffer_manager.configure_from_registry(&m_internal_state_name_registry);
     }
 
     /** @brief Pure virtual function that will configure the processor using plane numbers. */

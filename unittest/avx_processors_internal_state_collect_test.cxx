@@ -134,6 +134,7 @@ BOOST_AUTO_TEST_CASE(test_processor_respects_config) {
 
   nlohmann::json config = {
     {"accum_limit", 10},
+    {"metric_collect_toggle_state", true},
     {"requested_internal_states", "accum"}  // Only request accum
   };
 
