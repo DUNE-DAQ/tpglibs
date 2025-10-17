@@ -9,11 +9,15 @@
 #define BOOST_TEST_MODULE boost_test_macro_overview
 
 #include "tpglibs/TPGenerator.hpp"
+#include "tpglibs/GenericConfigValue.hpp"
+#include "tpglibs/ConfigValue.hpp"
+#include "tpglibs/Types.hpp"
 
 #include "fddetdataformats/WIBEthFrame.hpp"
 #include "fddetdataformats/TDEEthFrame.hpp"
 #include "trgdataformats/Types.hpp"
 
+#include <array>
 #include <boost/test/unit_test.hpp>
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -40,16 +44,14 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
            {32, 2}, {33, 2}, {34, 2}, {35, 2}, {36, 2}, {37, 2}, {38, 2}, {39, 2}, {40, 2}, {41, 2}, {42, 2}, {43, 2}, {44, 2}, {45, 2}, {46, 2}, {47, 2},
            {48, 0}, {49, 0}, {50, 0}, {51, 0}, {52, 0}, {53, 1}, {54, 1}, {55, 1}, {56, 1}, {57, 1}, {58, 2}, {59, 2}, {60, 2}, {61, 2}, {62, 2}, {63, 2}};
 
+  std::array<uint16_t, 3> plane_thresholds = {200, 300, 445};
+
+  types::tpg_config_map_t threshold_config;
+  threshold_config["plane_thresholds"] = std::make_shared<ConfigValue<std::array<uint16_t, 3>>(plane_thresholds);
+
   // Just using the thresholding for simplicity.
-  std::vector<std::pair<std::string, nlohmann::json>> configs = {
-    {
-      "AVXThresholdProcessor",
-      {
-        {"plane0", 200},
-        {"plane1", 300},
-        {"plane2", 445}
-      }
-    }
+  std::vector<std::pair<std::string, tpg_config_map_t>> configs = {
+    {"AVXThresholdProcessor", threshold_config}
   };
 
   TPGenerator tpg;

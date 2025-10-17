@@ -8,6 +8,7 @@
 
 #include "tpglibs/NaiveFactory.hpp"
 #include "tpglibs/NaiveUtils.hpp"
+#include "tpglibs/Types.hpp"
 
 #include <algorithm>
 
@@ -46,10 +47,10 @@ class NaiveRunSumProcessor : public NaiveProcessor {
 
     /** @brief Configures the `R` factor and `S` factor according to plane.
      *
-     *  @param config JSON of the `R` and `S` factors to use per plane.
+     *  @param config Map of the `R` and `S` factors to use per channel.
      *  @param plane_numbers Array of plane numbers. Gives the channels to apply the `R` and `S` factors.
      */
-    void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+    void configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) override;
 };
 
 } // namespace tpglibs

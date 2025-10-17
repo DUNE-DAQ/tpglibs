@@ -7,6 +7,7 @@
  */
 
 #include "tpglibs/NaiveFactory.hpp"
+#include "tpglibs/Types.hpp"
 
 #ifndef TPGLIBS_NAIVETHRESHOLDPROCESSOR_HPP_
 #define TPGLIBS_NAIVETHRESHOLDPROCESSOR_HPP_
@@ -28,10 +29,10 @@ class NaiveThresholdProcessor : public NaiveProcessor {
 
     /** @brief Configures thresholds according to plane numbers.
      *
-     *  @param config JSON containing thresholds for the 3 planes.
+     *  @param config Map containing thresholds for the 3 planes.
      *  @param plane_numbers Array of plane numbers. Gives the channels to apply the appropriate thresholds.
      */
-    void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+    void configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) override;
 };
 
 } // namespace tpglibs

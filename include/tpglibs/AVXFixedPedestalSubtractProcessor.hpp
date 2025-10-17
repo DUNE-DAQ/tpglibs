@@ -8,6 +8,7 @@
 
 #include "tpglibs/AVXFactory.hpp"
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
+#include "tpglibs/Types.hpp"
 
 #ifndef TPGLIBS_AVXFIXEDPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGLIBS_AVXFIXEDPEDESTALSUBTRACTPROCESSOR_HPP_
@@ -32,10 +33,10 @@ class AVXFixedPedestalSubtractProcessor : public AVXFrugalPedestalSubtractProces
 
     /** @brief Configure the number of startup samples to use before fixing.
      *
-     *  @param config JSON config for start period per plane.
+     *  @param config Map config for start period per plane.
      *  @param plane_numbers Array of plane numbers. Gives the channels to apply the start period.
      */
-    void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+    void configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) override;
 };
 
 } // namespace tpglibs

@@ -11,11 +11,11 @@
 
 #include "tpglibs/AbstractFactory.hpp"
 #include "tpglibs/AbstractProcessor.hpp"
+#include "tpglibs/Types.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
 #include "trgdataformats/Types.hpp"
 
-#include <nlohmann/json.hpp>
 #include <vector>
 
 namespace tpglibs {
@@ -41,7 +41,7 @@ class TPGPipeline {
      * @param configs Vector of processors and configurations to be used.
      * @param channel_plane_numbers Vector of channel numbers and their plane numbers.
      */
-    virtual void configure(const std::vector<std::pair<std::string, nlohmann::json>> configs, const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers) {
+    virtual void configure(const std::vector<std::pair<std::string, types::tpg_config_map_t>> configs, const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers) {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
       for (int i = 0; i < 16; i++) {

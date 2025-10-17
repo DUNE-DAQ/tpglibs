@@ -12,23 +12,30 @@ namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXRunSumProcessor", AVXRunSumProcessor)
 
-void AVXRunSumProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
-  int16_t memory_factors[16];
-  int16_t config_memory[3] = {config["memory_factor_plane0"],
-                              config["memory_factor_plane1"],
-                              config["memory_factor_plane2"]};
-  int16_t scale_factors[16];
-  int16_t config_scale[3]  = {config["scale_factor_plane0"],
-                              config["scale_factor_plane1"],
-                              config["scale_factor_plane2"]};
-
-  for (int i = 0; i < 16; i++) {
-    memory_factors[i] = config_memory[plane_numbers[i]];
-    scale_factors[i] = config_scale[plane_numbers[i]];
+void AVXRunSumProcessor::configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) {
+  if (config.contains("plane_memory_factors")) {
+    const std::array<uint16_t, 3> plane_memory_factors = config["plane_memory_factors"]->get_config_value();
+  } else {
+    throw MissingProcessorConfig("AVXRunSumProcessor", "plane_memory_factors");
   }
 
-  m_memory_factor = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(memory_factors));
-  m_scale_factor = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(scale_factors));
+  if (config.contains("plane_scale_factors")) {
+    const std::array<uint16_t, 3> plane_scale_factors = config["plane_scale_factors"]->get_config_value();
+  } else {
+    throw MissingProcessorConfig("AVXRunSumProcessor", "plane_scale_factors");
+  }
+
+  std::array<uint16_t, 16> memory_factors;
+  std::array<uint16_t, 16> scale_factors;
+
+  for (int i = 0; i < 16; i++) {
+    memory_factors[i] = plane_memory_factors[plane_numbers[i]];
+    scale_factors[i] = plane_scale_factors[plane_numbers[i]];
+  }
+
+
+  m_memory_factor = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(memory_factors.data()));
+  m_scale_factor = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(scale_factors.data()));
 }
 
 __m256i AVXRunSumProcessor::process(const __m256i& signal) {

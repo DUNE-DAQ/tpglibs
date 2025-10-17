@@ -13,6 +13,9 @@
 #include "tpglibs/AVXAbsRunSumProcessor.hpp"
 #include "tpglibs/AVXThresholdProcessor.hpp"
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
+#include "tpglibs/GenericConfigValue.hpp"
+#include "tpglibs/ConfigValue.hpp"
+#include "tpglibs/Types.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <fmt/core.h>
@@ -20,6 +23,7 @@
 #include <immintrin.h>
 #include <thread>
 #include <atomic>
+#include <memory>
 
 namespace tpglibs {
 
@@ -30,24 +34,21 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   std::shared_ptr<AVXProcessor> rs = std::make_shared<AVXRunSumProcessor>();
 
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  std::array<uint16_t, 3> plane_thresholds = {300, 700, 1300}
 
-  nlohmann::json thr_config = {
-    {"plane0", 300},
-    {"plane1", 700},
-    {"plane2", 1300}
-  };
-  thresholds->configure(thr_config, plane_numbers);
+  std::array<uint16_t, 3> plane_memory_factors;
+  memory_factors.fill(8);
+  std::array<uint16_t, 3> plane_scale_factors;
+  scale_factors.fill(5);
 
-  nlohmann::json rs_config = {
-    {"memory_factor_plane0", 8},
-    {"memory_factor_plane1", 8},
-    {"memory_factor_plane2", 8},
-    {"scale_factor_plane0", 5},
-    {"scale_factor_plane1", 5},
-    {"scale_factor_plane2", 5}
-  };
-  abs_rs->configure(rs_config, plane_numbers);
-  rs->configure(rs_config, plane_numbers);
+  types::tpg_config_map_t configs;
+  configs["plane_thresholds"] = std::make_shared<ConfigValue<std::array<uint16_t, 3>>(plane_thresholds);
+  configs["plane_memory_factors"] = std::make_shared<ConfigValue<std::array<uint16_t, 3>>(plane_memory_factors);
+  configs["plane_scale_factors"] = std::make_shared<ConfigValue<std::array<uint16_t, 3>>(plane_scale_factors);
+
+  thresholds->configure(configs, plane_numbers);
+  abs_rs->configure(configs, plane_numbers);
+  rs->configure(configs, plane_numbers);
 
   // Arbitrary input choices. Set so RS resets to 0.
   __m256i input0 = _mm256_set_epi16(-1600, 1500, -1400, 1300, -1200, 1100, -1000,  900,

@@ -58,27 +58,20 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
                              {240, 2},
                              {250, 2}};
 
-  // Horrendous brackets.
-  std::vector<std::pair<std::string, nlohmann::json>> configs = {
-    {
-      "AVXRunSumProcessor",
-      {
-        {"memory_factor_plane0", 10},
-        {"memory_factor_plane1", 10},
-        {"memory_factor_plane2", 10},
-        {"scale_factor_plane0", 10},
-        {"scale_factor_plane1", 10},
-        {"scale_factor_plane2", 10},
-      }
-    },
-    {
-      "AVXThresholdProcessor",
-      {
-        {"plane0", 200},
-        {"plane1", 1000},
-        {"plane2", 1500}
-      }
-    }
+  std::array<uint16_t, 3> plane_thresholds = {200, 1000, 1500};
+  std::array<uint16_t, 3> plane_memory_factors;
+  memory_factors.fill(10);
+  std::array<uint16_t, 3> plane_scale_factors;
+  scale_factors.fill(10);
+
+  types::tpg_config_map_t configs;
+  configs["plane_thresholds"] = std::make_shared<ConfigValue<std::array<uint16_t, 3>>(plane_thresholds);
+  configs["plane_memory_factors"] = std::make_shared<ConfigValue<std::array<uint16_t, 3>>(plane_memory_factors);
+  configs["plane_scale_factors"] = std::make_shared<ConfigValue<std::array<uint16_t, 3>>(plane_scale_factors);
+
+  std::vector<std::pair<std::string, types::tpg_config_map_t>> configs = {
+    {"AVXRunSumProcessor", configs},
+    {"AVXThresholdProcessor", configs}
   };
 
   std::vector<uint16_t> sot_minima = {1,1,1};

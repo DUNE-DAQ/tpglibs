@@ -12,18 +12,22 @@ namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXFrugalPedestalSubtractProcessor", AVXFrugalPedestalSubtractProcessor)
 
-void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* /* plane_numbers */) {
+void AVXFrugalPedestalSubtractProcessor::configure(const types::tpg_config_map_t& config, const int16_t* /* plane_numbers */) {
   // Configure common metric collection parameters
   // Register pointers to the ACTUAL member variables, not copies
   // Use shared_ptr with no-op deleter to avoid double-free
-  m_internal_state_name_registry.register_internal_state("pedestal", 
+  m_internal_state_name_registry.register_internal_state("pedestal",
     std::shared_ptr<__m256i>(&m_pedestal, [](auto*){}));
-  m_internal_state_name_registry.register_internal_state("accum", 
+  m_internal_state_name_registry.register_internal_state("accum",
     std::shared_ptr<__m256i>(&m_accum, [](auto*){}));
-    
+
   configure_internal_state_collection(config);
-  
-  m_accum_limit = config["accum_limit"];
+
+  if (config.contains("accum_limit")) {
+    m_accum_limit = config.at("accum_limit")->get_config_value();
+  } else {
+    m_accum_limit = 10;
+  }
 }
 
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {

@@ -12,6 +12,8 @@
 #define FMT_HEADER_ONLY
 
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
+#include "tpglibs/ConfigValue.hpp"
+#include "tpglibs/Types.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <immintrin.h>
@@ -47,11 +49,10 @@ BOOST_AUTO_TEST_CASE(test_basic_configuration) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 10},
-    {"metric_collect_toggle_state", true},
-    {"requested_internal_states", "pedestal,accum"}
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["metric_collect_toggle_state"] = std::make_shared<ConfigValue<bool>>(true);
+  config["requested_internal_states"] = std::make_shared<ConfigValue<std::string>>("pedestal,accum");
 
   // Should not crash
   pc->configure(config, plane_numbers);
@@ -64,10 +65,9 @@ BOOST_AUTO_TEST_CASE(test_configuration_without_internal_states) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 10},
-    {"metric_collect_toggle_state", false}
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["metric_collect_toggle_state"] = std::make_shared<ConfigValue<bool>>(false);
 
   pc->configure(config, plane_numbers);
   
@@ -79,11 +79,10 @@ BOOST_AUTO_TEST_CASE(test_configuration_different_accum_limits) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 42},
-    {"metric_collect_toggle_state", true},
-    {"requested_internal_states", "pedestal"}
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["metric_collect_toggle_state"] = std::make_shared<ConfigValue<bool>>(true);
+  config["requested_internal_states"] = std::make_shared<ConfigValue<std::string>>("pedestal");
 
   pc->configure(config, plane_numbers);
   
@@ -95,12 +94,11 @@ BOOST_AUTO_TEST_CASE(test_configuration_with_sample_period) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 10},
-    {"metric_collect_toggle_state", true},
-    {"metric_collect_time_sample_period", 1024},
-    {"requested_internal_states", "pedestal,accum"}
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["metric_collect_toggle_state"] = std::make_shared<ConfigValue<bool>>(true);
+  config["metric_collect_time_sample_period"] = std::make_shared<ConfigValue<int>>(1024);
+  config["requested_internal_states"] = std::make_shared<ConfigValue<std::string>>("pedestal,accum");
 
   pc->configure(config, plane_numbers);
   
@@ -112,11 +110,10 @@ BOOST_AUTO_TEST_CASE(test_processor_reports_requested_states) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 10},
-    {"metric_collect_toggle_state", true},
-    {"requested_internal_states", "pedestal,accum"}
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["metric_collect_toggle_state"] = std::make_shared<ConfigValue<bool>>(true);
+  config["requested_internal_states"] = std::make_shared<ConfigValue<std::string>>("pedestal,accum");
 
   pc->configure(config, plane_numbers);
   
@@ -132,10 +129,9 @@ BOOST_AUTO_TEST_CASE(test_processor_respects_config) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 10},
-    {"requested_internal_states", "accum"}  // Only request accum
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["requested_internal_states"] = std::make_shared<ConfigValue<std::string>>("accum");
 
   pc->configure(config, plane_numbers);
   
@@ -159,11 +155,10 @@ BOOST_AUTO_TEST_CASE(test_pedestal_only_collection) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 10},
-    {"metric_collect_toggle_state", true},
-    {"requested_internal_states", "pedestal"}
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["metric_collect_toggle_state"] = std::make_shared<ConfigValue<bool>>(true);
+  config["requested_internal_states"] = std::make_shared<ConfigValue<std::string>>("pedestal");
 
   pc->configure(config, plane_numbers);
 
@@ -185,11 +180,10 @@ BOOST_AUTO_TEST_CASE(test_accum_only_collection) {
   auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
 
-  nlohmann::json config = {
-    {"accum_limit", 10},
-    {"metric_collect_toggle_state", true},
-    {"requested_internal_states", "accum"}
-  };
+  types::tpg_config_map_t config;
+  config["accum_limit"] = std::make_shared<ConfigValue<uint16_t>>(10);
+  config["metric_collect_toggle_state"] = std::make_shared<ConfigValue<bool>>(true);
+  config["requested_internal_states"] = std::make_shared<ConfigValue<std::string>>("accum");
 
   pc->configure(config, plane_numbers);
 

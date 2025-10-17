@@ -7,6 +7,7 @@
  */
 
 #include "tpglibs/NaiveFactory.hpp"
+#include "tpglibs/Types.hpp"
 
 #ifndef TPGLIBS_NAIVEFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
 #define TPGLIBS_NAIVEFRUGALPEDESTALSUBTRACTPROCESSOR_HPP_
@@ -39,10 +40,10 @@ class NaiveFrugalPedestalSubtractProcessor : public NaiveProcessor {
 
     /** @brief Configure the accumulation limit according to plane number.
      *
-     *  @param config JSON config for the accumulation limits per plane.
+     *  @param config Map config for the accumulation limits per channel.
      *  @param plane_numbers Array of plane numbers. Gives the channels to apply the accumulation limit.
      */
-    void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+    void configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) override;
 };
 
 } // namespace tpglibs

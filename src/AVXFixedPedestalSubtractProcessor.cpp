@@ -12,9 +12,14 @@ namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXFixedPedestalSubtractProcessor", AVXFixedPedestalSubtractProcessor)
 
-void AVXFixedPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
+void AVXFixedPedestalSubtractProcessor::configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) {
   AVXFrugalPedestalSubtractProcessor::configure(config, plane_numbers);
-  m_start_period = config["start_period"];
+
+  if (config.contains("start_period")) {
+    m_start_period = config["start_period"]->get_config_value();
+  } else {
+    throw MissingProcessorConfig("AVXFixedPedestalSubtractProcessor", "start_period");
+  }
 }
 
 __m256i AVXFixedPedestalSubtractProcessor::process(const __m256i& signal) {

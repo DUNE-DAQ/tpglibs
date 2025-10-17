@@ -12,8 +12,12 @@ namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveFrugalPedestalSubtractProcessor", NaiveFrugalPedestalSubtractProcessor)
 
-void NaiveFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
-  m_accum_limit = config["accum_limit"];
+void NaiveFrugalPedestalSubtractProcessor::configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) {
+  if (config.contains("accum_limit")) {
+    m_accum_limit = config.at("accum_limit")->get_config_value();
+  } else {
+    m_accum_limit = 10;
+  }
 }
 
 NaiveFrugalPedestalSubtractProcessor::naive_array_t

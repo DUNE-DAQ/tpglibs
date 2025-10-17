@@ -12,16 +12,19 @@ namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXThresholdProcessor", AVXThresholdProcessor)
 
-void AVXThresholdProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
-  int16_t thresholds[16];
-  int16_t config_thresholds[3] = {config["plane0"], config["plane1"], config["plane2"]};
-
-  // Messy. Assumes plane numbers are in {0, 1, 2}.
-  for (int i = 0; i < 16; i++) {
-    thresholds[i] = config_thresholds[plane_numbers[i]];
+void AVXThresholdProcessor::configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) {
+  if (config.contains("plane_thresholds")) {
+    const std::array<uint16_t, 3> plane_thresholds = config["plane_thresholds"]->get_config_value();
+  } else {
+    throw MissingProcessorConfig("AVXThresholdProcessor", "plane_thresholds");
   }
 
-  m_threshold = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(thresholds));
+  std::array<uint16_t, 16> thresholds;
+  for (int i = 0; i < 16; i++) {
+    thresholds[i] = plane_thresholds[plane_numbers[i]];
+  }
+
+  m_threshold = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(thresholds.data()));
 }
 
 __m256i AVXThresholdProcessor::process(const __m256i& signal) {

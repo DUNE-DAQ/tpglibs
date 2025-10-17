@@ -9,13 +9,13 @@
 #ifndef TPGLIBS_ABSTRACTPROCESSOR_HPP_
 #define TPGLIBS_ABSTRACTPROCESSOR_HPP_
 
-#include <cstdint>
-#include <nlohmann/json.hpp>
-#include <memory>
-
 #include "tpglibs/ProcessorMetricArray.hpp"
 #include "tpglibs/ProcessorInternalStateBufferManager.hpp"
 #include "tpglibs/ProcessorInternalStateNameRegistry.hpp"
+#include "tpglibs/Types.hpp"
+
+#include <cstdint>
+#include <memory>
 
 namespace tpglibs {
 
@@ -57,23 +57,33 @@ class AbstractProcessor {
      *  that all processors need. Derived classes should call this method
      *  at the beginning of their configure() implementation.
      *
-     *  @param config JSON config containing metric_collect_toggle_state,
+     *  @param config Map config containing metric_collect_toggle_state,
      *                metric_collect_time_sample_period, and requested_internal_states
      */
-    virtual void configure_internal_state_collection(const nlohmann::json& config) {
-      m_collect_internal_state_flag = config.value("metric_collect_toggle_state", false);
-      m_sample_period = config.value("metric_collect_time_sample_period", 1);
+    virtual void configure_internal_state_collection(const types::tpg_config_map_t& config) {
+      if (config.contains("metric_collect_toggle_state")) {
+        m_collect_internal_state_flag = config["metric_collect_toggle_state"]->get_config_value();
+      } else {
+        m_collect_internal_state_flag = false;
+      }
+
+      if (config.contains("metric_collect_time_sample_period")) {
+        m_sample_period = config["metric_collect_time_sample_period"]->get_config_value();
+      } else {
+        m_sample_period = 1;
+      }
       
       if (config.contains("requested_internal_states")) {
-        m_internal_state_name_registry.parse_requested_internal_state_items(config["requested_internal_states"]);
+        m_internal_state_name_registry.parse_requested_internal_state_items(config["requested_internal_states"]->get_config_value());
       } else {
         m_internal_state_name_registry.parse_requested_internal_state_items("");
       }
+
       m_internal_state_buffer_manager.configure_from_registry(&m_internal_state_name_registry);
     }
 
     /** @brief Pure virtual function that will configure the processor using plane numbers. */
-    virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
+    virtual void configure(const types::tpg_config_map_t& config, const int16_t* plane_numbers) = 0;
 
     /** @brief Setter for next processor. */
     void set_next_processor(std::shared_ptr<AbstractProcessor<T>> next_processor) {

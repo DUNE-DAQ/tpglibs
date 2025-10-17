@@ -6,7 +6,6 @@ find_package(daq-cmake REQUIRED)
 daq_setup_environment()
 
 find_package(fmt REQUIRED)
-find_package(nlohmann_json REQUIRED)
 find_package(detdataformats REQUIRED)
 find_package(fddetdataformats REQUIRED)
 find_package(trgdataformats REQUIRED)
@@ -23,7 +22,7 @@ endif()
 
 ##############################################################################
 
-daq_add_library( *.cpp  LINK_LIBRARIES nlohmann_json::nlohmann_json detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt )
+daq_add_library( *.cpp  LINK_LIBRARIES detdataformats::detdataformats fddetdataformats::fddetdataformats trgdataformats::trgdataformats fmt::fmt )
 
 daq_add_python_bindings(*.cpp LINK_LIBRARIES ${PROJECT_NAME})
 
