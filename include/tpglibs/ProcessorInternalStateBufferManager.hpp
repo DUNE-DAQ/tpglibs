@@ -150,12 +150,6 @@ namespace tpglibs {
     }
     
     template <typename T>
-    void ProcessorInternalStateBufferManager<T>::switch_active_buffer() {
-        // This function is no longer used - buffer switching happens in switch_buffer_and_read
-        // by swapping read and write buffer pointers
-    }
-    
-    template <typename T>
     void ProcessorInternalStateBufferManager<T>::write_to_active_buffer() {
         // Increment seq to indicate write start (becomes odd)
         m_write_seq.fetch_add(1, std::memory_order_release);
@@ -206,6 +200,8 @@ namespace tpglibs {
         return *read_ptr;
     }
     
+    // Template specializations
+    // Specialization for __m256i since it has additional cast buffers.
     template<>
     inline void ProcessorInternalStateBufferManager<__m256i>::clear() {
         // free double buffer for temp values
@@ -214,7 +210,6 @@ namespace tpglibs {
         for (auto& buf : m_cast_store_buffers) { _mm_free(buf.m_data); }
     }
     
-    // Template specializations
     // Specialization for __m256i -> std::array<int16_t, 16> cast
     template <>
     inline ProcessorMetricArray<std::array<int16_t, 16>> ProcessorInternalStateBufferManager<__m256i>::switch_buffer_and_read_casted() {

@@ -30,7 +30,7 @@
       using signal_t = T;
 
       /** @brief Constructor. */
-      ProcessorInternalStateNameRegistry();
+      ProcessorInternalStateNameRegistry() = default;
 
       /** @brief Destructor. */
       ~ProcessorInternalStateNameRegistry();
@@ -125,10 +125,6 @@
   };
 
     // Template function implementations
-    template <typename T>
-    ProcessorInternalStateNameRegistry<T>::ProcessorInternalStateNameRegistry() {
-        // clear();
-    }
 
     template <typename T>
     ProcessorInternalStateNameRegistry<T>::~ProcessorInternalStateNameRegistry() {
