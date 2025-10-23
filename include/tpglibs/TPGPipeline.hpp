@@ -10,7 +10,7 @@
 #define TPGLIBS_TPGPIPELINE_HPP_
 
 #include "tpglibs/AbstractFactory.hpp"
-#include "tpglibs/ProcessorMetricCollector.hpp"
+#include "tpglibs/AbstractProcessor.hpp"
 
 #include "trgdataformats/TriggerPrimitive.hpp"
 #include "trgdataformats/Types.hpp"
@@ -91,19 +91,29 @@ class TPGPipeline {
     /** @brief Pure virtual function that will generate TPs given a mask to draw from. */
     virtual std::vector<dunedaq::trgdataformats::TriggerPrimitive> generate_tps(const signal_t& tp_mask) = 0;
 
+    /**
+     * @brief Return reference to all processors in this pipeline.
+     *
+     * @return A vector of all processor references.
+     */
+    virtual std::vector<std::shared_ptr<AbstractProcessor<signal_t>>> get_all_processor_references() {
+      std::vector<std::shared_ptr<AbstractProcessor<signal_t>>> processor_references;
+      if (m_processor_head == nullptr) return processor_references;
+
+      auto current_processor = std::static_pointer_cast<AbstractProcessor<signal_t>>(m_processor_head);
+      while (current_processor != nullptr) {
+        processor_references.push_back(current_processor);
+        current_processor = current_processor->get_next_processor();
+      }
+      return processor_references;
+    }
+
     /** @brief Set the samples over threshold minimum values. */
     virtual void set_sot_minima(const std::vector<uint16_t>& sot_minima) {
       int idx = 0;
       for (auto sot_minimum : sot_minima) {
         m_sot_minima[idx++] = sot_minimum;
       }
-    }
-
-    /** @brief Register all processors in this pipeline with the metric collector. */
-    virtual void attach_to_metric_collector(ProcessorMetricCollector<signal_t>& collector, size_t pipeline_id) {
-      if (m_processor_head == nullptr) return;
-
-      m_processor_head->attach_to_metric_collector(collector, pipeline_id);
     }
 
   protected:

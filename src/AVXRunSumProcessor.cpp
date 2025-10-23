@@ -13,6 +13,18 @@ namespace tpglibs {
 REGISTER_AVXPROCESSOR_CREATOR("AVXRunSumProcessor", AVXRunSumProcessor)
 
 void AVXRunSumProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
+  // Configure common metric collection parameters
+  // Register pointers to the ACTUAL member variables, not copies
+  // Use shared_ptr with no-op deleter to avoid double-free
+  m_internal_state_name_registry.register_internal_state("r", 
+    std::shared_ptr<__m256i>(&m_memory_factor, [](auto*){}));
+  m_internal_state_name_registry.register_internal_state("s", 
+    std::shared_ptr<__m256i>(&m_scale_factor, [](auto*){}));
+  m_internal_state_name_registry.register_internal_state("rs", 
+    std::shared_ptr<__m256i>(&m_running_sum, [](auto*){}));
+    
+  configure_internal_state_collection(config);
+
   int16_t memory_factors[16];
   int16_t config_memory[3] = {config["memory_factor_plane0"],
                               config["memory_factor_plane1"],
@@ -32,6 +44,12 @@ void AVXRunSumProcessor::configure(const nlohmann::json& config, const int16_t* 
 }
 
 __m256i AVXRunSumProcessor::process(const __m256i& signal) {
+  // Update sample counter and write internal states to buffer for harvesting
+  m_samples++;
+  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
+    m_internal_state_buffer_manager.write_to_active_buffer();
+  }
+
   __m256i scaled_rs = _mm256_div_epi16(m_running_sum, 10);
   scaled_rs = _mm256_mullo_epi16(scaled_rs, m_memory_factor);
 

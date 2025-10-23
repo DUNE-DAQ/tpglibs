@@ -12,8 +12,10 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <memory>
+
 #include "tpglibs/ProcessorMetricArray.hpp"
-#include "tpglibs/ProcessorMetricCollector.hpp"
+#include "tpglibs/ProcessorInternalStateBufferManager.hpp"
+#include "tpglibs/ProcessorInternalStateNameRegistry.hpp"
 
 namespace tpglibs {
 
@@ -26,11 +28,56 @@ class AbstractProcessor {
   /** @brief Points to next processor in the chain. */
   std::shared_ptr<AbstractProcessor<T>> m_next_processor;
 
+  protected:
+    ProcessorInternalStateBufferManager<T> m_internal_state_buffer_manager;
+    ProcessorInternalStateNameRegistry<T> m_internal_state_name_registry;
+    
+    // Sample counting and collection control
+    std::atomic<uint64_t> m_samples{0};
+    bool m_collect_internal_state_flag{false};
+    uint64_t m_sample_period{1};
+
   public:
     /** @brief Signal type to process on. General __m256i. */
     using signal_type_t = T;
 
     virtual ~AbstractProcessor() = default;
+
+    ProcessorInternalStateBufferManager<T>* _get_internal_state_buffer_manager() {
+      return &m_internal_state_buffer_manager;
+    }
+
+    ProcessorInternalStateNameRegistry<T>* _get_internal_state_name_registry() {
+      return &m_internal_state_name_registry;
+    }
+
+    /** @brief Configure common internal state collection parameters.
+     *
+     *  This method handles the common configuration for internal state collection
+     *  that all processors need. Derived classes should call this method
+     *  at the beginning of their configure() implementation.
+     *
+     *  @param config JSON config containing metric_collect_toggle_state,
+     *                metric_collect_time_sample_period, and requested_internal_states
+     */
+    virtual void configure_internal_state_collection(const nlohmann::json& config) {
+      m_collect_internal_state_flag = config.value("metric_collect_toggle_state", false);
+      m_sample_period = config.value("metric_collect_time_sample_period", 1);
+      
+      if (m_collect_internal_state_flag) {
+        if (config.contains("requested_internal_states")) {
+          m_internal_state_name_registry.parse_requested_internal_state_items(config["requested_internal_states"]);
+        } else {
+          m_internal_state_name_registry.parse_requested_internal_state_items("");
+        }
+        
+        // Only configure if we actually have states to collect
+        auto num_items = m_internal_state_name_registry.get_number_of_requested_internal_states();
+        if (num_items > 0) {
+          m_internal_state_buffer_manager.configure_from_registry(&m_internal_state_name_registry);
+        }
+      }
+    }
 
     /** @brief Pure virtual function that will configure the processor using plane numbers. */
     virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
@@ -38,6 +85,11 @@ class AbstractProcessor {
     /** @brief Setter for next processor. */
     void set_next_processor(std::shared_ptr<AbstractProcessor<T>> next_processor) {
       m_next_processor = next_processor;
+    }
+
+    /** @brief Getter for next processor. */
+    std::shared_ptr<AbstractProcessor<T>> get_next_processor() {
+      return m_next_processor;
     }
 
     /** @brief Simple signal pass-through. */
@@ -48,24 +100,13 @@ class AbstractProcessor {
       return signal;
     }
 
-    /** @brief Save metrics to store buffer; default does nothing. */
-    virtual void save_metric_to_store_buffer() {}
-
-    /** @brief Returns the string name of metrics recorded (stored and can be read) for this processor. */
-    virtual std::vector<std::string> get_metric_items() {
-      return {};
+    /** @brief Get the names of requested internal states (delegates to registry). */
+    virtual std::vector<std::string> get_requested_internal_state_names() const {
+      return m_internal_state_name_registry.get_names_of_requested_internal_states();
     }
 
-    /** @brief Read metrics from store buffer; default empty. */
-    virtual ProcessorMetricArray<signal_type_t> read_from_metric_store_buffer() {
-      return {};
-    }
-
-    /** @brief Register this processor and next processor with the metric collector. */
-    virtual void attach_to_metric_collector(ProcessorMetricCollector<signal_type_t>& collector, size_t pipeline_id) {
-      collector.attach_processor(*this, pipeline_id);
-      if (m_next_processor == nullptr) return;
-      m_next_processor->attach_to_metric_collector(collector, pipeline_id);
+    virtual ProcessorMetricArray<std::array<int16_t, 16>> read_internal_states_as_integer_array() {
+      return m_internal_state_buffer_manager.switch_buffer_and_read_casted();
     }
 };
 
