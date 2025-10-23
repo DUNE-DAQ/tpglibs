@@ -39,12 +39,18 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   thresholds->configure(thr_config, plane_numbers);
 
   nlohmann::json rs_config = {
-    {"memory_factor_plane0", 8},
-    {"memory_factor_plane1", 8},
-    {"memory_factor_plane2", 8},
-    {"scale_factor_plane0", 5},
-    {"scale_factor_plane1", 5},
-    {"scale_factor_plane2", 5}
+    {"memory_factor_plane0", 4},
+    {"memory_factor_plane1", 4},
+    {"memory_factor_plane2", 4},
+    {"scale_factor_plane0", 1},
+    {"scale_factor_plane1", 1},
+    {"scale_factor_plane2", 1},
+    {"memory_divisor_plane0", 5},
+    {"memory_divisor_plane1", 5},
+    {"memory_divisor_plane2", 5},
+    {"scale_divisor_plane0", 2},
+    {"scale_divisor_plane1", 2},
+    {"scale_divisor_plane2", 2}
   };
   abs_rs->configure(rs_config, plane_numbers);
   rs->configure(rs_config, plane_numbers);
