@@ -87,6 +87,12 @@ BOOST_AUTO_TEST_CASE(test_avx_runsum_configuration_and_registration) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -110,6 +116,12 @@ BOOST_AUTO_TEST_CASE(test_avx_runsum_initial_state_collection) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -152,6 +164,12 @@ BOOST_AUTO_TEST_CASE(test_avx_runsum_processing_and_state_update) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -204,6 +222,12 @@ BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_inherits_registration) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -227,6 +251,12 @@ BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_processing_with_absolute_values) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -279,6 +309,12 @@ BOOST_AUTO_TEST_CASE(test_naive_runsum_configuration_and_registration) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -302,6 +338,12 @@ BOOST_AUTO_TEST_CASE(test_naive_runsum_initial_state_collection) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -344,6 +386,12 @@ BOOST_AUTO_TEST_CASE(test_naive_runsum_processing_and_state_update) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -492,6 +540,12 @@ BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_inherits_registration) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -515,6 +569,12 @@ BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_processing_with_absolute_values) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   processor->configure(config, plane_numbers);
 
@@ -670,6 +730,12 @@ BOOST_AUTO_TEST_CASE(test_all_processors_independence) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
   config["accum_limit"] = 10;
 
   // Configure each processor with its specific states
@@ -754,6 +820,12 @@ BOOST_AUTO_TEST_CASE(test_processor_chain_with_internal_states) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
 
   avx_runsum1->configure(config, plane_numbers);
   avx_runsum2->configure(config, plane_numbers);
@@ -807,6 +879,12 @@ BOOST_AUTO_TEST_CASE(test_collection_disabled) {
     {"scale_factor_plane0", 10},
     {"scale_factor_plane1", 20},
     {"scale_factor_plane2", 30},
+    {"memory_divisor_plane0", 10},
+    {"memory_divisor_plane1", 10},
+    {"memory_divisor_plane2", 10},
+    {"scale_divisor_plane0", 10},
+    {"scale_divisor_plane1", 10},
+    {"scale_divisor_plane2", 10},
     {"metric_collect_toggle_state", false}
   };
 
@@ -873,6 +951,12 @@ BOOST_AUTO_TEST_CASE(test_all_processors_core_functionality) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
   config["accum_limit"] = 10;
 
   // Configure each processor with its specific states
@@ -965,6 +1049,12 @@ BOOST_AUTO_TEST_CASE(test_processor_specific_internal_states) {
   config["scale_factor_plane0"] = 10;
   config["scale_factor_plane1"] = 20;
   config["scale_factor_plane2"] = 30;
+  config["memory_divisor_plane0"] = 10;
+  config["memory_divisor_plane1"] = 10;
+  config["memory_divisor_plane2"] = 10;
+  config["scale_divisor_plane0"] = 10;
+  config["scale_divisor_plane1"] = 10;
+  config["scale_divisor_plane2"] = 10;
   config["accum_limit"] = 10;
 
   // Configure each processor with its specific states

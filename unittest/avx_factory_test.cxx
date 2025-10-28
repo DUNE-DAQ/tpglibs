@@ -40,7 +40,13 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     {"memory_factor_plane2", 8},
     {"scale_factor_plane0", 5},
     {"scale_factor_plane1", 5},
-    {"scale_factor_plane2", 5}
+    {"scale_factor_plane2", 5},
+    {"memory_divisor_plane0", 10},
+    {"memory_divisor_plane1", 10},
+    {"memory_divisor_plane2", 10},
+    {"scale_divisor_plane0", 10},
+    {"scale_divisor_plane1", 10},
+    {"scale_divisor_plane2", 10}
   };
   abs_rs->configure(rs_config, plane_numbers);
   rs->configure(rs_config, plane_numbers);
