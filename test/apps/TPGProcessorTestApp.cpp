@@ -20,25 +20,18 @@
 #include <cstring>
 #include <algorithm>
 
-struct InputFileHeader {
+struct BinaryFileHeader {
     uint32_t magic_number;
     uint32_t version;
     uint32_t data_type;
     uint32_t reserved;
 };
 
-struct ValidationFileHeader {
-    uint32_t magic_number;
-    uint32_t version;
-    uint32_t num_steps;
-    uint32_t reserved;
-};
-
-bool validate_input_header(std::ifstream& file) {
-    InputFileHeader header;
-    file.read(reinterpret_cast<char*>(&header), sizeof(InputFileHeader));
+bool validate_binary_header(std::ifstream& file) {
+    BinaryFileHeader header;
+    file.read(reinterpret_cast<char*>(&header), sizeof(BinaryFileHeader));
     
-    if (header.magic_number != 0x54414744) {  // "TAGD"
+    if (header.magic_number != 0x54504754) {  // "TPGT"
         std::cerr << "ERROR: Invalid input file magic number: 0x" 
                   << std::hex << header.magic_number << std::dec << std::endl;
         return false;
@@ -55,22 +48,6 @@ bool validate_input_header(std::ifstream& file) {
     return true;
 }
 
-bool validate_validation_header(std::ifstream& file) {
-    ValidationFileHeader header;
-    file.read(reinterpret_cast<char*>(&header), sizeof(ValidationFileHeader));
-    
-    if (header.magic_number != 0x54414756) {  // "TAGV"
-        std::cerr << "ERROR: Invalid validation file magic number: 0x" 
-                  << std::hex << header.magic_number << std::dec << std::endl;
-        return false;
-    }
-    if (header.version != 0x010004) {  // 1.0.4 in hex
-        std::cerr << "ERROR: Unsupported validation file version: 0x" 
-                  << std::hex << header.version << std::dec << std::endl;
-        return false;
-    }
-    return true;
-}
 
 std::shared_ptr<tpglibs::AbstractProcessor<std::array<int16_t, 16>>> 
 create_naive_processor(const std::string& processor_name) {
@@ -156,7 +133,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    if (!validate_input_header(input_stream)) {
+    if (!validate_binary_header(input_stream)) {
         std::cerr << "ERROR: Invalid input file format" << std::endl;
         return 1;
     }
@@ -168,8 +145,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    ValidationFileHeader val_header;
-    if (!validate_validation_header(validation_stream)) {
+    if (!validate_binary_header(validation_stream)) {
         std::cerr << "ERROR: Invalid validation file format" << std::endl;
         return 1;
     }
@@ -210,12 +186,15 @@ int main(int argc, char* argv[]) {
     // Skip the header (16 bytes)
     reader.seekg(16);
     
-    // Read validation data (header was already read during validation, but we need the num_steps value)
+    // Read validation data (header was already read during validation, but we need to rewind)
     // So we rewind and read it again
     validation_stream.clear();
     validation_stream.seekg(0, std::ios::beg);
-    validation_stream.read(reinterpret_cast<char*>(&val_header), sizeof(ValidationFileHeader));
-    int num_validation_steps = val_header.num_steps;
+    BinaryFileHeader val_header;
+    validation_stream.read(reinterpret_cast<char*>(&val_header), sizeof(BinaryFileHeader));
+    
+    // Get number of validation steps from config
+    int num_validation_steps = validation_steps.size();
     
     std::vector<std::vector<int16_t>> validation_data(num_validation_steps);
     for (int i = 0; i < num_validation_steps; ++i) {

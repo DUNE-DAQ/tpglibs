@@ -34,4 +34,10 @@ daq_add_unit_test(avx_processors_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(processor_metric_collector_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(binary_signal_reader_test LINK_LIBRARIES tpglibs)
 
+# Add test application
+add_executable(tpg_test_app
+    test/apps/TPGProcessorTestApp.cpp
+)
+target_link_libraries(tpg_test_app tpglibs)
+
 daq_install()
