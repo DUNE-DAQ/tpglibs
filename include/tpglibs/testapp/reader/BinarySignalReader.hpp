@@ -18,10 +18,10 @@ namespace tpglibs {
 namespace testapp {
 
 /**
- * @brief Simple binary file reader with type casting.
+ * @brief Simple binary file reader for integer types.
  *
- * Reads binary data from a file and automatically casts it to the requested type.
- * No fancy features, no over-engineering. Just read file, cast type, return vector.
+ * Reads binary data from a file and returns it as the requested integer type.
+ * Used for reading int16_t test data.
  */
 template<typename T>
 class BinarySignalReader {

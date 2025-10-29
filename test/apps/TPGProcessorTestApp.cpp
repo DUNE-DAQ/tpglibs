@@ -23,7 +23,6 @@
 struct BinaryFileHeader {
     uint32_t magic_number;
     uint32_t version;
-    uint32_t data_type;
     uint32_t reserved;
 };
 
@@ -39,10 +38,6 @@ bool validate_binary_header(std::ifstream& file) {
     if (header.version != 0x010004) {  // 1.0.4 in hex
         std::cerr << "ERROR: Unsupported input file version: 0x" 
                   << std::hex << header.version << std::dec << std::endl;
-        return false;
-    }
-    if (header.data_type != 0) {
-        std::cerr << "ERROR: Unsupported data type: " << header.data_type << std::endl;
         return false;
     }
     return true;
@@ -214,8 +209,8 @@ int main(int argc, char* argv[]) {
     
     // Read binary data
     tpglibs::testapp::BinarySignalReader<int16_t> reader(input_file);
-    // Skip the header (16 bytes)
-    reader.seekg(16);
+    // Skip the header (12 bytes)
+    reader.seekg(12);
     
     // Read validation data only if validation_steps is provided
     std::vector<std::vector<int16_t>> validation_data;
