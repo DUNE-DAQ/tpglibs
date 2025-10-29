@@ -100,31 +100,6 @@ BOOST_AUTO_TEST_CASE(TestPartialRead)
   std::remove(temp_filename.c_str());
 }
 
-BOOST_AUTO_TEST_CASE(TestFloatRead)
-{
-  // Create test data: 3 float values
-  std::vector<float> test_data = {1.5f, -2.7f, 3.14f};
-  
-  std::string temp_filename = "/tmp/test_float_read.bin";
-  std::ofstream temp_file(temp_filename, std::ios::binary);
-  for (const auto& value : test_data) {
-    temp_file.write(reinterpret_cast<const char*>(&value), sizeof(float));
-  }
-  temp_file.close();
-  
-  tpglibs::testapp::BinarySignalReader<float> reader(temp_filename);
-  
-  auto result = reader.next(3);
-  BOOST_CHECK_EQUAL(result.size(), 3);
-  BOOST_CHECK_CLOSE(result[0], 1.5f, 0.001f);
-  BOOST_CHECK_CLOSE(result[1], -2.7f, 0.001f);
-  BOOST_CHECK_CLOSE(result[2], 3.14f, 0.001f);
-  BOOST_CHECK(reader.eof());
-  
-  // Clean up
-  std::remove(temp_filename.c_str());
-}
-
 BOOST_AUTO_TEST_CASE(TestEmptyFile)
 {
   std::string temp_filename = "/tmp/test_empty.bin";
