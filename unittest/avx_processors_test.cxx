@@ -39,12 +39,18 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   thresholds->configure(thr_config, plane_numbers);
 
   nlohmann::json rs_config = {
-    {"memory_factor_plane0", 8},
-    {"memory_factor_plane1", 8},
-    {"memory_factor_plane2", 8},
-    {"scale_factor_plane0", 5},
-    {"scale_factor_plane1", 5},
-    {"scale_factor_plane2", 5}
+    {"memory_factor_plane0", 4},
+    {"memory_factor_plane1", 4},
+    {"memory_factor_plane2", 4},
+    {"scale_factor_plane0", 1},
+    {"scale_factor_plane1", 1},
+    {"scale_factor_plane2", 1},
+    {"memory_divisor_plane0", 5},
+    {"memory_divisor_plane1", 5},
+    {"memory_divisor_plane2", 5},
+    {"scale_divisor_plane0", 2},
+    {"scale_divisor_plane1", 2},
+    {"scale_divisor_plane2", 2}
   };
   abs_rs->configure(rs_config, plane_numbers);
   rs->configure(rs_config, plane_numbers);
@@ -93,66 +99,6 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
   BOOST_TEST(same_abs);
   BOOST_TEST(same_thr);
   BOOST_TEST(same_rs);
-}
-
-BOOST_AUTO_TEST_CASE(test_avx_metric) {
-  std::shared_ptr<AVXProcessor> pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
-
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
-
-  nlohmann::json pc_config = {
-    {"accum_limit", 42},
-    {"metric_collect_toggle_state", true}
-  };
-
-  pc->configure(pc_config, plane_numbers);
-
-  pc->save_metric_to_store_buffer();
-
-  // Do it a few more times to make sure active buffer switch works
-
-  pc->save_metric_to_store_buffer();
-  pc->save_metric_to_store_buffer();
-
-  auto metric_ptr = pc->read_from_metric_store_buffer();
-
-  BOOST_TEST(metric_ptr.m_size == 2);
-  BOOST_TEST(metric_ptr.m_data != nullptr);
-  // Verify that pedestal is not all zero, while accum is all zero.
-  BOOST_TEST(_mm256_testz_si256(metric_ptr.m_data[0], metric_ptr.m_data[0]) == 0);
-  BOOST_TEST(_mm256_testz_si256(metric_ptr.m_data[1], metric_ptr.m_data[1]) != 0);
-}
-
-BOOST_AUTO_TEST_CASE(test_avx_metric_multithread) {
-  // I currently can't think of simple test of actually read pedestal
-  // Here this test just ensures things don't crash
-  // Set up processor and config
-  auto pc = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
-  nlohmann::json pc_config = {{"accum_limit", 42}, {"metric_collect_toggle_state", true}};
-  pc->configure(pc_config, plane_numbers);
-
-  // Launch producer thread
-  std::atomic<bool> done{false};
-  std::thread producer([&](){
-    for (int i = 0; i < 10000; ++i) {
-      pc->save_metric_to_store_buffer();
-    }
-    done.store(true, std::memory_order_release);
-  });
-
-  // Launch consumer thread
-  std::thread consumer([&](){
-    while (!done.load(std::memory_order_acquire)) {
-      auto metric = pc->read_from_metric_store_buffer();
-      BOOST_CHECK(metric.m_data != nullptr);
-      BOOST_CHECK(metric.m_size == 2);
-    }
-  });
-
-  producer.join();
-  consumer.join();
-  
 }
 
 } // namespace tpglibs

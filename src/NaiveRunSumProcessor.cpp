@@ -13,6 +13,18 @@ namespace tpglibs {
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveRunSumProcessor", NaiveRunSumProcessor)
 
 void NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
+  // Configure common metric collection parameters
+  // Register pointers to the ACTUAL member variables, not copies
+  // Use shared_ptr with no-op deleter to avoid double-free
+  m_internal_state_name_registry.register_internal_state("r", 
+    std::shared_ptr<naive_array_t>(&m_memory_factor, [](auto*){}));
+  m_internal_state_name_registry.register_internal_state("s", 
+    std::shared_ptr<naive_array_t>(&m_scale_factor, [](auto*){}));
+  m_internal_state_name_registry.register_internal_state("rs", 
+    std::shared_ptr<naive_array_t>(&m_running_sum, [](auto*){}));
+    
+  configure_internal_state_collection(config);
+
   int16_t config_memory[3] = {config["memory_factor_plane0"],
                               config["memory_factor_plane1"],
                               config["memory_factor_plane2"]};
@@ -27,6 +39,12 @@ void NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t
 }
 
 NaiveRunSumProcessor::naive_array_t NaiveRunSumProcessor::process(const naive_array_t& signal) {
+  // Update sample counter and write internal states to buffer for harvesting
+  m_samples++;
+  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
+    m_internal_state_buffer_manager.write_to_active_buffer();
+  }
+
   for (int i = 0; i < 16; i++) {
     int32_t scaled_rs = _naive_div_int16(m_running_sum[i], 10);
     scaled_rs *= m_memory_factor[i];

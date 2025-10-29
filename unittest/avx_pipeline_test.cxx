@@ -63,12 +63,18 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
     {
       "AVXRunSumProcessor",
       {
-        {"memory_factor_plane0", 10},
-        {"memory_factor_plane1", 10},
-        {"memory_factor_plane2", 10},
-        {"scale_factor_plane0", 10},
-        {"scale_factor_plane1", 10},
-        {"scale_factor_plane2", 10},
+        {"memory_factor_plane0", 1},
+        {"memory_factor_plane1", 1},
+        {"memory_factor_plane2", 1},
+        {"scale_factor_plane0", 1},
+        {"scale_factor_plane1", 1},
+        {"scale_factor_plane2", 1},
+        {"memory_divisor_plane0", 1},
+        {"memory_divisor_plane1", 1},
+        {"memory_divisor_plane2", 1},
+        {"scale_divisor_plane0", 1},
+        {"scale_divisor_plane1", 1},
+        {"scale_divisor_plane2", 1}
       }
     },
     {

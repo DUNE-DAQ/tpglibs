@@ -33,6 +33,12 @@ class AVXRunSumProcessor : public AVXProcessor {
   /** @brief The `RS` in the model equation. */
   __m256i m_running_sum;
 
+  /** @brief The divisor for the `S` factor. */
+  __m256i m_scale_divisor;
+
+  /** @brief The divisor for the `R` factor. */
+  __m256i m_memory_divisor;
+
   public:
     /** @brief Calculate and store the running sum.
      *
