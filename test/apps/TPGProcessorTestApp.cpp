@@ -53,10 +53,6 @@ std::shared_ptr<tpglibs::AbstractProcessor<std::array<int16_t, 16>>>
 create_naive_processor(const std::string& processor_name) {
     auto factory = tpglibs::NaiveFactory::get_instance();
     auto processor = factory->create_processor(processor_name);
-    if (!processor) {
-        std::cerr << "ERROR: Failed to create processor: " << processor_name << std::endl;
-        return nullptr;
-    }
     return processor;
 }
 
@@ -64,29 +60,25 @@ std::shared_ptr<tpglibs::AVXProcessor>
 create_avx_processor(const std::string& processor_name) {
     auto factory = tpglibs::AVXFactory::get_instance();
     auto processor = factory->create_processor(processor_name);
-    if (!processor) {
-        std::cerr << "ERROR: Failed to create processor: " << processor_name << std::endl;
-        return nullptr;
-    }
     return processor;
 }
 
-std::array<int16_t, 16> convert_to_array(const std::vector<int16_t>& vec) {
+std::array<int16_t, 16> convert_vector_to_array(const std::vector<int16_t>& vec) {
     std::array<int16_t, 16> result;
     std::fill(result.begin(), result.end(), 0);
     std::copy(vec.begin(), vec.begin() + std::min(vec.size(), size_t(16)), result.begin());
     return result;
 }
 
-std::vector<int16_t> convert_to_vector(const std::array<int16_t, 16>& arr) {
+std::vector<int16_t> convert_array_to_vector(const std::array<int16_t, 16>& arr) {
     return std::vector<int16_t>(arr.begin(), arr.end());
 }
 
-__m256i array_to_avx(const std::array<int16_t, 16>& arr) {
+__m256i convert_array_i16x16_to_m256(const std::array<int16_t, 16>& arr) {
     return _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(arr.data()));
 }
 
-std::array<int16_t, 16> avx_to_array(const __m256i& avx_val) {
+std::array<int16_t, 16> convert_m256_to_array_i16x16(const __m256i& avx_val) {
     std::array<int16_t, 16> result;
     _mm256_storeu_si256(reinterpret_cast<__m256i*>(result.data()), avx_val);
     return result;
@@ -94,22 +86,20 @@ std::array<int16_t, 16> avx_to_array(const __m256i& avx_val) {
 
 void print_usage(const char* program_name) {
     std::cerr << "Usage: " << program_name 
-              << " <input_file> <processor_type> <config_file> <validation_file> <max_steps>" << std::endl;
+              << " <input_file> <config_file> <validation_file>" << std::endl;
     std::cerr << "Example: " << program_name 
-              << " test_input.bin AVXRunSumProcessor config.json validation.val 20" << std::endl;
+              << " test_input.bin config.json validation.bin" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 6) {
+    if (argc != 4) {
         print_usage(argv[0]);
         return 1;
     }
     
     std::string input_file = argv[1];
-    std::string processor_type = argv[2];
-    std::string config_file = argv[3];
-    std::string validation_file = argv[4];
-    int max_steps = std::atoi(argv[5]);
+    std::string config_file = argv[2];
+    std::string validation_file = argv[3];
     
     // Load configuration
     std::ifstream config_stream(config_file);
@@ -134,7 +124,6 @@ int main(int argc, char* argv[]) {
     }
     
     if (!validate_binary_header(input_stream)) {
-        std::cerr << "ERROR: Invalid input file format" << std::endl;
         return 1;
     }
     
@@ -146,29 +135,71 @@ int main(int argc, char* argv[]) {
     }
     
     if (!validate_binary_header(validation_stream)) {
-        std::cerr << "ERROR: Invalid validation file format" << std::endl;
         return 1;
     }
     
-    // Get validation steps from config
-    auto validation_steps = config["test_config"]["validation_steps"];
-    int samples_per_time_step = config["test_config"]["samples_per_time_step"];
-    
-    // Create processor based on type
-    std::shared_ptr<tpglibs::AVXProcessor> avx_processor;
-    std::shared_ptr<tpglibs::AbstractProcessor<std::array<int16_t, 16>>> naive_processor;
-    bool is_avx = (processor_type.find("AVX") != std::string::npos);
-    
-    if (is_avx) {
-        avx_processor = create_avx_processor(processor_type);
-        if (!avx_processor) {
+    // Test config validation block
+    if (!config.contains("test_config") || !config["test_config"].is_object()) {
+        std::cerr << "ERROR: Missing test_config section in config" << std::endl;
+        return 1;
+    }
+    const auto& test_config = config["test_config"];
+
+    if (!test_config.contains("processor_name") || !test_config["processor_name"].is_string()) {
+        std::cerr << "ERROR: test_config.processor_name must be a string" << std::endl;
+        return 1;
+    }
+    std::string processor_name = test_config["processor_name"].get<std::string>();
+
+    if (!test_config.contains("samples_per_time_step") || !test_config["samples_per_time_step"].is_number_integer()) {
+        std::cerr << "ERROR: test_config.samples_per_time_step must be an integer" << std::endl;
+        return 1;
+    }
+    int samples_per_time_step = test_config["samples_per_time_step"].get<int>();
+
+    auto validation_steps = test_config.value("validation_steps", nlohmann::json::array());
+    if (!validation_steps.is_array()) {
+        std::cerr << "ERROR: test_config.validation_steps must be an array if provided" << std::endl;
+        return 1;
+    }
+
+    int max_steps = 0;
+    if (test_config.contains("max_steps") && test_config["max_steps"].is_number_integer()) {
+        max_steps = test_config["max_steps"].get<int>();
+        if (max_steps <= 0) {
+            std::cerr << "ERROR: test_config.max_steps must be a positive integer" << std::endl;
             return 1;
         }
     } else {
-        naive_processor = create_naive_processor(processor_type);
-        if (!naive_processor) {
+        if (validation_steps.empty()) {
+            std::cerr << "ERROR: Either test_config.max_steps or non-empty test_config.validation_steps must be provided" << std::endl;
             return 1;
         }
+        int derived_max = 0;
+        for (const auto& v : validation_steps) {
+            if (!v.is_number_integer()) {
+                std::cerr << "ERROR: validation_steps must contain integers" << std::endl;
+                return 1;
+            }
+            derived_max = std::max(derived_max, v.get<int>());
+        }
+        max_steps = derived_max + 1;
+    }
+    
+    // Create processor based on name
+    std::shared_ptr<tpglibs::AVXProcessor> avx_processor;
+    std::shared_ptr<tpglibs::AbstractProcessor<std::array<int16_t, 16>>> naive_processor;
+    bool is_avx = (processor_name.find("AVX") != std::string::npos);
+    
+    try {
+        if (is_avx) {
+            avx_processor = create_avx_processor(processor_name);
+        } else {
+            naive_processor = create_naive_processor(processor_name);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: Failed to create processor: " << e.what() << std::endl;
+        return 1;
     }
     
     // Configure processor
@@ -186,37 +217,53 @@ int main(int argc, char* argv[]) {
     // Skip the header (16 bytes)
     reader.seekg(16);
     
-    // Read validation data (header was already read during validation, but we need to rewind)
-    // So we rewind and read it again
-    validation_stream.clear();
-    validation_stream.seekg(0, std::ios::beg);
-    BinaryFileHeader val_header;
-    validation_stream.read(reinterpret_cast<char*>(&val_header), sizeof(BinaryFileHeader));
+    // Read validation data only if validation_steps is provided
+    std::vector<std::vector<int16_t>> validation_data;
+    bool has_validation = !validation_steps.empty();
     
-    // Get number of validation steps from config
-    int num_validation_steps = validation_steps.size();
-    
-    std::vector<std::vector<int16_t>> validation_data(num_validation_steps);
-    for (int i = 0; i < num_validation_steps; ++i) {
-        validation_data[i].resize(samples_per_time_step);
-        validation_stream.read(reinterpret_cast<char*>(validation_data[i].data()), 
-                             samples_per_time_step * sizeof(int16_t));
+    if (has_validation) {
+        // Read expected outputs by seeking to the correct step offset in the validation file
+        validation_data.resize(validation_steps.size());
+        const std::streamsize step_bytes = static_cast<std::streamsize>(samples_per_time_step * sizeof(int16_t));
+        const std::streamoff header_size = static_cast<std::streamoff>(sizeof(BinaryFileHeader));
+
+        for (size_t i = 0; i < validation_steps.size(); ++i) {
+            validation_data[i].resize(samples_per_time_step);
+            int target_step = validation_steps.at(i).get<int>();
+            std::streamoff offset = header_size + static_cast<std::streamoff>(target_step) * step_bytes;
+            
+            validation_stream.clear();
+            validation_stream.seekg(offset, std::ios::beg);
+            validation_stream.read(reinterpret_cast<char*>(validation_data[i].data()), step_bytes);
+            
+            if (validation_stream.gcount() < step_bytes) {
+                std::cout << "WARNING: Validation file does not contain data for step " << target_step 
+                          << ". Loaded " << i << "/" << validation_steps.size() << " validation records." << std::endl;
+                validation_data.resize(i);
+                break;
+            }
+        }
     }
     
     // Process data step by step
     int step = 0;
-    int validation_index = 0;
+    size_t validation_index = 0;
     bool all_passed = true;
-    int num_steps_processed = 0;
+    size_t num_steps_processed = 0;
     
     std::cout << "Starting processing..." << std::endl;
-    std::cout << "Processor: " << processor_type << std::endl;
+    std::cout << "Processor: " << processor_name << std::endl;
     std::cout << "Max steps: " << max_steps << std::endl;
-    std::cout << "Validation steps: ";
-    for (auto step_num : validation_steps) {
-        std::cout << step_num << " ";
+    if (has_validation) {
+        std::cout << "Validation steps: ";
+        for (auto step_num : validation_steps) {
+            std::cout << step_num << " ";
+        }
+        std::cout << std::endl;
+    } else {
+        std::cout << "Validation: Disabled (no validation_steps provided)" << std::endl;
     }
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl;
     
     while (step < max_steps && !reader.eof()) {
         // Read one time step of data
@@ -224,69 +271,73 @@ int main(int argc, char* argv[]) {
         if (time_step_data.empty()) break;
         
         // Ensure we have exactly 16 samples
-        while (time_step_data.size() < 16) {
-            time_step_data.push_back(0);
-        }
+        time_step_data.resize(16, 0);
         
         // Convert to array
-        std::array<int16_t, 16> input_array = convert_to_array(time_step_data);
+        std::array<int16_t, 16> input_array = convert_vector_to_array(time_step_data);
         
         // Process the time step
         std::array<int16_t, 16> result;
         if (is_avx) {
-            __m256i input_avx = array_to_avx(input_array);
+            __m256i input_avx = convert_array_i16x16_to_m256(input_array);
             __m256i result_avx = avx_processor->process(input_avx);
-            result = avx_to_array(result_avx);
+            result = convert_m256_to_array_i16x16(result_avx);
         } else {
             result = naive_processor->process(input_array);
         }
         
         // Check if this is a validation step
-        if (validation_index < static_cast<int>(validation_steps.size()) && step == static_cast<int>(validation_steps[validation_index])) {
-            // Get expected result
-            std::vector<int16_t> expected = validation_data[validation_index];
-            
-            // Compare actual vs expected
-            bool step_passed = true;
-            for (int i = 0; i < 16; ++i) {
-                if (result[i] != expected[i]) {
-                    step_passed = false;
-                    if (!step_passed && all_passed) {
-                        std::cout << "Validation step " << step << " FAILED:" << std::endl;
-                        std::cout << "  Expected: ";
-                        for (int j = 0; j < 16; ++j) {
-                            std::cout << expected[j] << " ";
-                        }
-                        std::cout << std::endl;
-                        std::cout << "  Actual:   ";
-                        for (int j = 0; j < 16; ++j) {
-                            std::cout << result[j] << " ";
-                        }
-                        std::cout << std::endl;
-                        std::cout << "  First mismatch at index " << i << ": expected " 
-                                  << expected[i] << ", got " << result[i] << std::endl;
+        if (validation_index < validation_data.size() &&
+            step == validation_steps.at(validation_index).get<int>()) {
+            const std::vector<int16_t>& expected = validation_data[validation_index];
+
+            // Find first mismatch using std::mismatch for clarity
+            auto mm = std::mismatch(result.begin(), result.end(), expected.begin());
+            bool passed = (mm.first == result.end());
+
+            if (!passed) {
+                if (all_passed) {
+                    int idx = static_cast<int>(std::distance(result.begin(), mm.first));
+                    std::cout << "Validation step " << step << " FAILED:" << std::endl;
+                    std::cout << "  Expected: ";
+                    for (int j = 0; j < 16; ++j) {
+                        std::cout << expected[j] << " ";
                     }
-                    break;
+                    std::cout << std::endl;
+                    std::cout << "  Actual:   ";
+                    for (int j = 0; j < 16; ++j) {
+                        std::cout << result[j] << " ";
+                    }
+                    std::cout << std::endl;
+                    std::cout << "  First mismatch at index " << idx << ": expected "
+                              << expected[idx] << ", got " << result[idx] << std::endl;
                 }
-            }
-            
-            if (!step_passed) {
                 all_passed = false;
             } else {
                 std::cout << "Validation step " << step << " PASSED" << std::endl;
             }
-            
+
             validation_index++;
         }
         
         step++;
         num_steps_processed++;
     }
+
+    // Warn if input ended before completing all loaded validation steps
+    if (has_validation && validation_index < validation_data.size() && reader.eof()) {
+        std::cout << "WARNING: Reached end of input before completing all validation steps. Completed "
+                  << validation_index << "/" << validation_data.size() << " validation steps." << std::endl;
+    }
     
     // Report final results
     std::cout << std::endl << "Processing completed." << std::endl;
     std::cout << "Steps processed: " << num_steps_processed << std::endl;
-    std::cout << "Validation results: " << (all_passed ? "PASS" : "FAIL") << std::endl;
-    
-    return all_passed ? 0 : 1;
+    if (has_validation) {
+        std::cout << "Validation results: " << (all_passed ? "PASS" : "FAIL") << std::endl;
+        return all_passed ? 0 : 1;
+    } else {
+        std::cout << "Validation: Not performed" << std::endl;
+        return 0;
+    }
 }
