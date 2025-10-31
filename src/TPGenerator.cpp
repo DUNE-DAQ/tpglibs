@@ -17,14 +17,6 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   m_num_pipelines = channel_plane_numbers.size() / m_num_channels_per_pipeline;
   m_sample_tick_difference = sample_tick_difference;
 
-  for (const auto& name_config : configs) {
-    if (name_config.second.contains("metric_collect_toggle_state") && name_config.second["metric_collect_toggle_state"] == true) {
-      m_tpg_metric_collect_enabled = true;
-    }
-  }
-
-  if (m_tpg_metric_collect_enabled) get_processor_metric_collector_ptr()->configure(configs, channel_plane_numbers, m_num_pipelines);
-
   for (int p = 0; p < m_num_pipelines; p++) {
     AVXPipeline new_pipe = AVXPipeline();
     auto begin_channel_plane = channel_plane_numbers.begin() + p*m_num_channels_per_pipeline;
@@ -33,41 +25,21 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
     new_pipe.set_sot_minima(m_sot_minima);
     m_tpg_pipelines.push_back(new_pipe);
   }
+}
 
+std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> TPGenerator::get_all_processor_references_with_pipeline_index() {
+  std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> processor_references;
   int total_pipelines = m_tpg_pipelines.size();
   int start_index = (total_pipelines >= m_num_pipelines) ? (total_pipelines - m_num_pipelines) : 0;
   int pipeline_id = 0;
   for (int i = start_index; i < total_pipelines && pipeline_id < m_num_pipelines; ++i, ++pipeline_id) {
-    auto& pipeline = m_tpg_pipelines[i];
-    if (m_tpg_metric_collect_enabled) pipeline.attach_to_metric_collector(*get_processor_metric_collector_ptr(), pipeline_id);
-    // I belive this is a current separate bug with repopulating the m_tpg_pipelines. Doing the safer treatment to take last pushed m_num_pipelines pipelines.
+    // @FIXME Restore to simple treatment, when repeated add of pipelines is fixed.
+    for (auto& processor : m_tpg_pipelines[i].get_all_processor_references()) {
+      processor_references.push_back(std::make_pair(processor, pipeline_id));
+    }
   }
-
-  if (m_tpg_metric_collect_enabled) get_processor_metric_collector_ptr()->run();
-
+  return processor_references;
 }
-
-std::shared_ptr<ProcessorMetricCollector<__m256i>>  TPGenerator::get_processor_metric_collector_ptr() {
-  if (m_processor_metric_collector_ptr == nullptr) {
-    m_processor_metric_collector_ptr = std::make_shared<ProcessorMetricCollector<__m256i>>();
-  }
-  return m_processor_metric_collector_ptr;
-}
-
-void TPGenerator::signal_metric_collection() {
-  get_processor_metric_collector_ptr()->signal_collect();
-}
-
-std::unordered_map<dunedaq::trgdataformats::channel_t, std::vector<std::pair<std::string, int16_t>>> TPGenerator::get_processor_metrics() {
-  get_processor_metric_collector_ptr()->lock_metric_modify();
-
-  auto metrics = get_processor_metric_collector_ptr()->get_metrics();
-
-  get_processor_metric_collector_ptr()->unlock_metric_modify();
-
-  return metrics;
-}
-
 
 void
 TPGenerator::set_sot_minima(const std::vector<uint16_t>& sot_minima) {

@@ -26,14 +26,6 @@ class AVXProcessor : public AbstractProcessor<__m256i> {
     virtual __m256i process(const __m256i& signal) override {
       return AbstractProcessor<__m256i>::process(signal);
     }
-
-    /** @brief Save metrics to store buffer; no-op for basic AVXProcessor. */
-    void save_metric_to_store_buffer() override {}
-
-    /** @brief Read metrics from store buffer; returns empty for basic AVXProcessor. */
-    ProcessorMetricArray<__m256i> read_from_metric_store_buffer() override {
-      return {};
-    }
 };
 #pragma GCC diagnostic pop
 
