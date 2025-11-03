@@ -20,9 +20,8 @@
 
 namespace tpglibs {
 
-BOOST_AUTO_TEST_CASE(test_macro_overview)
-{
-  // Build a frame to send through the TPGenerator.
+/* Helper function to build a test frame to send through a TPGenerator. */
+dunedaq::fddetdataformats::WIBEthFrame create_test_frame() {
   dunedaq::fddetdataformats::WIBEthFrame frame;
 
   const int num_time_samples_per_frame = dunedaq::fddetdataformats::WIBEthFrame::s_time_samples_per_frame;
@@ -32,6 +31,15 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
       frame.set_adc(chan, t_sample, (t_sample*100 + chan) % 500);
     }
   }
+  /* Naively, this looks like:
+   *   uint14_t adcs[i][j] = (100*i + j) % 500;
+   * */
+  return frame;
+}
+
+BOOST_AUTO_TEST_CASE(test_macro_overview)
+{
+  dunedaq::fddetdataformats::WIBEthFrame frame = create_test_frame();
 
   // Lazy with the channel-plane assignments.
   std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers =
@@ -67,6 +75,52 @@ BOOST_AUTO_TEST_CASE(test_macro_overview)
 
   BOOST_TEST(tp_count == 600);
   BOOST_TEST(min_peak > 200);  // Truly it should depend on the plane, so this is naive.
+}
+
+BOOST_AUTO_TEST_CASE(test_tpg_resetting) {
+  dunedaq::fddetdataformats::WIBEthFrame frame = create_test_frame();
+
+  std::vector<std::pair<std::string, nlohmann::json>> configs = {
+    {
+      "AVXThresholdProcessor",
+      {
+        {"plane0", 200},
+        {"plane1", 300},
+        {"plane2", 445}
+      }
+    }
+  };
+
+  TPGenerator tpg;
+  constexpr int sample_tick_difference = 1;
+
+  std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers =
+          {{ 0, 0}, { 1, 0}, { 2, 0}, { 3, 0}, { 4, 0}, { 5, 0}, { 6, 0}, { 7, 0}, { 8, 0}, { 9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0},
+           {16, 1}, {17, 1}, {18, 1}, {19, 1}, {20, 1}, {21, 1}, {22, 1}, {23, 1}, {24, 1}, {25, 1}, {26, 1}, {27, 1}, {28, 1}, {29, 1}, {30, 1}, {31, 1},
+           {32, 2}, {33, 2}, {34, 2}, {35, 2}, {36, 2}, {37, 2}, {38, 2}, {39, 2}, {40, 2}, {41, 2}, {42, 2}, {43, 2}, {44, 2}, {45, 2}, {46, 2}, {47, 2},
+           {48, 0}, {49, 0}, {50, 0}, {51, 0}, {52, 0}, {53, 1}, {54, 1}, {55, 1}, {56, 1}, {57, 1}, {58, 2}, {59, 2}, {60, 2}, {61, 2}, {62, 2}, {63, 2}};
+
+  tpg.configure(configs, channel_plane_numbers, sample_tick_difference);
+
+  std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = tpg(&frame);
+  BOOST_TEST(tps.size() == 600);
+
+  tps.clear();
+  tpg.reset();
+
+  configs[0].second["plane0"] = 64;
+  configs[0].second["plane1"] = 64;
+  configs[0].second["plane2"] = 64;
+
+  tpg.configure(configs, channel_plane_numbers, sample_tick_difference);
+
+  tps = tpg(&frame);
+  BOOST_TEST(tps.size() == 768);
+
+  tpg.reset();
+  tps.clear();
+  tps = tpg(&frame);
+  BOOST_TEST(tps.size() == 0);
 }
 
 } // namespace tpglibs

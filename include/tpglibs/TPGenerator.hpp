@@ -30,9 +30,10 @@ namespace tpglibs {
  */
 class TPGenerator {
   static const uint8_t m_num_channels_per_pipeline = 16; // AVX2 with int16 data samples allows us to process 16 channels.
+  bool m_configured {false};
   uint8_t m_num_pipelines = 0;  // Gets set inside configure.
   std::vector<AVXPipeline> m_tpg_pipelines;
-  float m_sample_tick_difference;
+  float m_sample_tick_difference = 0;
   std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
 
   public:
@@ -46,6 +47,11 @@ class TPGenerator {
     void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                    const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
                    const float sample_tick_difference);
+
+    /**
+     * @brief Remove all pipelines and reset member variables to default state.
+     */
+    void reset();
 
     /**
      * @brief Set the minimum samples over threshold for a TP according to plane.
