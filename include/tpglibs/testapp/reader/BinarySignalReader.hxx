@@ -49,17 +49,19 @@ std::vector<T> BinarySignalReader<T>::next(size_t n) {
 
 template<typename T>
 bool BinarySignalReader<T>::eof() {
-  if (m_eof_reached) {
-    return true;
-  }
-  
   // Check if we're at the end of the file by comparing position with file size
   std::streampos current_pos = m_file.tellg();
   m_file.seekg(0, std::ios::end);
   std::streampos end_pos = m_file.tellg();
   m_file.seekg(current_pos);
   
-  return current_pos >= end_pos;
+  if (current_pos >= end_pos) {
+    m_eof_reached = true;
+    return true;
+  }
+  
+  m_eof_reached = false;
+  return false;
 }
 
 template<typename T>
@@ -70,7 +72,7 @@ std::streampos BinarySignalReader<T>::tellg() {
 template<typename T>
 void BinarySignalReader<T>::seekg(std::streampos pos) {
   m_file.seekg(pos);
-  m_eof_reached = false;
+  eof(); // Update m_eof_reached based on actual position
 }
 
 } // namespace testapp
