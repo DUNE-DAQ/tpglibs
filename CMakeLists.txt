@@ -39,7 +39,7 @@ daq_add_unit_test(binary_signal_reader_test LINK_LIBRARIES tpglibs)
 
 # Add test application
 add_executable(tpg_test_app
-    test/apps/TPGProcessorTestApp.cpp
+    test/apps/test_tpg_processor_app.cxx
 )
 target_link_libraries(tpg_test_app tpglibs)
 

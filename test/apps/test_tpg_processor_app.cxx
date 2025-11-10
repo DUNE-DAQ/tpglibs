@@ -1,5 +1,5 @@
 /**
- * @file TPGProcessorTestApp.cpp
+ * @file test_tpg_processor_app.cxx
  *
  * @brief TPG Processor Test Application - Processes binary data through configured processors
  *
@@ -336,3 +336,4 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 }
+
