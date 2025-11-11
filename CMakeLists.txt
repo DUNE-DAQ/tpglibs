@@ -35,5 +35,9 @@ daq_add_unit_test(ProcessorInternalStateNameRegistry_test LINK_LIBRARIES tpglibs
 daq_add_unit_test(ProcessorInternalStateBufferManager_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(avx_processors_internal_state_collect_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(processor_state_registrate_collect_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(binary_signal_reader_test LINK_LIBRARIES tpglibs)
+
+# Add test application
+daq_add_application(tpglibs_processor_test test_tpg_processor_app.cxx TEST LINK_LIBRARIES tpglibs)
 
 daq_install()
