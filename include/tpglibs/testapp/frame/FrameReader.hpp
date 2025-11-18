@@ -1,0 +1,152 @@
+/**
+ * @file FrameReader.hpp
+ *
+ * @brief Frame reader for binary frame files - reads frames sequentially
+ *
+ * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * Licensing/copyright details are in the COPYING file that you should have
+ * received with this code.
+ */
+
+#ifndef TPGLIBS_TESTAPP_FRAMEREADER_HPP_
+#define TPGLIBS_TESTAPP_FRAMEREADER_HPP_
+
+#include "tpglibs/testapp/reader/BinarySignalReader.hpp"
+#include <cstdint>
+#include <vector>
+#include <string>
+
+namespace tpglibs {
+namespace testapp {
+
+/**
+ * @brief Status codes for frame reading operations
+ */
+enum class FrameReadStatus {
+  OK,           ///< Frame read successfully
+  END_OF_FILE,  ///< End of file reached (normal condition)
+  ERROR         ///< Fatal error (invalid header, malformed frame, I/O error)
+};
+
+/**
+ * @brief Raw frame view - contains frame header and data
+ *
+ * This is a simple container for raw frame bytes. The frame consists of:
+ * - Header: 16 bytes (8 bytes timestamp + 8 bytes another_key)
+ * - Data: frame_data_size bytes
+ */
+struct RawFrameView {
+  std::vector<uint8_t> bytes;  ///< Complete frame: header (16 bytes) + data
+  
+  /**
+   * @brief Get pointer to frame header (first 16 bytes)
+   */
+  const uint8_t* header() const { return bytes.data(); }
+  
+  /**
+   * @brief Get pointer to frame data (bytes after header)
+   */
+  const uint8_t* data() const { return bytes.data() + 16; }
+  
+  /**
+   * @brief Get frame data size
+   */
+  size_t data_size() const { return bytes.size() - 16; }
+  
+  /**
+   * @brief Check if frame is valid (has header and data)
+   */
+  bool is_valid() const { return bytes.size() >= 16; }
+};
+
+/**
+ * @brief Frame reader for binary frame files
+ *
+ * Reads frames sequentially from a binary file. Each frame consists of:
+ * - Frame header: 16 bytes (timestamp + another_key)
+ * - Frame data: configurable size (typically num_channels * num_time_samples * 2)
+ *
+ * The file must start with a BinaryFileHeader (12 bytes) which is validated
+ * on construction.
+ *
+ * Error semantics:
+ * - EOF: Normal end of file, no error
+ * - ERROR: Fatal error (invalid header, malformed frame, I/O error)
+ *
+ * Reset semantics:
+ * - reset() seeks back to start of frame data (after file header)
+ * - Assumes file header is still valid (no revalidation)
+ */
+class FrameReader {
+ public:
+  /**
+   * @brief Constructor - opens file and validates header
+   * @param filepath Path to binary frame file
+   * @param frame_data_size Size of frame data in bytes (excluding 16-byte header)
+   * @throws std::runtime_error if file cannot be opened or header is invalid
+   */
+  explicit FrameReader(const std::string& filepath, size_t frame_data_size);
+  
+  /**
+   * @brief Destructor
+   */
+  ~FrameReader() = default;
+  
+  // Non-copyable
+  FrameReader(const FrameReader&) = delete;
+  FrameReader& operator=(const FrameReader&) = delete;
+  
+  // Movable
+  FrameReader(FrameReader&&) = default;
+  FrameReader& operator=(FrameReader&&) = default;
+  
+  /**
+   * @brief Read next frame from file
+   * @return Pair of (status, frame_view)
+   *   - status == OK: Frame read successfully, frame_view contains data
+   *   - status == END_OF_FILE: End of file reached, frame_view is empty
+   *   - status == ERROR: Fatal error occurred, frame_view is empty
+   */
+  std::pair<FrameReadStatus, RawFrameView> next_frame();
+  
+  /**
+   * @brief Check if end of file reached
+   * @return true if EOF reached
+   */
+  bool eof();
+  
+  /**
+   * @brief Reset reader to start of frame data (after file header)
+   *
+   * Seeks back to position after the 12-byte file header.
+   * Does not revalidate the file header - assumes it's still valid.
+   */
+  void reset();
+  
+  /**
+   * @brief Get current file position (relative to start of file)
+   */
+  std::streampos tellg();
+
+ private:
+  BinarySignalReader<uint8_t> m_reader;
+  size_t m_frame_data_size;
+  size_t m_total_frame_size;  // 16 (header) + frame_data_size
+  bool m_eof_reached;
+  static constexpr size_t FILE_HEADER_SIZE = 12;  // BinaryFileHeader size
+  static constexpr size_t FRAME_HEADER_SIZE = 16; // Frame header size
+  
+  /**
+   * @brief Validate file header (magic number and version)
+   * @return true if valid, false otherwise
+   */
+  bool validate_file_header();
+};
+
+} // namespace testapp
+} // namespace tpglibs
+
+#include "FrameReader.hxx"
+
+#endif // TPGLIBS_TESTAPP_FRAMEREADER_HPP_
+
