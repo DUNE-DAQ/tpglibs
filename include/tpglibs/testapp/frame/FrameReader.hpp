@@ -40,18 +40,27 @@ struct RawFrameView {
   
   /**
    * @brief Get pointer to frame header (first 16 bytes)
+   * @warning Returns nullptr if frame is invalid (bytes.size() < 16)
    */
-  const uint8_t* header() const { return bytes.data(); }
+  const uint8_t* header() const { 
+    return (bytes.size() >= 16) ? bytes.data() : nullptr; 
+  }
   
   /**
    * @brief Get pointer to frame data (bytes after header)
+   * @warning Returns nullptr if frame is invalid (bytes.size() < 16)
    */
-  const uint8_t* data() const { return bytes.data() + 16; }
+  const uint8_t* data() const { 
+    return (bytes.size() >= 16) ? bytes.data() + 16 : nullptr; 
+  }
   
   /**
    * @brief Get frame data size
+   * @warning Returns 0 if frame is invalid (bytes.size() < 16) to avoid unsigned underflow
    */
-  size_t data_size() const { return bytes.size() - 16; }
+  size_t data_size() const { 
+    return (bytes.size() >= 16) ? bytes.size() - 16 : 0; 
+  }
   
   /**
    * @brief Check if frame is valid (has header and data)

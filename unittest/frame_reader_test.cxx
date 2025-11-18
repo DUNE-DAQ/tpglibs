@@ -10,6 +10,7 @@
 #define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/frame/FrameReader.hpp"
+#include "test_helpers.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <fstream>
@@ -17,25 +18,8 @@
 #include <cstdint>
 #include <cstring>
 
-namespace {
-  // Helper to create a valid binary file header
-  void write_file_header(std::ofstream& file) {
-    uint32_t magic = 0x54504754;  // "TPGT"
-    uint32_t version = 0x010004;  // 1.0.4
-    uint32_t reserved = 0x00000000;
-    file.write(reinterpret_cast<const char*>(&magic), sizeof(magic));
-    file.write(reinterpret_cast<const char*>(&version), sizeof(version));
-    file.write(reinterpret_cast<const char*>(&reserved), sizeof(reserved));
-  }
-  
-  // Helper to create a frame (16-byte header + data)
-  void write_frame(std::ofstream& file, uint64_t timestamp, uint64_t another_key, 
-                   const std::vector<uint8_t>& data) {
-    file.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
-    file.write(reinterpret_cast<const char*>(&another_key), sizeof(another_key));
-    file.write(reinterpret_cast<const char*>(data.data()), data.size());
-  }
-}
+using tpglibs::unittest::write_file_header;
+using tpglibs::unittest::write_frame;
 
 BOOST_AUTO_TEST_SUITE(FrameReaderTest)
 

@@ -83,11 +83,12 @@ std::pair<FrameReadStatus, RawFrameView> FrameReader::next_frame() {
   // Read frame data
   auto data_bytes = m_reader.next(m_frame_data_size);
   if (data_bytes.size() != m_frame_data_size) {
+    // Incomplete frame data is always an error
+    // Check EOF to set state consistently
     if (m_reader.eof()) {
       m_eof_reached = true;
-      return {FrameReadStatus::ERROR, RawFrameView{}};  // Incomplete frame is an error
     }
-    return {FrameReadStatus::ERROR, RawFrameView{}};
+    return {FrameReadStatus::ERROR, RawFrameView{}};  // Incomplete frame is an error
   }
   
   frame.bytes.insert(frame.bytes.end(), data_bytes.begin(), data_bytes.end());
