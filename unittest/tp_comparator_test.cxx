@@ -124,27 +124,6 @@ BOOST_AUTO_TEST_CASE(TestChannelMismatch)
   BOOST_CHECK(result.mismatch_reason.find("got 10") != std::string::npos);
 }
 
-BOOST_AUTO_TEST_CASE(TestTimeOverThresholdMismatch)
-{
-  std::vector<dunedaq::trgdataformats::TriggerPrimitive> expected;
-  auto tp_expected = create_test_tp(1000, 5, 200, 3);
-  tp_expected.time_over_threshold = 100;
-  expected.push_back(tp_expected);
-  
-  std::vector<dunedaq::trgdataformats::TriggerPrimitive> actual;
-  auto tp_actual = create_test_tp(1000, 5, 200, 3);
-  tp_actual.time_over_threshold = 200;  // Different time_over_threshold
-  actual.push_back(tp_actual);
-  
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
-  
-  BOOST_CHECK(!result.matches);
-  BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
-  BOOST_CHECK(result.mismatch_reason.find("time_over_threshold mismatch") != std::string::npos);
-  BOOST_CHECK(result.mismatch_reason.find("expected 100") != std::string::npos);
-  BOOST_CHECK(result.mismatch_reason.find("got 200") != std::string::npos);
-}
-
 BOOST_AUTO_TEST_CASE(TestAdcPeakMismatch)
 {
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> expected;
@@ -282,10 +261,8 @@ BOOST_AUTO_TEST_CASE(TestSortingByChannel)
   // Test sorting by channel (secondary key when time_start matches)
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> expected;
   auto tp1 = create_test_tp(1000, 5, 200, 3);
-  tp1.time_over_threshold = 100;
   expected.push_back(tp1);
   auto tp2 = create_test_tp(1000, 7, 200, 3);  // Same time_start, different channel
-  tp2.time_over_threshold = 100;
   expected.push_back(tp2);
   
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> actual;
@@ -297,15 +274,15 @@ BOOST_AUTO_TEST_CASE(TestSortingByChannel)
   BOOST_CHECK(result.matches);
 }
 
-BOOST_AUTO_TEST_CASE(TestSortingByTimeOverThreshold)
+BOOST_AUTO_TEST_CASE(TestSortingBySamplesOverThreshold)
 {
-  // Test sorting by time_over_threshold (tertiary key)
+  // Test sorting by samples_over_threshold (tertiary key)
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> expected;
   auto tp1 = create_test_tp(1000, 5, 200, 3);
-  tp1.time_over_threshold = 100;
+  tp1.samples_over_threshold = 3;
   expected.push_back(tp1);
   auto tp2 = create_test_tp(1000, 5, 200, 3);  // Same time_start and channel
-  tp2.time_over_threshold = 200;  // Different time_over_threshold
+  tp2.samples_over_threshold = 7;  // Different samples_over_threshold
   expected.push_back(tp2);
   
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> actual;
@@ -320,7 +297,6 @@ BOOST_AUTO_TEST_CASE(TestSortingByTimeOverThreshold)
 BOOST_AUTO_TEST_CASE(TestFormatTP)
 {
   auto tp = create_test_tp(1000, 5, 200, 3);
-  tp.time_over_threshold = 100;
   tp.adc_integral = 5000;
   tp.samples_to_peak = 10;
   
@@ -328,7 +304,6 @@ BOOST_AUTO_TEST_CASE(TestFormatTP)
   
   BOOST_CHECK(formatted.find("time_start=1000") != std::string::npos);
   BOOST_CHECK(formatted.find("channel=5") != std::string::npos);
-  BOOST_CHECK(formatted.find("time_over_threshold=100") != std::string::npos);
   BOOST_CHECK(formatted.find("adc_peak=200") != std::string::npos);
   BOOST_CHECK(formatted.find("samples_over_threshold=3") != std::string::npos);
   BOOST_CHECK(formatted.find("adc_integral=5000") != std::string::npos);

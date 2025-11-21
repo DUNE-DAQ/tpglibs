@@ -265,7 +265,6 @@ TPs are stored using raw binary serialization of the `dunedaq::trgdataformats::T
 **Key Fields in TriggerPrimitive** (for reference, actual struct may have more):
 - `time_start` (int64_t): Timestamp when TP starts
 - `channel` (channel_t, typically uint32_t): Channel number
-- `time_over_threshold` (int64_t or uint32_t): Duration over threshold
 - `adc_peak` (int16_t): Peak ADC value
 - `samples_over_threshold` (uint16_t): Number of samples over threshold
 
@@ -274,7 +273,7 @@ TPs are stored using raw binary serialization of the `dunedaq::trgdataformats::T
 TPs must be sorted for deterministic comparison and file format consistency:
 1. **Primary key**: `time_start` (ascending)
 2. **Secondary key**: `channel` (ascending)
-3. **Tertiary key**: `time_over_threshold` (ascending)
+3. **Tertiary key**: `samples_over_threshold` (ascending)
 
 Both `TPWriter` and `TPReader` must use the same sorting criteria. The `TPComparator` utility should also use this same ordering.
 
@@ -291,11 +290,10 @@ TP validation files use the same file header as other binary files (Section 1.2)
 
 When validating TPs:
 1. Read expected TPs for the validation frame index
-2. Sort both expected and actual TPs using the same criteria (time_start, channel, time_over_threshold)
+2. Sort both expected and actual TPs using the same criteria (time_start, channel, samples_over_threshold)
 3. Compare element-by-element:
    - `time_start` must match exactly
    - `channel` must match exactly
-   - `time_over_threshold` must match exactly
    - `adc_peak` must match exactly
    - `samples_over_threshold` must match exactly
    - Other fields as defined by TriggerPrimitive struct

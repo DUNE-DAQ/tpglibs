@@ -40,8 +40,11 @@ daq_add_unit_test(frame_reader_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(dummy_frame_adapter_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(tp_reader_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(tp_comparator_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(binary_file_validator_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(test_config_parser_test LINK_LIBRARIES tpglibs)
 
-# Add test application
+# Add test applications
 daq_add_application(tpglibs_processor_test test_tpg_processor_app.cxx TEST LINK_LIBRARIES tpglibs)
+daq_add_application(tpglibs_generator_test test_tpg_generator_app.cxx TEST LINK_LIBRARIES tpglibs)
 
 daq_install()

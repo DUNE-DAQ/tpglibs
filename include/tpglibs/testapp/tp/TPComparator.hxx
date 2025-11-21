@@ -63,7 +63,6 @@ std::string TPComparator::format_tp(const dunedaq::trgdataformats::TriggerPrimit
   std::ostringstream oss;
   oss << "TP(time_start=" << tp.time_start
       << ", channel=" << tp.channel
-      << ", time_over_threshold=" << tp.time_over_threshold
       << ", adc_peak=" << tp.adc_peak
       << ", samples_over_threshold=" << tp.samples_over_threshold
       << ", adc_integral=" << tp.adc_integral
@@ -84,8 +83,8 @@ void TPComparator::sort_tps(std::vector<dunedaq::trgdataformats::TriggerPrimitiv
       if (a.channel != b.channel) {
         return a.channel < b.channel;
       }
-      // Tertiary: time_over_threshold
-      return a.time_over_threshold < b.time_over_threshold;
+      // Tertiary: samples_over_threshold
+      return a.samples_over_threshold < b.samples_over_threshold;
     });
 }
 
@@ -105,13 +104,6 @@ std::string TPComparator::compare_single_tp(
     std::ostringstream oss;
     oss << "channel mismatch: expected " << expected.channel 
         << ", got " << actual.channel;
-    return oss.str();
-  }
-  
-  if (expected.time_over_threshold != actual.time_over_threshold) {
-    std::ostringstream oss;
-    oss << "time_over_threshold mismatch: expected " << expected.time_over_threshold 
-        << ", got " << actual.time_over_threshold;
     return oss.str();
   }
   

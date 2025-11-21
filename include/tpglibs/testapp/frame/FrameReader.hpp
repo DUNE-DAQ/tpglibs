@@ -11,6 +11,7 @@
 #ifndef TPGLIBS_TESTAPP_FRAMEREADER_HPP_
 #define TPGLIBS_TESTAPP_FRAMEREADER_HPP_
 
+#include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 #include "tpglibs/testapp/reader/BinarySignalReader.hpp"
 #include <cstdint>
 #include <vector>
@@ -91,10 +92,11 @@ class FrameReader {
   /**
    * @brief Constructor - opens file and validates header
    * @param filepath Path to binary frame file
-   * @param frame_data_size Size of frame data in bytes (excluding 16-byte header)
    * @throws std::runtime_error if file cannot be opened or header is invalid
+   * 
+   * Uses fixed frame size for 64 channels × 256 time samples
    */
-  explicit FrameReader(const std::string& filepath, size_t frame_data_size);
+  explicit FrameReader(const std::string& filepath);
   
   /**
    * @brief Destructor
@@ -139,11 +141,12 @@ class FrameReader {
 
  private:
   BinarySignalReader<uint8_t> m_reader;
-  size_t m_frame_data_size;
   size_t m_total_frame_size;  // 16 (header) + frame_data_size
   bool m_eof_reached;
-  static constexpr size_t FILE_HEADER_SIZE = 12;  // BinaryFileHeader size
+  static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::HEADER_SIZE;
   static constexpr size_t FRAME_HEADER_SIZE = 16; // Frame header size
+  // Fixed frame data size for 64 channels × 256 time samples (unpacked int16_t format)
+  static constexpr size_t FRAME_DATA_SIZE = 64 * 256 * sizeof(int16_t);  // 32,768 bytes
   
   /**
    * @brief Validate file header (magic number and version)

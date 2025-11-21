@@ -32,7 +32,7 @@ struct TPComparisonResult {
  * @brief Comparator for TriggerPrimitive objects
  *
  * Static utility class for comparing TP vectors. Sorts both vectors
- * using the same key (time_start, channel, time_over_threshold) before
+ * using the same key (time_start, channel, samples_over_threshold) before
  * comparing to ensure deterministic results.
  */
 class TPComparator {
@@ -40,7 +40,7 @@ class TPComparator {
   /**
    * @brief Compare two TP vectors
    *
-   * Sorts both vectors using the same criteria (time_start, channel, time_over_threshold)
+   * Sorts both vectors using the same criteria (time_start, channel, samples_over_threshold)
    * before comparing element-by-element.
    *
    * @param expected Expected TPs (from validation file)
@@ -62,7 +62,7 @@ class TPComparator {
   /**
    * @brief Sort TPs for deterministic comparison
    *
-   * Uses sorting key: time_start (primary), channel (secondary), time_over_threshold (tertiary).
+   * Uses sorting key: time_start (primary), channel (secondary), samples_over_threshold (tertiary).
    * This matches the sorting used by TPWriter for consistency.
    *
    * @param tps Vector of TPs to sort (modified in place)

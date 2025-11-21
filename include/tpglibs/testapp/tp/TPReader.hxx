@@ -15,15 +15,10 @@
 #include <stdexcept>
 #include <climits>
 #include <limits>
+#include <string>
 
 namespace tpglibs {
 namespace testapp {
-
-struct BinaryFileHeader {
-  uint32_t magic_number;
-  uint32_t version;
-  uint32_t reserved;
-};
 
 TPReader::TPReader(const std::string& filepath) {
   std::ifstream file(filepath, std::ios::binary);
@@ -32,8 +27,10 @@ TPReader::TPReader(const std::string& filepath) {
   }
   
   // Validate file header
-  if (!validate_file_header(file)) {
-    throw std::runtime_error("Invalid file header in TP validation file: " + filepath);
+  std::string header_error;
+  if (!validate_file_header(file, header_error)) {
+    throw std::runtime_error("Invalid file header in TP validation file: " + filepath +
+                             (header_error.empty() ? "" : (": " + header_error)));
   }
   
   // Build index from remaining file content
@@ -42,25 +39,9 @@ TPReader::TPReader(const std::string& filepath) {
   file.close();
 }
 
-bool TPReader::validate_file_header(std::ifstream& file) {
+bool TPReader::validate_file_header(std::ifstream& file, std::string& error) {
   BinaryFileHeader header;
-  file.read(reinterpret_cast<char*>(&header), sizeof(BinaryFileHeader));
-  
-  if (file.gcount() != sizeof(BinaryFileHeader)) {
-    return false;
-  }
-  
-  // Validate magic number: 0x54504754 ("TPGT")
-  if (header.magic_number != 0x54504754) {
-    return false;
-  }
-  
-  // Validate version: 0x010004 (1.0.4)
-  if (header.version != 0x010004) {
-    return false;
-  }
-  
-  return true;
+  return BinaryFileValidator::validate_stream(file, header, error);
 }
 
 void TPReader::build_index(std::ifstream& file) {

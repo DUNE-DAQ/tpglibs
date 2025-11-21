@@ -11,6 +11,7 @@
 #ifndef TPGLIBS_TESTAPP_TPREADER_HPP_
 #define TPGLIBS_TESTAPP_TPREADER_HPP_
 
+#include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 #include "trgdataformats/TriggerPrimitive.hpp"
 #include <cstdint>
 #include <vector>
@@ -83,7 +84,7 @@ class TPReader {
   size_t num_frames() const;
 
  private:
-  static constexpr size_t FILE_HEADER_SIZE = 12;  // BinaryFileHeader size
+  static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::HEADER_SIZE;
   static constexpr size_t FRAME_INDEX_SIZE = sizeof(uint32_t);
   static constexpr size_t TP_COUNT_SIZE = sizeof(uint32_t);
   
@@ -95,7 +96,7 @@ class TPReader {
    * @param file Input file stream (positioned at start)
    * @return true if valid, false otherwise
    */
-  bool validate_file_header(std::ifstream& file);
+  bool validate_file_header(std::ifstream& file, std::string& error);
   
   /**
    * @brief Build index by reading all TP records from file
