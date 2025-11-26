@@ -13,6 +13,7 @@
 #include "tpglibs/testapp/tp/TPReader.hpp"
 #include "tpglibs/testapp/tp/TPComparator.hpp"
 #include "tpglibs/testapp/common/BinaryFileValidator.hpp"
+#include "tpglibs/testapp/common/TestConfigParser.hpp"
 #include "tpglibs/TPGenerator.hpp"
 #include "trgdataformats/Types.hpp"
 
@@ -28,9 +29,13 @@
 
 void print_usage(const char* program_name) {
   std::cerr << "Usage: " << program_name 
-            << " <input_frames_file> <config_file> <validation_file>" << std::endl;
+            << " [--validate-config] <input_frames_file> <config_file> <validation_file>" << std::endl;
+  std::cerr << "Options:" << std::endl;
+  std::cerr << "  --validate-config    Only validate config file, do not run TPGenerator" << std::endl;
   std::cerr << "Example: " << program_name 
             << " frames.bin config.json validation.val" << std::endl;
+  std::cerr << "Example: " << program_name 
+            << " --validate-config config.json" << std::endl;
 }
 
 /**
@@ -50,14 +55,32 @@ bool validate_binary_file(const std::string& filepath, const std::string& label)
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 4) {
-    print_usage(argv[0]);
-    return 1;
+  bool validate_config_only = false;
+  int arg_offset = 1;
+  
+  // Check for --validate-config flag
+  if (argc >= 2 && std::string(argv[1]) == "--validate-config") {
+    validate_config_only = true;
+    arg_offset = 2;
   }
   
-  std::string input_frames_file = argv[1];
-  std::string config_file = argv[2];
-  std::string validation_file = argv[3];
+  if (validate_config_only) {
+    // Config validation mode: only need config file
+    if (argc != 3) {
+      print_usage(argv[0]);
+      return 1;
+    }
+  } else {
+    // Normal mode: need all three files
+    if (argc != 4) {
+      print_usage(argv[0]);
+      return 1;
+    }
+  }
+  
+  std::string input_frames_file = validate_config_only ? "" : argv[arg_offset];
+  std::string config_file = argv[validate_config_only ? arg_offset : arg_offset + 1];
+  std::string validation_file = validate_config_only ? "" : argv[arg_offset + 2];
   
   // Load configuration
   std::ifstream config_stream(config_file);
@@ -75,82 +98,59 @@ int main(int argc, char* argv[]) {
   }
   config_stream.close();
   
-  // Parse basic config
+  // Parse TPGenerator config using TestConfigParser
+  tpglibs::testapp::TPGeneratorTestConfig tpg_config;
+  std::string parse_error;
+  if (!tpglibs::testapp::TestConfigParser::parse_tpgenerator_config(config, tpg_config, parse_error)) {
+    std::cerr << "ERROR: Failed to parse config: " << parse_error << std::endl;
+    return 1;
+  }
+  
   // Frame dimensions are fixed: 64 channels × 256 time samples (matching TPGenerator)
   constexpr int num_channels = 64;
   constexpr int num_time_samples = 256;
-  float sample_tick_difference = 1.0;
-  std::vector<uint16_t> sot_minima = {1, 1, 1};
-  std::vector<int> validation_frames;
-  
-  if (config.contains("test_config")) {
-    const auto& test_config = config["test_config"];
-    if (test_config.contains("sample_tick_difference")) {
-      sample_tick_difference = test_config["sample_tick_difference"].get<float>();
-    }
-    if (test_config.contains("sot_minima") && test_config["sot_minima"].is_array()) {
-      sot_minima.clear();
-      for (const auto& val : test_config["sot_minima"]) {
-        if (!val.is_number_unsigned()) {
-          std::cerr << "ERROR: sot_minima must contain non-negative integers" << std::endl;
-          return 1;
-        }
-        sot_minima.push_back(val.get<uint16_t>());
-      }
-      // Validate sot_minima has reasonable size (typically 3 for 3 planes)
-      if (sot_minima.empty()) {
-        std::cerr << "ERROR: sot_minima cannot be empty" << std::endl;
-        return 1;
-      }
-    }
-    if (test_config.contains("validation_frames") && test_config["validation_frames"].is_array()) {
-      for (const auto& val : test_config["validation_frames"]) {
-        if (!val.is_number_integer()) {
-          std::cerr << "ERROR: validation_frames must contain integers" << std::endl;
-          return 1;
-        }
-        int frame_idx = val.get<int>();
-        if (frame_idx < 0) {
-          std::cerr << "ERROR: validation_frames must contain non-negative integers" << std::endl;
-          return 1;
-        }
-        validation_frames.push_back(frame_idx);
-      }
-    }
-  }
-  
-  // Parse processor configs (minimal for now)
-  std::vector<std::pair<std::string, nlohmann::json>> processor_configs;
-  if (config.contains("processor_configs") && config["processor_configs"].is_array()) {
-    for (const auto& proc_config : config["processor_configs"]) {
-      if (proc_config.contains("processor_name") && proc_config.contains("config")) {
-        processor_configs.push_back({
-          proc_config["processor_name"].get<std::string>(),
-          proc_config["config"]
-        });
-      }
-    }
-  }
-  
-  // Parse channel-plane mappings
-  std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_mappings;
-  if (config.contains("channel_plane_mappings") && config["channel_plane_mappings"].is_array()) {
-    for (const auto& mapping : config["channel_plane_mappings"]) {
-      if (mapping.is_array() && mapping.size() == 2) {
-        channel_plane_mappings.push_back({
-          mapping[0].get<dunedaq::trgdataformats::channel_t>(),
-          mapping[1].get<int16_t>()
-        });
-      }
-    }
-  }
   
   // Validate channel-plane mappings size matches fixed num_channels (64)
-  if (!channel_plane_mappings.empty() && 
-      static_cast<int>(channel_plane_mappings.size()) != num_channels) {
-    std::cerr << "ERROR: channel_plane_mappings size (" << channel_plane_mappings.size()
+  if (static_cast<int>(tpg_config.channel_plane_mappings.size()) != num_channels) {
+    std::cerr << "ERROR: channel_plane_mappings size (" << tpg_config.channel_plane_mappings.size()
               << ") does not match expected num_channels (64)" << std::endl;
     return 1;
+  }
+  
+  // Config validation mode: print parsed config and exit
+  if (validate_config_only) {
+    std::cout << "Config validation successful!" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Parsed configuration:" << std::endl;
+    std::cout << "  Processor configs: " << tpg_config.processor_configs.size() << std::endl;
+    for (size_t i = 0; i < tpg_config.processor_configs.size(); ++i) {
+      std::cout << "    [" << i << "] " << tpg_config.processor_configs[i].first << std::endl;
+    }
+    std::cout << "  Channel-plane mappings: " << tpg_config.channel_plane_mappings.size() << std::endl;
+    std::cout << "  Sample tick difference: " << tpg_config.sample_tick_difference << std::endl;
+    std::cout << "  SOT minima: [";
+    for (size_t i = 0; i < tpg_config.sot_minima.size(); ++i) {
+      std::cout << tpg_config.sot_minima[i];
+      if (i < tpg_config.sot_minima.size() - 1) std::cout << ", ";
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "  Validation frames: ";
+    if (tpg_config.validation_frames.empty()) {
+      std::cout << "(none)" << std::endl;
+    } else {
+      for (size_t i = 0; i < tpg_config.validation_frames.size(); ++i) {
+        std::cout << tpg_config.validation_frames[i];
+        if (i < tpg_config.validation_frames.size() - 1) std::cout << ", ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << "  Max frames: ";
+    if (tpg_config.max_frames > 0) {
+      std::cout << tpg_config.max_frames << std::endl;
+    } else {
+      std::cout << "(unlimited)" << std::endl;
+    }
+    return 0;
   }
   
   // Validate binary file headers
@@ -165,19 +165,11 @@ int main(int argc, char* argv[]) {
   tpglibs::testapp::TPReader tp_reader(validation_file);
   
   // Configure TPGenerator
-  if (processor_configs.empty()) {
-    std::cerr << "ERROR: No processor configs provided" << std::endl;
-    return 1;
-  }
-  if (channel_plane_mappings.empty()) {
-    std::cerr << "ERROR: No channel-plane mappings provided" << std::endl;
-    return 1;
-  }
-  
   tpglibs::TPGenerator tpg;
   try {
-    tpg.configure(processor_configs, channel_plane_mappings, sample_tick_difference);
-    tpg.set_sot_minima(sot_minima);
+    tpg.configure(tpg_config.processor_configs, tpg_config.channel_plane_mappings, 
+                  tpg_config.sample_tick_difference);
+    tpg.set_sot_minima(tpg_config.sot_minima);
   } catch (const std::exception& e) {
     std::cerr << "ERROR: Failed to configure TPGenerator: " << e.what() << std::endl;
     return 1;
@@ -188,24 +180,35 @@ int main(int argc, char* argv[]) {
   
   std::cout << "Starting TPGenerator processing..." << std::endl;
   std::cout << "Channels: " << num_channels << ", Time samples: " << num_time_samples << std::endl;
-  if (!validation_frames.empty()) {
+  if (!tpg_config.validation_frames.empty()) {
     std::cout << "Validation frames: ";
-    for (int frame_idx : validation_frames) {
+    for (int frame_idx : tpg_config.validation_frames) {
       std::cout << frame_idx << " ";
     }
     std::cout << std::endl;
   } else {
     std::cout << "No validation frames specified - processing only" << std::endl;
   }
+  if (tpg_config.max_frames > 0) {
+    std::cout << "Max frames: " << tpg_config.max_frames << std::endl;
+  }
   std::cout << std::endl;
   
   // Convert validation_frames vector to set for O(1) lookup
-  std::set<int> validation_frames_set(validation_frames.begin(), validation_frames.end());
+  std::set<int> validation_frames_set(tpg_config.validation_frames.begin(), 
+                                       tpg_config.validation_frames.end());
+  
+  // Track max_frames limit if set
+  int max_frames = tpg_config.max_frames > 0 ? tpg_config.max_frames : -1;
   
   size_t frame_index = 0;
   bool all_passed = true;
   
   while (!frame_reader.eof()) {
+    // Check max_frames limit if set
+    if (max_frames > 0 && static_cast<int>(frame_index) >= max_frames) {
+      break;
+    }
     auto [status, frame_view] = frame_reader.next_frame();
     
     if (status == tpglibs::testapp::FrameReadStatus::END_OF_FILE) {
@@ -268,7 +271,7 @@ int main(int argc, char* argv[]) {
   
   std::cout << std::endl << "Processing completed." << std::endl;
   std::cout << "Frames processed: " << frame_index << std::endl;
-  if (!validation_frames.empty()) {
+  if (!tpg_config.validation_frames.empty()) {
     std::cout << "Validation results: " << (all_passed ? "PASS" : "FAIL") << std::endl;
     return all_passed ? 0 : 3;
   } else {
