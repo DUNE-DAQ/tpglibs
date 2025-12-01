@@ -202,6 +202,27 @@ bool validate_channel_mappings(const tpglibs::testapp::TPGeneratorTestConfig& co
 }
 
 /**
+ * @brief Validate that max_frames covers all validation_frames
+ * @return true if valid, false otherwise
+ */
+bool validate_max_frames_consistency(const tpglibs::testapp::TPGeneratorTestConfig& config) {
+  // Only validate if max_frames is set ( > 0) and validation_frames is not empty
+  if (config.max_frames > 0 && !config.validation_frames.empty()) {
+    int max_validation_frame = *std::max_element(config.validation_frames.begin(), 
+                                                  config.validation_frames.end());
+    if (config.max_frames <= max_validation_frame) {
+      std::cerr << "ERROR: max_frames (" << config.max_frames 
+                << ") must be greater than the largest validation frame (" 
+                << max_validation_frame << ")" << std::endl;
+      std::cerr << "  Validation frames: [" << format_vector(config.validation_frames) << "]" << std::endl;
+      std::cerr << "  This ensures all validation frames will be processed" << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * @brief Validate that validation frames exist in validation file
  * @return true if all frames exist, false otherwise
  */
@@ -415,6 +436,10 @@ int run_config_validation(const std::string& config_file) {
     return ExitCode::USAGE_ERROR;
   }
   
+  if (!validate_max_frames_consistency(tpg_config)) {
+    return ExitCode::USAGE_ERROR;
+  }
+  
   print_config_summary(tpg_config);
   return ExitCode::SUCCESS;
 }
@@ -437,6 +462,10 @@ int run_processing_mode(const AppArguments& args) {
   }
   
   if (!validate_channel_mappings(tpg_config)) {
+    return ExitCode::USAGE_ERROR;
+  }
+  
+  if (!validate_max_frames_consistency(tpg_config)) {
     return ExitCode::USAGE_ERROR;
   }
   
