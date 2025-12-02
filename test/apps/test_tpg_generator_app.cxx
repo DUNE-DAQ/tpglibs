@@ -38,9 +38,10 @@ namespace ExitCode {
 }
 
 // Frame dimensions (matching TPGenerator and DUMMY_FRAME_STRUCT)
+// DUMMY_FRAME_STRUCT is defined in DummyFrameAdapter.hpp
 namespace FrameConstants {
-  constexpr int NUM_CHANNELS = tpglibs::testapp::DUMMY_FRAME_STRUCT::s_num_channels;
-  constexpr int NUM_TIME_SAMPLES = tpglibs::testapp::DUMMY_FRAME_STRUCT::s_time_samples_per_frame;
+  constexpr int NUM_CHANNELS = tpglibs::testapp::DUMMY_FRAME_STRUCT::s_num_channels; // 64
+  constexpr int NUM_TIME_SAMPLES = tpglibs::testapp::DUMMY_FRAME_STRUCT::s_time_samples_per_frame; // 256
   constexpr size_t FRAME_HEADER_SIZE = 16;
   constexpr size_t FRAME_DATA_SIZE = NUM_CHANNELS * NUM_TIME_SAMPLES * sizeof(int16_t);
   constexpr size_t EXPECTED_FRAME_SIZE = FRAME_HEADER_SIZE + FRAME_DATA_SIZE;
@@ -151,6 +152,7 @@ bool validate_binary_file(const std::string& filepath, const std::string& label)
 
 /**
  * @brief Format vector for output (comma-separated)
+ * Only used for outputting vectors to the console.
  */
 template<typename T>
 std::string format_vector(const std::vector<T>& vec, const std::string& empty_label = "(none)") {
@@ -252,11 +254,13 @@ std::optional<tpglibs::TPGenerator> configure_tpgenerator(
     const tpglibs::testapp::TPGeneratorTestConfig& config) {
   tpglibs::TPGenerator tpg;
   try {
+    // pass through the config to the TPGenerator
     tpg.configure(config.processor_configs, config.channel_plane_mappings, 
                   config.sample_tick_difference);
     tpg.set_sot_minima(config.sot_minima);
   } catch (const std::exception& e) {
     std::cerr << "ERROR: Failed to configure TPGenerator: " << e.what() << std::endl;
+    // assume nothing wrong with TPGenerator itself, then must be something wrong with the config
     std::cerr << "  Check processor_configs and channel_plane_mappings in config file" << std::endl;
     return std::nullopt;
   }
@@ -304,6 +308,7 @@ std::optional<std::vector<dunedaq::trgdataformats::TriggerPrimitive>> process_fr
   
   // Process through TPGenerator
   try {
+    // call the TPGenerator
     return tpg(frame.get());
   } catch (const std::exception& e) {
     std::cerr << "ERROR: TPGenerator processing failed at frame " << frame_index << std::endl;
@@ -363,6 +368,7 @@ int process_frames(tpglibs::TPGenerator& tpg,
                                       config.validation_frames.end());
   
   // Track max_frames limit
+  // Use value -1 to indicate no limit
   const int max_frames = config.max_frames > 0 ? config.max_frames : -1;
   
   size_t frame_index = 0;
@@ -392,7 +398,7 @@ int process_frames(tpglibs::TPGenerator& tpg,
       return ExitCode::FILE_ERROR;
     }
     
-    // Validate if this is a validation frame
+    // Perform requested validation (if this is a validation frame)
     if (validation_frames_set.find(static_cast<int>(frame_index)) != validation_frames_set.end()) {
       auto expected_tps = tp_reader.get_tps_for_frame(frame_index);
       if (!validate_tps(frame_index, expected_tps, *actual_tps)) {
