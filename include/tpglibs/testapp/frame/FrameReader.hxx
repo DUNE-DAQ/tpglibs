@@ -60,6 +60,7 @@ std::pair<FrameReadStatus, RawFrameView> FrameReader::next_frame() {
       return {FrameReadStatus::END_OF_FILE, RawFrameView{}};
     }
     // Partial frame header is always an error, even if EOF
+    // This is never expected to happen, so we throw an error
     m_eof_reached = true;  // Mark EOF since we can't continue
     return {FrameReadStatus::ERROR, RawFrameView{}};
   }

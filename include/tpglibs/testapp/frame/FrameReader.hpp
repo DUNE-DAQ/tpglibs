@@ -32,7 +32,8 @@ enum class FrameReadStatus {
 /**
  * @brief Raw frame view - contains frame header and data
  *
- * This is a simple container for raw frame bytes. The frame consists of:
+ * This is a simple container for raw frame bytes that only divides the frame into header and data.
+ * The frame consists of:
  * - Header: 16 bytes (8 bytes timestamp + 8 bytes another_key)
  * - Data: frame_data_size bytes
  */
@@ -52,11 +53,12 @@ struct RawFrameView {
    * @warning Returns nullptr if frame is invalid (bytes.size() < 16)
    */
   const uint8_t* data() const { 
+    // simple check to see if content exists after the header
     return (bytes.size() >= 16) ? bytes.data() + 16 : nullptr; 
   }
   
   /**
-   * @brief Get frame data size
+   * @brief Get frame data size, which is the size of the frame minus the header size
    * @warning Returns 0 if frame is invalid (bytes.size() < 16) to avoid unsigned underflow
    */
   size_t data_size() const { 
@@ -75,8 +77,9 @@ struct RawFrameView {
  * Reads frames sequentially from a binary file. Each frame consists of:
  * - Frame header: 16 bytes (timestamp + another_key)
  * - Frame data: configurable size (typically num_channels * num_time_samples * 2)
+ * 2 stands for 2 bytes per sample, which is the size of int16_t
  *
- * The file must start with a BinaryFileHeader (12 bytes) which is validated
+ * The file must start with a BinaryFileHeader (12 bytes, defined for this test app, in common/BinaryFileValidator.hpp) which is validated
  * on construction.
  *
  * Error semantics:

@@ -30,12 +30,12 @@ namespace testapp {
  * - Compatible with TPGenerator's expected interface
  */
 struct DUMMY_FRAME_STRUCT {
-  // TPGenerator compatibility - hardcoded for 64 channels, 256 time samples
+  // Since this is dedicated test application, hardcoded for 64 channels, 256 time samples
   using word_t = uint64_t;
   static constexpr int s_num_channels = 64;
   static constexpr int s_time_samples_per_frame = 256;
   static constexpr int s_bits_per_adc = 16;
-  static constexpr int s_words_per_time_sample = 16;  // (64 + 3) / 4 = 16
+  static constexpr int s_words_per_time_sample = 16;
   
   uint64_t timestamp;      ///< Frame timestamp (8 bytes)
   uint64_t another_key;    ///< Additional header field (8 bytes)
@@ -67,6 +67,7 @@ struct DUMMY_FRAME_STRUCT {
    * @param channel Channel index [0, 63]
    * @param time_sample Time sample index [0, 255]
    * @param value ADC value to set
+   * @note This is not used in the test application, but is included for completeness
    */
   void set_adc(size_t channel, size_t time_sample, int16_t value);
   
