@@ -143,7 +143,5 @@ class TestConfigParser {
 } // namespace testapp
 } // namespace tpglibs
 
-#include "TestConfigParser.hxx"
-
 #endif // TPGLIBS_TESTAPP_TESTCONFIGPARSER_HPP_
 

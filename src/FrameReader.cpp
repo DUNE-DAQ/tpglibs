@@ -1,15 +1,12 @@
 /**
- * @file FrameReader.hxx
+ * @file FrameReader.cpp
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#ifndef TPGLIBS_TESTAPP_FRAMEREADER_HXX_
-#define TPGLIBS_TESTAPP_FRAMEREADER_HXX_
-
-#include "FrameReader.hpp"
+#include "tpglibs/testapp/frame/FrameReader.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <string>
@@ -103,6 +100,4 @@ std::streampos FrameReader::tellg() {
 
 } // namespace testapp
 } // namespace tpglibs
-
-#endif // TPGLIBS_TESTAPP_FRAMEREADER_HXX_
 

@@ -108,7 +108,5 @@ class TPReader {
 } // namespace testapp
 } // namespace tpglibs
 
-#include "TPReader.hxx"
-
 #endif // TPGLIBS_TESTAPP_TPREADER_HPP_
 

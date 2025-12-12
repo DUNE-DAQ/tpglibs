@@ -161,7 +161,5 @@ class FrameReader {
 } // namespace testapp
 } // namespace tpglibs
 
-#include "FrameReader.hxx"
-
 #endif // TPGLIBS_TESTAPP_FRAMEREADER_HPP_
 

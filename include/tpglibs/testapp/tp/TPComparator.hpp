@@ -83,7 +83,5 @@ class TPComparator {
 } // namespace testapp
 } // namespace tpglibs
 
-#include "TPComparator.hxx"
-
 #endif // TPGLIBS_TESTAPP_TPCOMPARATOR_HPP_
 

@@ -1,15 +1,12 @@
 /**
- * @file TestConfigParser.hxx
+ * @file TestConfigParser.cpp
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#ifndef TPGLIBS_TESTAPP_TESTCONFIGPARSER_HXX_
-#define TPGLIBS_TESTAPP_TESTCONFIGPARSER_HXX_
-
-#include "TestConfigParser.hpp"
+#include "tpglibs/testapp/common/TestConfigParser.hpp"
 #include <algorithm>
 
 namespace tpglibs {
@@ -314,6 +311,4 @@ bool TestConfigParser::validate_required_integer(const nlohmann::json& obj,
 
 } // namespace testapp
 } // namespace tpglibs
-
-#endif // TPGLIBS_TESTAPP_TESTCONFIGPARSER_HXX_
 

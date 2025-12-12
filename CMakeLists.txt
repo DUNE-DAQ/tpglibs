@@ -47,4 +47,10 @@ daq_add_unit_test(test_config_parser_test LINK_LIBRARIES tpglibs)
 daq_add_application(tpglibs_processor_test test_tpg_processor_app.cxx TEST LINK_LIBRARIES tpglibs)
 daq_add_application(tpglibs_generator_test test_tpg_generator_app.cxx TEST LINK_LIBRARIES tpglibs)
 
+# Add golden test data generator utility
+daq_add_application(generate_golden_test_data generate_golden_test_data.cxx TEST LINK_LIBRARIES tpglibs)
+
+# Add example test files generator utility
+daq_add_application(generate_example_tests generate_example_tests.cxx TEST LINK_LIBRARIES tpglibs)
+
 daq_install()

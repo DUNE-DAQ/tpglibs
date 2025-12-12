@@ -1,15 +1,12 @@
 /**
- * @file TPReader.hxx
+ * @file TPReader.cpp
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#ifndef TPGLIBS_TESTAPP_TPREADER_HXX_
-#define TPGLIBS_TESTAPP_TPREADER_HXX_
-
-#include "TPReader.hpp"
+#include "tpglibs/testapp/tp/TPReader.hpp"
 #include <fstream>
 #include <cstring>
 #include <stdexcept>
@@ -142,6 +139,4 @@ size_t TPReader::num_frames() const {
 
 } // namespace testapp
 } // namespace tpglibs
-
-#endif // TPGLIBS_TESTAPP_TPREADER_HXX_
 

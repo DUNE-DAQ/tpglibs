@@ -1,15 +1,12 @@
 /**
- * @file TPComparator.hxx
+ * @file TPComparator.cpp
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#ifndef TPGLIBS_TESTAPP_TPCOMPARATOR_HXX_
-#define TPGLIBS_TESTAPP_TPCOMPARATOR_HXX_
-
-#include "TPComparator.hpp"
+#include "tpglibs/testapp/tp/TPComparator.hpp"
 #include <algorithm>
 #include <sstream>
 #include <limits>
@@ -141,6 +138,4 @@ std::string TPComparator::compare_single_tp(
 
 } // namespace testapp
 } // namespace tpglibs
-
-#endif // TPGLIBS_TESTAPP_TPCOMPARATOR_HXX_
 

@@ -92,7 +92,5 @@ class BinaryFileValidator {
 } // namespace testapp
 } // namespace tpglibs
 
-#include "BinaryFileValidator.hxx"
-
 #endif // TPGLIBS_TESTAPP_BINARYFILEVALIDATOR_HPP_
 

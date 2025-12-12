@@ -122,8 +122,6 @@ class DummyFrameAdapter {
 } // namespace testapp
 } // namespace tpglibs
 
-#include "DummyFrameAdapter.hxx"
-
 #endif // TPGLIBS_TESTAPP_DUMMYFRAMEADAPTER_HPP_
 
 

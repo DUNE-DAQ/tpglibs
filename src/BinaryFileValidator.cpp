@@ -1,15 +1,12 @@
 /**
- * @file BinaryFileValidator.hxx
+ * @file BinaryFileValidator.cpp
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#ifndef TPGLIBS_TESTAPP_BINARYFILEVALIDATOR_HXX_
-#define TPGLIBS_TESTAPP_BINARYFILEVALIDATOR_HXX_
-
-#include "BinaryFileValidator.hpp"
+#include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 #include <cstring>
 #include <string>
 #include <fstream>
@@ -73,6 +70,4 @@ bool BinaryFileValidator::validate_header_fields(const BinaryFileHeader& header,
 
 } // namespace testapp
 } // namespace tpglibs
-
-#endif // TPGLIBS_TESTAPP_BINARYFILEVALIDATOR_HXX_
 
