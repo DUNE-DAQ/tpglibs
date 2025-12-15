@@ -41,7 +41,7 @@ bool FrameReader::validate_file_header() {
 
 std::pair<FrameReadStatus, RawFrameView> FrameReader::next_frame() {
   if (m_eof_reached) {
-    return {FrameReadStatus::END_OF_FILE, RawFrameView{}};
+    return {FrameReadStatus::kEOF, RawFrameView{}};
   }
   
   RawFrameView frame;
@@ -50,16 +50,16 @@ std::pair<FrameReadStatus, RawFrameView> FrameReader::next_frame() {
   // Read frame header (16 bytes)
   auto header_bytes = m_reader.next(FRAME_HEADER_SIZE);
   if (header_bytes.size() != FRAME_HEADER_SIZE) {
-    // Only treat 0 bytes read + EOF as clean END_OF_FILE
-    // Any partial read (0 < size < FRAME_HEADER_SIZE) is a corrupted/incomplete header = ERROR
+    // Only treat 0 bytes read + EOF as clean kEOF
+    // Any partial read (0 < size < FRAME_HEADER_SIZE) is a corrupted/incomplete header = kError
     if (header_bytes.size() == 0 && m_reader.eof()) {
       m_eof_reached = true;
-      return {FrameReadStatus::END_OF_FILE, RawFrameView{}};
+      return {FrameReadStatus::kEOF, RawFrameView{}};
     }
     // Partial frame header is always an error, even if EOF
     // This is never expected to happen, so we throw an error
     m_eof_reached = true;  // Mark EOF since we can't continue
-    return {FrameReadStatus::ERROR, RawFrameView{}};
+    return {FrameReadStatus::kError, RawFrameView{}};
   }
   
   frame.bytes.insert(frame.bytes.end(), header_bytes.begin(), header_bytes.end());
@@ -72,12 +72,12 @@ std::pair<FrameReadStatus, RawFrameView> FrameReader::next_frame() {
     if (m_reader.eof()) {
       m_eof_reached = true;
     }
-    return {FrameReadStatus::ERROR, RawFrameView{}};  // Incomplete frame is an error
+    return {FrameReadStatus::kError, RawFrameView{}};  // Incomplete frame is an error
   }
   
   frame.bytes.insert(frame.bytes.end(), data_bytes.begin(), data_bytes.end());
   
-  return {FrameReadStatus::OK, frame};
+  return {FrameReadStatus::kOk, frame};
 }
 
 bool FrameReader::eof() {

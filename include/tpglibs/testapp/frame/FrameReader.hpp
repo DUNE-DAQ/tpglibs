@@ -24,9 +24,9 @@ namespace testapp {
  * @brief Status codes for frame reading operations
  */
 enum class FrameReadStatus {
-  OK,           ///< Frame read successfully
-  END_OF_FILE,  ///< End of file reached (normal condition)
-  ERROR         ///< Fatal error (invalid header, malformed frame, I/O error)
+  kOk,      ///< Frame read successfully
+  kEOF,     ///< End of file reached (normal condition)
+  kError    ///< Fatal error (invalid header, malformed frame, I/O error)
 };
 
 /**
@@ -117,9 +117,9 @@ class FrameReader {
   /**
    * @brief Read next frame from file
    * @return Pair of (status, frame_view)
-   *   - status == OK: Frame read successfully, frame_view contains data
-   *   - status == END_OF_FILE: End of file reached, frame_view is empty
-   *   - status == ERROR: Fatal error occurred, frame_view is empty
+   *   - status == kOk: Frame read successfully, frame_view contains data
+   *   - status == kEOF: End of file reached, frame_view is empty
+   *   - status == kError: Fatal error occurred, frame_view is empty
    */
   std::pair<FrameReadStatus, RawFrameView> next_frame();
   

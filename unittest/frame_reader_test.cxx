@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(TestReadSingleFrame)
   
   auto [status, frame] = reader.next_frame();
   
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::OK);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kOk);
   BOOST_CHECK(frame.is_valid());
   BOOST_CHECK_EQUAL(frame.bytes.size(), 16 + frame_data_size);  // header + data
   
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(TestReadSingleFrame)
   
   // Should be at EOF now
   auto [status2, frame2] = reader.next_frame();
-  BOOST_CHECK(status2 == tpglibs::testapp::FrameReadStatus::END_OF_FILE);
+  BOOST_CHECK(status2 == tpglibs::testapp::FrameReadStatus::kEOF);
   BOOST_CHECK(!frame2.is_valid());
   BOOST_CHECK(reader.eof());
   
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(TestReadMultipleFrames)
   
   for (int i = 0; i < 3; ++i) {
     auto [status, frame] = reader.next_frame();
-    BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::OK);
+    BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kOk);
     BOOST_CHECK(frame.is_valid());
     
     uint64_t read_timestamp;
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(TestReadMultipleFrames)
   
   // Next read should be EOF
   auto [status, frame] = reader.next_frame();
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::END_OF_FILE);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kEOF);
   BOOST_CHECK(reader.eof());
   
   // Clean up
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(TestEOF)
   
   // Should immediately return EOF
   auto [status, frame] = reader.next_frame();
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::END_OF_FILE);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kEOF);
   BOOST_CHECK(!frame.is_valid());
   BOOST_CHECK(reader.eof());
   
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(TestErrorIncompleteFrame)
   
   // Should return ERROR for incomplete frame
   auto [status, frame] = reader.next_frame();
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::ERROR);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kError);
   BOOST_CHECK(!frame.is_valid());
   
   // Clean up
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(TestErrorPartialFrameHeader)
   // Should return ERROR for partial frame header, not END_OF_FILE
   // A partial frame header is corruption, not a clean EOF
   auto [status, frame] = reader.next_frame();
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::ERROR);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kError);
   BOOST_CHECK(!frame.is_valid());
   BOOST_CHECK(reader.eof());  // Should mark EOF since we can't continue
   
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(TestReset)
   
   // Read first frame
   auto [status1, frame1] = reader.next_frame();
-  BOOST_CHECK(status1 == tpglibs::testapp::FrameReadStatus::OK);
+  BOOST_CHECK(status1 == tpglibs::testapp::FrameReadStatus::kOk);
   
   uint64_t read_timestamp1;
   std::memcpy(&read_timestamp1, frame1.header(), sizeof(read_timestamp1));
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(TestReset)
   reader.reset();
   
   auto [status2, frame2] = reader.next_frame();
-  BOOST_CHECK(status2 == tpglibs::testapp::FrameReadStatus::OK);
+  BOOST_CHECK(status2 == tpglibs::testapp::FrameReadStatus::kOk);
   
   uint64_t read_timestamp2;
   std::memcpy(&read_timestamp2, frame2.header(), sizeof(read_timestamp2));

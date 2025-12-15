@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameValid)
   tpglibs::testapp::FrameReader reader(temp_filename);
   auto [status, frame_view] = reader.next_frame();
   
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::OK);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kOk);
   BOOST_CHECK(frame_view.is_valid());
   
   // Convert to DUMMY_FRAME_STRUCT using adapter (no dimension parameters)
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameInvalidSize)
   tpglibs::testapp::FrameReader reader(temp_filename);
   auto [status, frame_view] = reader.next_frame();
   // FrameReader will fail because frame size doesn't match expected 64×256
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::ERROR);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kError);
   
   // Clean up
   std::remove(temp_filename.c_str());
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(TestValidateFrameView)
   // Read frame
   tpglibs::testapp::FrameReader reader(temp_filename);
   auto [status, frame_view] = reader.next_frame();
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::OK);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kOk);
   
   // Validate with correct size (64×256)
   BOOST_CHECK(tpglibs::testapp::DummyFrameAdapter::validate_frame_view(frame_view));
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameHighValues)
   // Read and convert
   tpglibs::testapp::FrameReader reader(temp_filename);
   auto [status, frame_view] = reader.next_frame();
-  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::OK);
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kOk);
   
   auto frame = tpglibs::testapp::DummyFrameAdapter::create_frame(frame_view);
   BOOST_CHECK(frame != nullptr);

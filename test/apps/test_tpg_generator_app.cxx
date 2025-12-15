@@ -383,10 +383,10 @@ int process_frames(tpglibs::TPGenerator& tpg,
     // Read next frame
     auto [status, frame_view] = frame_reader.next_frame();
     
-    if (status == tpglibs::testapp::FrameReadStatus::END_OF_FILE) {
+    if (status == tpglibs::testapp::FrameReadStatus::kEOF) {
       break;
     }
-    if (status == tpglibs::testapp::FrameReadStatus::ERROR) {
+    if (status == tpglibs::testapp::FrameReadStatus::kError) {
       std::cerr << "ERROR: Failed to read frame at index " << frame_index << std::endl;
       std::cerr << "  Possible causes: corrupted frame data, unexpected file size, or I/O error" << std::endl;
       return ExitCode::FILE_ERROR;
