@@ -27,6 +27,8 @@ namespace testapp {
  * - Header: 16 bytes (8 bytes timestamp + 8 bytes another_key)
  * - Data: 256 time samples × 16 words × 8 bytes = 32,768 bytes (packed uint64_t format)
  * - Data layout: packed uint64_t words, each word contains 4 consecutive 16-bit ADC values
+ * - ADC VALUE RANGE: Values must be in 14-bit range [0, 16383] to match TPGenerator expectations
+ * - Storage: Values stored as 16-bit int16_t, but constrained to 14-bit range
  * - Compatible with TPGenerator's expected interface
  */
 struct DUMMY_FRAME_STRUCT {
@@ -34,8 +36,13 @@ struct DUMMY_FRAME_STRUCT {
   using word_t = uint64_t;
   static constexpr int s_num_channels = 64;
   static constexpr int s_time_samples_per_frame = 256;
-  static constexpr int s_bits_per_adc = 16;
+  static constexpr int s_bits_per_adc = 16;  // Layout bits: controls array dimension and register alignment
   static constexpr int s_words_per_time_sample = 16;
+  
+  // ADC value bit depth constants (separate from layout bits)
+  static constexpr int s_adc_value_bits = 14;  // Actual ADC value bit depth
+  static constexpr int16_t s_adc_max_value = 0x3FFF;  // 16383 - 14-bit max
+  static constexpr int16_t s_adc_min_value = 0;       // 0 - 14-bit min
   
   uint64_t timestamp;      ///< Frame timestamp (8 bytes)
   uint64_t another_key;    ///< Additional header field (8 bytes)
@@ -55,10 +62,21 @@ struct DUMMY_FRAME_STRUCT {
   uint64_t get_timestamp() const { return timestamp; }
   
   /**
+   * @brief Clamp ADC value to 14-bit range [0, 16383]
+   * @param value ADC value to clamp
+   * @return Clamped value in range [s_adc_min_value, s_adc_max_value]
+   */
+  static constexpr int16_t clamp_adc_value(int16_t value) {
+    return (value > s_adc_max_value) ? s_adc_max_value :
+           (value < s_adc_min_value) ? s_adc_min_value : value;
+  }
+  
+  /**
    * @brief Get ADC value for a specific channel and time sample
    * @param channel Channel index [0, 63]
    * @param time_sample Time sample index [0, 255]
-   * @return ADC value
+   * @return ADC value (returns 0 for out-of-bounds access with warning)
+   * @note Out-of-bounds access will emit a warning to stderr and return 0
    */
   int16_t get_adc(size_t channel, size_t time_sample) const;
   
@@ -66,8 +84,9 @@ struct DUMMY_FRAME_STRUCT {
    * @brief Set ADC value for a specific channel and time sample
    * @param channel Channel index [0, 63]
    * @param time_sample Time sample index [0, 255]
-   * @param value ADC value to set
-   * @note This is not used in the test application, but is included for completeness
+   * @param value ADC value to set (will be clamped to [0, 16383] if out of range)
+   * @note Out-of-bounds access will emit a warning to stderr and be ignored
+   * @note Values exceeding 14-bit range [0, 16383] will be clamped with warning
    */
   void set_adc(size_t channel, size_t time_sample, int16_t value);
   

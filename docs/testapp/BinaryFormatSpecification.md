@@ -152,6 +152,9 @@ struct BinaryFileHeader {
 
 **Frame Data Layout:**
 - **Data Type**: `int16_t` (2 bytes per sample, little-endian)
+- **ADC Value Range**: Values must be in 14-bit range [0, 16383] to match TPGenerator expectations
+  - Values exceeding this range will be clamped to [0, 16383] during frame creation
+  - Storage is 16-bit `int16_t`, but valid values are constrained to 14-bit range
 - **Organization**: Row-major order - all channels for time sample 0, then all channels for time sample 1, etc.
 - **Channel Ordering**: Channels 0-15 (pipeline 0), 16-31 (pipeline 1), 32-47 (pipeline 2), 48-63 (pipeline 3)
 

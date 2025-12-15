@@ -179,7 +179,12 @@ BOOST_AUTO_TEST_CASE(TestTPGeneratorCompatibility)
   // Verify TPGenerator compatibility members
   BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::s_num_channels, 64);
   BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::s_time_samples_per_frame, 256);
-  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::s_bits_per_adc, 16);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::s_bits_per_adc, 16);  // Layout bits
+  
+  // Verify ADC value bit depth constants
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::s_adc_value_bits, 14);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::s_adc_max_value, 0x3FFF);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::s_adc_min_value, 0);
   
   // Verify adc_words pointer is valid
   BOOST_CHECK(frame->adc_words != nullptr);
@@ -190,6 +195,121 @@ BOOST_AUTO_TEST_CASE(TestTPGeneratorCompatibility)
   
   // Verify data storage is correct size (256 * 16 = 4096 words)
   BOOST_CHECK_EQUAL(frame->data.size(), 4096);
+}
+
+BOOST_AUTO_TEST_CASE(TestAdcValueClamping)
+{
+  // Test clamping helper function directly
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::clamp_adc_value(0), 0);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::clamp_adc_value(16383), 16383);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::clamp_adc_value(16384), 16383);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::clamp_adc_value(32767), 16383);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::clamp_adc_value(-1), 0);
+  BOOST_CHECK_EQUAL(tpglibs::testapp::DUMMY_FRAME_STRUCT::clamp_adc_value(1000), 1000);
+  
+  // Test clamping via set_adc/get_adc
+  auto frame = std::make_unique<tpglibs::testapp::DUMMY_FRAME_STRUCT>();
+  const int16_t max_value = tpglibs::testapp::DUMMY_FRAME_STRUCT::s_adc_max_value;
+  
+  // Test minimum value (0)
+  frame->set_adc(0, 0, 0);
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), 0);
+  
+  // Test maximum valid value (16383)
+  frame->set_adc(0, 0, max_value);
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), max_value);
+  
+  // Test value just above maximum (16384) - should be clamped
+  frame->set_adc(0, 0, 16384);
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), max_value);
+  
+  // Test high 16-bit value (32767) - should be clamped
+  frame->set_adc(0, 0, 32767);
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), max_value);
+  
+  // Test negative value - should be clamped to 0
+  frame->set_adc(0, 0, -1);
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), 0);
+  
+  // Test valid mid-range value
+  frame->set_adc(0, 0, 1000);
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), 1000);
+}
+
+BOOST_AUTO_TEST_CASE(TestBoundsChecking)
+{
+  // Test bounds checking for out-of-range channel/time_sample indices
+  auto frame = std::make_unique<tpglibs::testapp::DUMMY_FRAME_STRUCT>();
+  
+  // Set a known value at valid position
+  frame->set_adc(0, 0, 100);
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), 100);
+  
+  // Test out-of-bounds channel access - should return safe default (0)
+  BOOST_CHECK_EQUAL(frame->get_adc(64, 0), 0);  // Channel 64 is out of bounds (max is 63)
+  BOOST_CHECK_EQUAL(frame->get_adc(100, 0), 0);
+  
+  // Test out-of-bounds time_sample access - should return safe default (0)
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 256), 0);  // Time sample 256 is out of bounds (max is 255)
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 1000), 0);
+  
+  // Test out-of-bounds set_adc - should silently ignore
+  frame->set_adc(64, 0, 200);  // Should not crash or modify data
+  frame->set_adc(0, 256, 300);  // Should not crash or modify data
+  
+  // Verify original value unchanged
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), 100);
+}
+
+BOOST_AUTO_TEST_CASE(TestCreateFrameHighValues)
+{
+  // Test that create_frame clamps high values during conversion
+  std::string temp_filename = "/tmp/test_high_values.bin";
+  std::ofstream temp_file(temp_filename, std::ios::binary);
+  
+  write_file_header(temp_file);
+  
+  uint64_t timestamp = 1234;
+  uint64_t another_key = 5678;
+  constexpr size_t num_channels = 64;
+  constexpr size_t num_time_samples = 256;
+  std::vector<int16_t> frame_data(num_channels * num_time_samples);
+  
+  // Fill with mix of valid and invalid values
+  for (size_t t = 0; t < num_time_samples; ++t) {
+    for (size_t c = 0; c < num_channels; ++c) {
+      if (c == 0) {
+        frame_data[t * num_channels + c] = 20000;  // > 16383, should be clamped
+      } else if (c == 1) {
+        frame_data[t * num_channels + c] = 16383;  // Valid max
+      } else if (c == 2) {
+        frame_data[t * num_channels + c] = 0;  // Valid min
+      } else {
+        frame_data[t * num_channels + c] = 1000;  // Valid mid-range
+      }
+    }
+  }
+  
+  write_frame(temp_file, timestamp, another_key, frame_data);
+  temp_file.close();
+  
+  // Read and convert
+  tpglibs::testapp::FrameReader reader(temp_filename);
+  auto [status, frame_view] = reader.next_frame();
+  BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::OK);
+  
+  auto frame = tpglibs::testapp::DummyFrameAdapter::create_frame(frame_view);
+  BOOST_CHECK(frame != nullptr);
+  
+  // Verify clamping occurred
+  const int16_t max_value = tpglibs::testapp::DUMMY_FRAME_STRUCT::s_adc_max_value;
+  BOOST_CHECK_EQUAL(frame->get_adc(0, 0), max_value);  // Clamped from 20000
+  BOOST_CHECK_EQUAL(frame->get_adc(1, 0), max_value);  // Unchanged (valid)
+  BOOST_CHECK_EQUAL(frame->get_adc(2, 0), 0);          // Unchanged (valid)
+  BOOST_CHECK_EQUAL(frame->get_adc(3, 0), 1000);       // Unchanged (valid)
+  
+  // Clean up
+  std::remove(temp_filename.c_str());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
