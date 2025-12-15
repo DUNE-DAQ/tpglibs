@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <sstream>
 #include <limits>
+#include <tuple>
 
 namespace tpglibs {
 namespace testapp {
@@ -72,16 +73,9 @@ void TPValidator::sort_tps(std::vector<dunedaq::trgdataformats::TriggerPrimitive
   std::sort(tps.begin(), tps.end(), 
     [](const dunedaq::trgdataformats::TriggerPrimitive& a,
        const dunedaq::trgdataformats::TriggerPrimitive& b) {
-      // Primary: time_start
-      if (a.time_start != b.time_start) {
-        return a.time_start < b.time_start;
-      }
-      // Secondary: channel
-      if (a.channel != b.channel) {
-        return a.channel < b.channel;
-      }
-      // Tertiary: samples_over_threshold
-      return a.samples_over_threshold < b.samples_over_threshold;
+      // Lexicographic comparison: time_start (primary), channel (secondary), samples_over_threshold (tertiary)
+      return std::tie(a.time_start, a.channel, a.samples_over_threshold) < 
+             std::tie(b.time_start, b.channel, b.samples_over_threshold);
     });
 }
 
