@@ -1,5 +1,5 @@
 /**
- * @file TPReader.hpp
+ * @file TPValidationReader.hpp
  *
  * @brief Reader for TP validation binary files
  *
@@ -8,8 +8,8 @@
  * received with this code.
  */
 
-#ifndef TPGLIBS_TESTAPP_TPREADER_HPP_
-#define TPGLIBS_TESTAPP_TPREADER_HPP_
+#ifndef TPGLIBS_TESTAPP_TPVALIDATIONREADER_HPP_
+#define TPGLIBS_TESTAPP_TPVALIDATIONREADER_HPP_
 
 #include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 #include "trgdataformats/TriggerPrimitive.hpp"
@@ -34,27 +34,27 @@ namespace testapp {
  * - File header: 12 bytes (magic, version, reserved)
  * - For each frame: frame_index (4 bytes), num_tps (4 bytes), TP data
  */
-class TPReader {
+class TPValidationReader {
  public:
   /**
    * @brief Constructor - opens file and builds index
    * @param filepath Path to TP validation binary file (.val)
    * @throws std::runtime_error if file cannot be opened or header is invalid
    */
-  explicit TPReader(const std::string& filepath);
+  explicit TPValidationReader(const std::string& filepath);
   
   /**
    * @brief Destructor
    */
-  ~TPReader() = default;
+  ~TPValidationReader() = default;
   
   // Non-copyable
-  TPReader(const TPReader&) = delete;
-  TPReader& operator=(const TPReader&) = delete;
+  TPValidationReader(const TPValidationReader&) = delete;
+  TPValidationReader& operator=(const TPValidationReader&) = delete;
   
   // Movable
-  TPReader(TPReader&&) = default;
-  TPReader& operator=(TPReader&&) = default;
+  TPValidationReader(TPValidationReader&&) = default;
+  TPValidationReader& operator=(TPValidationReader&&) = default;
   
   /**
    * @brief Get TPs for a specific frame index
@@ -108,5 +108,5 @@ class TPReader {
 } // namespace testapp
 } // namespace tpglibs
 
-#endif // TPGLIBS_TESTAPP_TPREADER_HPP_
+#endif // TPGLIBS_TESTAPP_TPVALIDATIONREADER_HPP_
 

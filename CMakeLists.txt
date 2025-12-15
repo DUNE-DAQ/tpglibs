@@ -38,7 +38,7 @@ daq_add_unit_test(processor_state_registrate_collect_test LINK_LIBRARIES tpglibs
 daq_add_unit_test(binary_signal_reader_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(frame_reader_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(dummy_frame_adapter_test LINK_LIBRARIES tpglibs)
-daq_add_unit_test(tp_reader_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(tp_validation_reader_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(tp_validator_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(binary_file_validator_test LINK_LIBRARIES tpglibs)
 daq_add_unit_test(test_config_parser_test LINK_LIBRARIES tpglibs)

@@ -1,12 +1,12 @@
 /**
- * @file TPReader.cpp
+ * @file TPValidationReader.cpp
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#include "tpglibs/testapp/tp/TPReader.hpp"
+#include "tpglibs/testapp/tp/TPValidationReader.hpp"
 #include <fstream>
 #include <cstring>
 #include <stdexcept>
@@ -17,7 +17,7 @@
 namespace tpglibs {
 namespace testapp {
 
-TPReader::TPReader(const std::string& filepath) {
+TPValidationReader::TPValidationReader(const std::string& filepath) {
   std::ifstream file(filepath, std::ios::binary);
   if (!file.is_open()) {
     throw std::runtime_error("Failed to open TP validation file: " + filepath);
@@ -36,12 +36,12 @@ TPReader::TPReader(const std::string& filepath) {
   file.close();
 }
 
-bool TPReader::validate_file_header(std::ifstream& file, std::string& error) {
+bool TPValidationReader::validate_file_header(std::ifstream& file, std::string& error) {
   BinaryFileHeader header;
   return BinaryFileValidator::validate_stream(file, header, error);
 }
 
-void TPReader::build_index(std::ifstream& file) {
+void TPValidationReader::build_index(std::ifstream& file) {
   const size_t tp_size = sizeof(dunedaq::trgdataformats::TriggerPrimitive);
   
   // Reasonable maximum: 1 million TPs per frame (prevents DoS and overflow)
@@ -112,7 +112,7 @@ void TPReader::build_index(std::ifstream& file) {
 }
 
 std::vector<dunedaq::trgdataformats::TriggerPrimitive> 
-TPReader::get_tps_for_frame(uint32_t frame_index) const {
+TPValidationReader::get_tps_for_frame(uint32_t frame_index) const {
   auto it = m_index.find(frame_index);
   if (it != m_index.end()) {
     return it->second;  // Return copy of TPs
@@ -120,7 +120,7 @@ TPReader::get_tps_for_frame(uint32_t frame_index) const {
   return std::vector<dunedaq::trgdataformats::TriggerPrimitive>();  // Empty vector if not found
 }
 
-std::vector<uint32_t> TPReader::get_validation_frames() const {
+std::vector<uint32_t> TPValidationReader::get_validation_frames() const {
   std::vector<uint32_t> frames;
   frames.reserve(m_index.size());
   for (const auto& pair : m_index) {
@@ -129,11 +129,11 @@ std::vector<uint32_t> TPReader::get_validation_frames() const {
   return frames;
 }
 
-bool TPReader::has_frame(uint32_t frame_index) const {
+bool TPValidationReader::has_frame(uint32_t frame_index) const {
   return m_index.find(frame_index) != m_index.end();
 }
 
-size_t TPReader::num_frames() const {
+size_t TPValidationReader::num_frames() const {
   return m_index.size();
 }
 

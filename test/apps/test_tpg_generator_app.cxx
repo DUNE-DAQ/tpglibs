@@ -10,7 +10,7 @@
 
 #include "tpglibs/testapp/frame/FrameReader.hpp"
 #include "tpglibs/testapp/frame/DummyFrameAdapter.hpp"
-#include "tpglibs/testapp/tp/TPReader.hpp"
+#include "tpglibs/testapp/tp/TPValidationReader.hpp"
 #include "tpglibs/testapp/tp/TPValidator.hpp"
 #include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 #include "tpglibs/testapp/common/TestConfigParser.hpp"
@@ -228,7 +228,7 @@ bool validate_max_frames_consistency(const tpglibs::testapp::TPGeneratorTestConf
  * @brief Validate that validation frames exist in validation file
  * @return true if all frames exist, false otherwise
  */
-bool validate_validation_frames(const tpglibs::testapp::TPReader& tp_reader,
+bool validate_validation_frames(const tpglibs::testapp::TPValidationReader& tp_reader,
                                 const std::vector<int>& validation_frames) {
   if (validation_frames.empty()) {
     return true;
@@ -359,7 +359,7 @@ bool validate_tps(size_t frame_index,
  */
 int process_frames(tpglibs::TPGenerator& tpg,
                     tpglibs::testapp::FrameReader& frame_reader,
-                    tpglibs::testapp::TPReader& tp_reader,
+                    tpglibs::testapp::TPValidationReader& tp_reader,
                     const tpglibs::testapp::TPGeneratorTestConfig& config) {
   print_processing_start(config);
   
@@ -484,8 +484,8 @@ int run_processing_mode(const AppArguments& args) {
   }
   
   // Read expected TPs from validation file
-  tpglibs::testapp::TPReader tp_reader(args.validation_file);
-  // Note: TPReader constructor throws std::runtime_error on failure
+  tpglibs::testapp::TPValidationReader tp_reader(args.validation_file);
+  // Note: TPValidationReader constructor throws std::runtime_error on failure
   
   // Validate that validation frames exist
   if (!validate_validation_frames(tp_reader, tpg_config.validation_frames)) {
