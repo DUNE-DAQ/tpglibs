@@ -25,10 +25,11 @@ bool BinaryFileValidator::validate_stream(std::istream& stream,
             std::to_string(bytes_read) + ")";
     return false;
   }
-  if (!stream.good() && !stream.eof()) {
+  if (stream.bad()) {
     error = "Stream error while reading binary file header";
     return false;
   }
+  // EOF after reading exactly HEADER_SIZE bytes is acceptable, so we don't check it
   return validate_header_fields(header, error);
 }
 
