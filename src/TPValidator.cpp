@@ -84,50 +84,54 @@ std::string TPValidator::compare(
     const dunedaq::trgdataformats::TriggerPrimitive& actual) {
   
   // Compare all fields exactly (order matches sorting key priority for consistency)
+  // Collect all mismatches to provide comprehensive diagnostic information
+  std::ostringstream oss;
+  bool has_mismatch = false;
+  
   if (expected.time_start != actual.time_start) {
-    std::ostringstream oss;
+    if (has_mismatch) oss << "; ";
     oss << "time_start mismatch: expected " << expected.time_start 
         << ", got " << actual.time_start;
-    return oss.str();
+    has_mismatch = true;
   }
   
   if (expected.channel != actual.channel) {
-    std::ostringstream oss;
+    if (has_mismatch) oss << "; ";
     oss << "channel mismatch: expected " << expected.channel 
         << ", got " << actual.channel;
-    return oss.str();
+    has_mismatch = true;
   }
   
   if (expected.adc_peak != actual.adc_peak) {
-    std::ostringstream oss;
+    if (has_mismatch) oss << "; ";
     oss << "adc_peak mismatch: expected " << expected.adc_peak 
         << ", got " << actual.adc_peak;
-    return oss.str();
+    has_mismatch = true;
   }
   
   if (expected.samples_over_threshold != actual.samples_over_threshold) {
-    std::ostringstream oss;
+    if (has_mismatch) oss << "; ";
     oss << "samples_over_threshold mismatch: expected " << expected.samples_over_threshold 
         << ", got " << actual.samples_over_threshold;
-    return oss.str();
+    has_mismatch = true;
   }
   
   if (expected.adc_integral != actual.adc_integral) {
-    std::ostringstream oss;
+    if (has_mismatch) oss << "; ";
     oss << "adc_integral mismatch: expected " << expected.adc_integral 
         << ", got " << actual.adc_integral;
-    return oss.str();
+    has_mismatch = true;
   }
   
   if (expected.samples_to_peak != actual.samples_to_peak) {
-    std::ostringstream oss;
+    if (has_mismatch) oss << "; ";
     oss << "samples_to_peak mismatch: expected " << expected.samples_to_peak 
         << ", got " << actual.samples_to_peak;
-    return oss.str();
+    has_mismatch = true;
   }
   
-  // All fields match
-  return "";
+  // Return combined mismatch message or empty string if all fields match
+  return oss.str();
 }
 
 } // namespace testapp
