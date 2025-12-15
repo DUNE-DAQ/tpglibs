@@ -10,6 +10,8 @@
 #include <cstring>
 #include <string>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 
 namespace tpglibs {
 namespace testapp {
@@ -59,11 +61,19 @@ bool BinaryFileValidator::validate_file(const std::string& filepath,
 bool BinaryFileValidator::validate_header_fields(const BinaryFileHeader& header,
                                                  std::string& error) {
   if (header.magic_number != s_magic_number) {
-    error = "Invalid magic number in binary file header";
+    std::ostringstream oss;
+    oss << "Invalid magic number in binary file header (expected 0x"
+        << std::hex << std::uppercase << std::setfill('0') << std::setw(8)
+        << s_magic_number << ", got 0x" << std::setw(8) << header.magic_number << ")";
+    error = oss.str();
     return false;
   }
   if (header.version != s_version) {
-    error = "Unsupported binary file version";
+    std::ostringstream oss;
+    oss << "Unsupported binary file version (expected 0x"
+        << std::hex << std::uppercase << std::setfill('0') << std::setw(8)
+        << s_version << ", got 0x" << std::setw(8) << header.version << ")";
+    error = oss.str();
     return false;
   }
   return true;
