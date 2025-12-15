@@ -1,12 +1,12 @@
 /**
- * @file TPComparator.cpp
+ * @file TPValidator.cpp
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#include "tpglibs/testapp/tp/TPComparator.hpp"
+#include "tpglibs/testapp/tp/TPValidator.hpp"
 #include <algorithm>
 #include <sstream>
 #include <limits>
@@ -14,11 +14,11 @@
 namespace tpglibs {
 namespace testapp {
 
-TPComparisonResult TPComparator::compare(
+TPValidationResult TPValidator::validate(
     const std::vector<dunedaq::trgdataformats::TriggerPrimitive>& expected,
     const std::vector<dunedaq::trgdataformats::TriggerPrimitive>& actual) {
   
-  TPComparisonResult result;
+  TPValidationResult result;
   result.matches = false;
   result.first_mismatch_index = std::numeric_limits<size_t>::max();
   result.mismatch_reason = "";
@@ -43,7 +43,7 @@ TPComparisonResult TPComparator::compare(
   
   // Compare element-by-element
   for (size_t i = 0; i < expected_sorted.size(); ++i) {
-    std::string mismatch = compare_single_tp(expected_sorted[i], actual_sorted[i]);
+    std::string mismatch = compare(expected_sorted[i], actual_sorted[i]);
     if (!mismatch.empty()) {
       result.first_mismatch_index = i;
       result.mismatch_reason = mismatch;
@@ -56,7 +56,7 @@ TPComparisonResult TPComparator::compare(
   return result;
 }
 
-std::string TPComparator::format_tp(const dunedaq::trgdataformats::TriggerPrimitive& tp) {
+std::string TPValidator::format_tp(const dunedaq::trgdataformats::TriggerPrimitive& tp) {
   std::ostringstream oss;
   oss << "TP(time_start=" << tp.time_start
       << ", channel=" << tp.channel
@@ -68,7 +68,7 @@ std::string TPComparator::format_tp(const dunedaq::trgdataformats::TriggerPrimit
   return oss.str();
 }
 
-void TPComparator::sort_tps(std::vector<dunedaq::trgdataformats::TriggerPrimitive>& tps) {
+void TPValidator::sort_tps(std::vector<dunedaq::trgdataformats::TriggerPrimitive>& tps) {
   std::sort(tps.begin(), tps.end(), 
     [](const dunedaq::trgdataformats::TriggerPrimitive& a,
        const dunedaq::trgdataformats::TriggerPrimitive& b) {
@@ -85,7 +85,7 @@ void TPComparator::sort_tps(std::vector<dunedaq::trgdataformats::TriggerPrimitiv
     });
 }
 
-std::string TPComparator::compare_single_tp(
+std::string TPValidator::compare(
     const dunedaq::trgdataformats::TriggerPrimitive& expected,
     const dunedaq::trgdataformats::TriggerPrimitive& actual) {
   

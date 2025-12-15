@@ -1,15 +1,15 @@
 /**
- * @file TPComparator.hpp
+ * @file TPValidator.hpp
  *
- * @brief Comparator for TriggerPrimitive objects
+ * @brief Validator for TriggerPrimitive objects
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#ifndef TPGLIBS_TESTAPP_TPCOMPARATOR_HPP_
-#define TPGLIBS_TESTAPP_TPCOMPARATOR_HPP_
+#ifndef TPGLIBS_TESTAPP_TPVALIDATOR_HPP_
+#define TPGLIBS_TESTAPP_TPVALIDATOR_HPP_
 
 #include "trgdataformats/TriggerPrimitive.hpp"
 #include <cstdint>
@@ -20,34 +20,34 @@ namespace tpglibs {
 namespace testapp {
 
 /**
- * @brief Result of TP comparison
+ * @brief Result of TP validation
  */
-struct TPComparisonResult {
+struct TPValidationResult {
   bool matches;                    ///< True if TPs match exactly
   size_t first_mismatch_index;     ///< Index of first mismatch (SIZE_MAX if matches)
   std::string mismatch_reason;     ///< Description of mismatch
 };
 
 /**
- * @brief Comparator for TriggerPrimitive objects
+ * @brief Validator for TriggerPrimitive objects
  *
- * Static utility class for comparing TP vectors. Sorts both vectors
+ * Static utility class for validating TP vectors. Sorts both vectors
  * using the same key (time_start, channel, samples_over_threshold) before
  * comparing to ensure deterministic results.
  */
-class TPComparator {
+class TPValidator {
  public:
   /**
-   * @brief Compare two TP vectors
+   * @brief Validate two TP vectors
    *
    * Sorts both vectors using the same criteria (time_start, channel, samples_over_threshold)
    * before comparing element-by-element.
    *
    * @param expected Expected TPs (from validation file)
    * @param actual Actual TPs (from TPGenerator)
-   * @return TPComparisonResult with match status and first mismatch details
+   * @return TPValidationResult with match status and first mismatch details
    */
-  static TPComparisonResult compare(
+  static TPValidationResult validate(
       const std::vector<dunedaq::trgdataformats::TriggerPrimitive>& expected,
       const std::vector<dunedaq::trgdataformats::TriggerPrimitive>& actual);
   
@@ -75,7 +75,7 @@ class TPComparator {
    * @param actual Actual TP
    * @return Empty string if match, otherwise description of first mismatch
    */
-  static std::string compare_single_tp(
+  static std::string compare(
       const dunedaq::trgdataformats::TriggerPrimitive& expected,
       const dunedaq::trgdataformats::TriggerPrimitive& actual);
 };
@@ -83,5 +83,5 @@ class TPComparator {
 } // namespace testapp
 } // namespace tpglibs
 
-#endif // TPGLIBS_TESTAPP_TPCOMPARATOR_HPP_
+#endif // TPGLIBS_TESTAPP_TPVALIDATOR_HPP_
 

@@ -1,15 +1,15 @@
 /**
- * @file tp_comparator_test.cxx
+ * @file tp_validator_test.cxx
  *
  * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#define BOOST_TEST_MODULE tp_comparator_test
+#define BOOST_TEST_MODULE tp_validator_test
 #define FMT_HEADER_ONLY
 
-#include "tpglibs/testapp/tp/TPComparator.hpp"
+#include "tpglibs/testapp/tp/TPValidator.hpp"
 #include "test_helpers.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -19,7 +19,7 @@
 
 using tpglibs::unittest::create_test_tp;
 
-BOOST_AUTO_TEST_SUITE(TPComparatorTest)
+BOOST_AUTO_TEST_SUITE(TPValidatorTest)
 
 BOOST_AUTO_TEST_CASE(TestExactMatch)
 {
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(TestExactMatch)
   actual.push_back(create_test_tp(1000, 5, 200, 3));
   actual.push_back(create_test_tp(2000, 7, 250, 4));
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, std::numeric_limits<size_t>::max());
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(TestExactMatchUnsorted)
   actual.push_back(create_test_tp(1000, 5, 200, 3));    // Different order
   actual.push_back(create_test_tp(2000, 7, 250, 4));
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, std::numeric_limits<size_t>::max());
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(TestSizeMismatch)
   actual.push_back(create_test_tp(1000, 5, 200, 3));
   // Missing second TP
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(TestEmptyVectors)
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> expected;
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> actual;
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, std::numeric_limits<size_t>::max());
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(TestTimeStartMismatch)
   auto tp = create_test_tp(2000, 5, 200, 3);  // Different time_start
   actual.push_back(tp);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(TestChannelMismatch)
   auto tp = create_test_tp(1000, 10, 200, 3);  // Different channel
   actual.push_back(tp);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(TestAdcPeakMismatch)
   auto tp = create_test_tp(1000, 5, 300, 3);  // Different adc_peak
   actual.push_back(tp);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(TestSamplesOverThresholdMismatch)
   auto tp = create_test_tp(1000, 5, 200, 5);  // Different samples_over_threshold
   actual.push_back(tp);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(TestAdcIntegralMismatch)
   tp_actual.adc_integral = 2000;  // Different adc_integral
   actual.push_back(tp_actual);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(TestSamplesToPeakMismatch)
   tp_actual.samples_to_peak = 20;  // Different samples_to_peak
   actual.push_back(tp_actual);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 0);
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(TestMultipleTPsWithSorting)
   actual.push_back(create_test_tp(1000, 5, 200, 3));
   actual.push_back(create_test_tp(2000, 7, 250, 4));
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, std::numeric_limits<size_t>::max());
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(TestMultipleTPsSecondMismatch)
   actual.push_back(create_test_tp(1000, 5, 200, 3));
   actual.push_back(create_test_tp(2000, 7, 300, 4));  // Different adc_peak
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(!result.matches);
   BOOST_CHECK_EQUAL(result.first_mismatch_index, 1);
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(TestSortingByTimeStart)
   actual.push_back(create_test_tp(2000, 5, 200, 3));  // Reversed order
   actual.push_back(create_test_tp(1000, 5, 200, 3));
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(result.matches);
 }
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(TestSortingByChannel)
   actual.push_back(tp2);  // Reversed order
   actual.push_back(tp1);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(result.matches);
 }
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(TestSortingBySamplesOverThreshold)
   actual.push_back(tp2);  // Reversed order
   actual.push_back(tp1);
   
-  auto result = tpglibs::testapp::TPComparator::compare(expected, actual);
+  auto result = tpglibs::testapp::TPValidator::validate(expected, actual);
   
   BOOST_CHECK(result.matches);
 }
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(TestFormatTP)
   tp.adc_integral = 5000;
   tp.samples_to_peak = 10;
   
-  std::string formatted = tpglibs::testapp::TPComparator::format_tp(tp);
+  std::string formatted = tpglibs::testapp::TPValidator::format_tp(tp);
   
   BOOST_CHECK(formatted.find("time_start=1000") != std::string::npos);
   BOOST_CHECK(formatted.find("channel=5") != std::string::npos);

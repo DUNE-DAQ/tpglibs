@@ -11,7 +11,7 @@
 #include "tpglibs/testapp/frame/FrameReader.hpp"
 #include "tpglibs/testapp/frame/DummyFrameAdapter.hpp"
 #include "tpglibs/testapp/tp/TPReader.hpp"
-#include "tpglibs/testapp/tp/TPComparator.hpp"
+#include "tpglibs/testapp/tp/TPValidator.hpp"
 #include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 #include "tpglibs/testapp/common/TestConfigParser.hpp"
 #include "tpglibs/TPGenerator.hpp"
@@ -327,22 +327,22 @@ bool validate_tps(size_t frame_index,
                   const std::vector<dunedaq::trgdataformats::TriggerPrimitive>& actual_tps) {
   std::cout << "Validating frame " << frame_index << "..." << std::endl;
   
-  auto comparison = tpglibs::testapp::TPComparator::compare(expected_tps, actual_tps);
+  auto validation = tpglibs::testapp::TPValidator::validate(expected_tps, actual_tps);
   
-  if (!comparison.matches) {
+  if (!validation.matches) {
     std::cout << "Validation FAILED for frame " << frame_index << std::endl;
-    std::cout << "  " << comparison.mismatch_reason << std::endl;
-    if (comparison.first_mismatch_index != std::numeric_limits<size_t>::max()) {
-      std::cout << "  First mismatch at TP index " << comparison.first_mismatch_index << std::endl;
-      if (comparison.first_mismatch_index < expected_tps.size()) {
+    std::cout << "  " << validation.mismatch_reason << std::endl;
+    if (validation.first_mismatch_index != std::numeric_limits<size_t>::max()) {
+      std::cout << "  First mismatch at TP index " << validation.first_mismatch_index << std::endl;
+      if (validation.first_mismatch_index < expected_tps.size()) {
         std::cout << "  Expected: " 
-                  << tpglibs::testapp::TPComparator::format_tp(
-                      expected_tps[comparison.first_mismatch_index]) << std::endl;
+                  << tpglibs::testapp::TPValidator::format_tp(
+                      expected_tps[validation.first_mismatch_index]) << std::endl;
       }
-      if (comparison.first_mismatch_index < actual_tps.size()) {
+      if (validation.first_mismatch_index < actual_tps.size()) {
         std::cout << "  Actual: " 
-                  << tpglibs::testapp::TPComparator::format_tp(
-                      actual_tps[comparison.first_mismatch_index]) << std::endl;
+                  << tpglibs::testapp::TPValidator::format_tp(
+                      actual_tps[validation.first_mismatch_index]) << std::endl;
       }
     }
     return false;
