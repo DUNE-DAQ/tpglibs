@@ -103,16 +103,7 @@ bool TestConfigParser::parse_tpgenerator_config(const nlohmann::json& config,
   result.channel_plane_mappings.clear();
   
   // Parse processor_configs (required, non-empty)
-  if (!config.contains("processor_configs")) {
-    error = "Missing processor_configs in config";
-    return false;
-  }
-  if (!config["processor_configs"].is_array()) {
-    error = "processor_configs must be an array";
-    return false;
-  }
-  if (config["processor_configs"].empty()) {
-    error = "processor_configs must be non-empty";
+  if (!validate_required_array(config, "processor_configs", error)) {
     return false;
   }
   
@@ -121,12 +112,10 @@ bool TestConfigParser::parse_tpgenerator_config(const nlohmann::json& config,
       error = "Each element in processor_configs must be an object";
       return false;
     }
-    if (!proc_config.contains("processor_name") || !proc_config["processor_name"].is_string()) {
-      error = "Each processor config must have a string processor_name field";
+    if (!validate_required_string(proc_config, "processor_name", error)) {
       return false;
     }
-    if (!proc_config.contains("config") || !proc_config["config"].is_object()) {
-      error = "Each processor config must have an object config field";
+    if (!validate_required_object(proc_config, "config", error)) {
       return false;
     }
     result.processor_configs.push_back({
@@ -136,16 +125,7 @@ bool TestConfigParser::parse_tpgenerator_config(const nlohmann::json& config,
   }
   
   // Parse channel_plane_mappings (required, non-empty)
-  if (!config.contains("channel_plane_mappings")) {
-    error = "Missing channel_plane_mappings in config";
-    return false;
-  }
-  if (!config["channel_plane_mappings"].is_array()) {
-    error = "channel_plane_mappings must be an array";
-    return false;
-  }
-  if (config["channel_plane_mappings"].empty()) {
-    error = "channel_plane_mappings must be non-empty";
+  if (!validate_required_array(config, "channel_plane_mappings", error)) {
     return false;
   }
   
@@ -304,6 +284,24 @@ bool TestConfigParser::validate_required_integer(const nlohmann::json& obj,
   }
   if (!obj[field_name].is_number_integer()) {
     error = field_name + " must be an integer";
+    return false;
+  }
+  return true;
+}
+
+bool TestConfigParser::validate_required_array(const nlohmann::json& obj,
+                                                const std::string& field_name,
+                                                std::string& error) {
+  if (!obj.contains(field_name)) {
+    error = "Missing " + field_name + " in config";
+    return false;
+  }
+  if (!obj[field_name].is_array()) {
+    error = field_name + " must be an array";
+    return false;
+  }
+  if (obj[field_name].empty()) {
+    error = field_name + " must be non-empty";
     return false;
   }
   return true;

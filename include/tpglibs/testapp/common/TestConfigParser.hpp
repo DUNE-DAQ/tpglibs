@@ -138,6 +138,17 @@ class TestConfigParser {
   static bool validate_required_integer(const nlohmann::json& obj,
                                          const std::string& field_name,
                                          std::string& error);
+  
+  /**
+   * @brief Validate that JSON value is a required non-empty array field
+   * @param obj JSON object
+   * @param field_name Field name to check
+   * @param[out] error Error message if validation fails
+   * @return true if field exists, is an array, and is non-empty, false otherwise
+   */
+  static bool validate_required_array(const nlohmann::json& obj,
+                                      const std::string& field_name,
+                                      std::string& error);
 };
 
 } // namespace testapp
