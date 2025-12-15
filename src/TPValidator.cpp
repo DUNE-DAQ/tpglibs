@@ -23,6 +23,16 @@ TPValidationResult TPValidator::validate(
   result.first_mismatch_index = std::numeric_limits<size_t>::max();
   result.mismatch_reason = "";
   
+  // Check size mismatch before sorting (early return for efficiency)
+  if (expected.size() != actual.size()) {
+    result.first_mismatch_index = 0;
+    std::ostringstream oss;
+    oss << "Size mismatch: expected " << expected.size() 
+        << " TPs, got " << actual.size() << " TPs";
+    result.mismatch_reason = oss.str();
+    return result;
+  }
+  
   // Make copies for sorting (don't modify input vectors)
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> expected_sorted = expected;
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> actual_sorted = actual;
@@ -30,16 +40,6 @@ TPValidationResult TPValidator::validate(
   // Sort both vectors using same criteria
   sort_tps(expected_sorted);
   sort_tps(actual_sorted);
-  
-  // Check size mismatch
-  if (expected_sorted.size() != actual_sorted.size()) {
-    result.first_mismatch_index = 0;
-    std::ostringstream oss;
-    oss << "Size mismatch: expected " << expected_sorted.size() 
-        << " TPs, got " << actual_sorted.size() << " TPs";
-    result.mismatch_reason = oss.str();
-    return result;
-  }
   
   // Compare element-by-element
   for (size_t i = 0; i < expected_sorted.size(); ++i) {
