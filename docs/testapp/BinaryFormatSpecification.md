@@ -209,7 +209,9 @@ TPs are stored using raw binary serialization of the `dunedaq::trgdataformats::T
 
 **Key Fields in TriggerPrimitive** (for reference):
 - `time_start` (int64_t): Timestamp when TP starts
-- `channel` (channel_t, typically uint32_t): Channel number
+- `channel` (channel_t, which is uint32_t): Channel number
+  - The TP channel value is 24 bits wide
+  - `channel_t` is defined as `uint32_t` (32 bits) in `trgdataformats`, providing sufficient coverage for the 24-bit channel value
 - `adc_peak` (int16_t): Peak ADC value
 - `samples_over_threshold` (uint16_t): Number of samples over threshold
 
