@@ -21,11 +21,11 @@ using tpglibs::testapp::BinaryFileValidator;
 
 namespace {
 
-std::string make_header_buffer(uint32_t magic = BinaryFileValidator::MAGIC_NUMBER,
-                               uint32_t version = BinaryFileValidator::VERSION,
+std::string make_header_buffer(uint32_t magic = BinaryFileValidator::s_magic_number,
+                               uint32_t version = BinaryFileValidator::s_version,
                                uint32_t reserved = 0x00000000) {
   BinaryFileHeader header{magic, version, reserved};
-  std::string buffer(BinaryFileValidator::HEADER_SIZE, '\0');
+  std::string buffer(BinaryFileValidator::s_header_size, '\0');
   std::memcpy(buffer.data(), &header, sizeof(BinaryFileHeader));
   return buffer;
 }
@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE(TestValidateStreamSuccess)
 
   BOOST_CHECK(ok);
   BOOST_CHECK(error.empty());
-  BOOST_CHECK_EQUAL(header.magic_number, BinaryFileValidator::MAGIC_NUMBER);
-  BOOST_CHECK_EQUAL(header.version, BinaryFileValidator::VERSION);
+  BOOST_CHECK_EQUAL(header.magic_number, BinaryFileValidator::s_magic_number);
+  BOOST_CHECK_EQUAL(header.version, BinaryFileValidator::s_version);
 }
 
 BOOST_AUTO_TEST_CASE(TestValidateStreamInvalidMagic)
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(TestValidateStreamInvalidMagic)
 
 BOOST_AUTO_TEST_CASE(TestValidateStreamInvalidVersion)
 {
-  auto buffer = make_header_buffer(BinaryFileValidator::MAGIC_NUMBER, 0x99999999);
+  auto buffer = make_header_buffer(BinaryFileValidator::s_magic_number, 0x99999999);
   std::istringstream stream(buffer);
   BinaryFileHeader header{};
   std::string error;
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(TestValidateStreamInvalidVersion)
 
 BOOST_AUTO_TEST_CASE(TestValidateStreamShortHeader)
 {
-  std::string buffer(BinaryFileValidator::HEADER_SIZE - 4, '\0');
+  std::string buffer(BinaryFileValidator::s_header_size - 4, '\0');
   std::istringstream stream(buffer);
   BinaryFileHeader header{};
   std::string error;
@@ -100,13 +100,13 @@ BOOST_AUTO_TEST_CASE(TestValidateBufferSuccess)
 
   BOOST_CHECK(ok);
   BOOST_CHECK(error.empty());
-  BOOST_CHECK_EQUAL(header.magic_number, BinaryFileValidator::MAGIC_NUMBER);
-  BOOST_CHECK_EQUAL(header.version, BinaryFileValidator::VERSION);
+  BOOST_CHECK_EQUAL(header.magic_number, BinaryFileValidator::s_magic_number);
+  BOOST_CHECK_EQUAL(header.version, BinaryFileValidator::s_version);
 }
 
 BOOST_AUTO_TEST_CASE(TestValidateBufferInsufficientBytes)
 {
-  std::vector<uint8_t> buffer(BinaryFileValidator::HEADER_SIZE - 1, 0);
+  std::vector<uint8_t> buffer(BinaryFileValidator::s_header_size - 1, 0);
   BinaryFileHeader header{};
   std::string error;
   bool ok = BinaryFileValidator::validate_buffer(buffer.data(), buffer.size(), header, error);

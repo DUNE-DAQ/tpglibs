@@ -19,9 +19,9 @@ bool BinaryFileValidator::validate_stream(std::istream& stream,
                                           std::string& error) {
   stream.read(reinterpret_cast<char*>(&header), sizeof(BinaryFileHeader));
   const std::streamsize bytes_read = stream.gcount();
-  if (bytes_read != static_cast<std::streamsize>(HEADER_SIZE)) {
+  if (bytes_read != static_cast<std::streamsize>(s_header_size)) {
     error = "Failed to read binary file header (expected " + 
-            std::to_string(HEADER_SIZE) + " bytes, got " + 
+            std::to_string(s_header_size) + " bytes, got " + 
             std::to_string(bytes_read) + ")";
     return false;
   }
@@ -29,7 +29,7 @@ bool BinaryFileValidator::validate_stream(std::istream& stream,
     error = "Stream error while reading binary file header";
     return false;
   }
-  // EOF after reading exactly HEADER_SIZE bytes is acceptable, so we don't check it
+  // EOF after reading exactly s_header_size bytes is acceptable, so we don't check it
   return validate_header_fields(header, error);
 }
 
@@ -37,7 +37,7 @@ bool BinaryFileValidator::validate_buffer(const uint8_t* data,
                                           size_t size,
                                           BinaryFileHeader& header,
                                           std::string& error) {
-  if (size < HEADER_SIZE) {
+  if (size < s_header_size) {
     error = "Insufficient bytes for binary file header";
     return false;
   }
@@ -58,11 +58,11 @@ bool BinaryFileValidator::validate_file(const std::string& filepath,
 
 bool BinaryFileValidator::validate_header_fields(const BinaryFileHeader& header,
                                                  std::string& error) {
-  if (header.magic_number != MAGIC_NUMBER) {
+  if (header.magic_number != s_magic_number) {
     error = "Invalid magic number in binary file header";
     return false;
   }
-  if (header.version != VERSION) {
+  if (header.version != s_version) {
     error = "Unsupported binary file version";
     return false;
   }

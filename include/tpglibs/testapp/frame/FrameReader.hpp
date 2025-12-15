@@ -146,7 +146,7 @@ class FrameReader {
   BinarySignalReader<uint8_t> m_reader;
   size_t m_total_frame_size;  // 16 (header) + frame_data_size
   bool m_eof_reached;
-  static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::HEADER_SIZE;
+  static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::s_header_size;
   static constexpr size_t FRAME_HEADER_SIZE = 16; // Frame header size
   // Fixed frame data size for 64 channels × 256 time samples (unpacked int16_t format)
   static constexpr size_t FRAME_DATA_SIZE = 64 * 256 * sizeof(int16_t);  // 32,768 bytes

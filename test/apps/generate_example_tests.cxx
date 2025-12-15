@@ -144,8 +144,8 @@
  write_file_header(std::ofstream& out)
  {
    tpglibs::testapp::BinaryFileHeader header;
-   header.magic_number = tpglibs::testapp::BinaryFileValidator::MAGIC_NUMBER;
-   header.version = tpglibs::testapp::BinaryFileValidator::VERSION;
+   header.magic_number = tpglibs::testapp::BinaryFileValidator::s_magic_number;
+   header.version = tpglibs::testapp::BinaryFileValidator::s_version;
    header.reserved = 0;
    out.write(reinterpret_cast<const char*>(&header), sizeof(header));
  }

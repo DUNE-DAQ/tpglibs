@@ -38,9 +38,9 @@ struct BinaryFileHeader {
  */
 class BinaryFileValidator {
  public:
-  static constexpr uint32_t MAGIC_NUMBER = 0x54504754;  ///< "TPGT"
-  static constexpr uint32_t VERSION = 0x010004;         ///< 1.0.4 in hex
-  static constexpr size_t HEADER_SIZE = sizeof(BinaryFileHeader);
+  static constexpr uint32_t s_magic_number = 0x54504754;  ///< "TPGT"
+  static constexpr uint32_t s_version = 0x010004;         ///< 1.0.4 in hex
+  static constexpr size_t s_header_size = sizeof(BinaryFileHeader);
 
   /**
    * @brief Validate a binary file header from a stream.

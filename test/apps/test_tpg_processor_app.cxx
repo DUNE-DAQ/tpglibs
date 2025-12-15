@@ -213,7 +213,7 @@ int main(int argc, char* argv[]) {
         validation_data.resize(validation_steps.size());
         const std::streamsize step_bytes = static_cast<std::streamsize>(samples_per_time_step * sizeof(int16_t));
         const std::streamoff header_size =
-            static_cast<std::streamoff>(tpglibs::testapp::BinaryFileValidator::HEADER_SIZE);
+            static_cast<std::streamoff>(tpglibs::testapp::BinaryFileValidator::s_header_size);
 
         for (size_t i = 0; i < validation_steps.size(); ++i) {
             validation_data[i].resize(samples_per_time_step);

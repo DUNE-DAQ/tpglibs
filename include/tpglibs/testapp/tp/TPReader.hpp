@@ -84,7 +84,7 @@ class TPReader {
   size_t num_frames() const;
 
  private:
-  static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::HEADER_SIZE;
+  static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::s_header_size;
   static constexpr size_t FRAME_INDEX_SIZE = sizeof(uint32_t);
   static constexpr size_t TP_COUNT_SIZE = sizeof(uint32_t);
   
