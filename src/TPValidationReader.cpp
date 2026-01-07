@@ -44,8 +44,9 @@ bool TPValidationReader::validate_file_header(std::ifstream& file, std::string& 
 void TPValidationReader::build_index(std::ifstream& file) {
   const size_t tp_size = sizeof(dunedaq::trgdataformats::TriggerPrimitive);
   
-  // Reasonable maximum: 1 million TPs per frame (prevents DoS and overflow)
-  constexpr uint32_t MAX_TPS_PER_FRAME = 1000000;
+  // Maximum TPs per frame: 64 channels × 256 time samples / 2 = 8192
+  // This assumes alternating threshold crossings (max TP count scenario)
+  constexpr uint32_t MAX_TPS_PER_FRAME = 8192;
   
   while (file.good()) {
     // Read frame index
