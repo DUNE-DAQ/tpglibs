@@ -84,9 +84,9 @@ class TPValidationReader {
   size_t num_frames() const;
 
  private:
-  static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::s_header_size;
-  static constexpr size_t FRAME_INDEX_SIZE = sizeof(uint32_t);
-  static constexpr size_t TP_COUNT_SIZE = sizeof(uint32_t);
+  static constexpr size_t s_FILE_HEADER_SIZE = BinaryFileValidator::s_header_size;
+  static constexpr size_t s_FRAME_INDEX_SIZE = sizeof(uint32_t);
+  static constexpr size_t s_TP_COUNT_SIZE = sizeof(uint32_t);
   
   // Index: frame_index -> TPs
   std::unordered_map<uint32_t, std::vector<dunedaq::trgdataformats::TriggerPrimitive>> m_index;

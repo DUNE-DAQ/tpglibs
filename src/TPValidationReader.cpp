@@ -50,10 +50,10 @@ void TPValidationReader::build_index(std::ifstream& file) {
   while (file.good()) {
     // Read frame index
     uint32_t frame_index;
-    file.read(reinterpret_cast<char*>(&frame_index), FRAME_INDEX_SIZE);
+    file.read(reinterpret_cast<char*>(&frame_index), s_FRAME_INDEX_SIZE);
     
     // Check if read was successful
-    if (!file.good() || file.gcount() != FRAME_INDEX_SIZE) {
+    if (!file.good() || file.gcount() != s_FRAME_INDEX_SIZE) {
       // End of file (normal) or read error
       if (file.eof() && file.gcount() == 0) {
         // Clean EOF - no more records
@@ -66,9 +66,9 @@ void TPValidationReader::build_index(std::ifstream& file) {
     
     // Read TP count
     uint32_t num_tps;
-    file.read(reinterpret_cast<char*>(&num_tps), TP_COUNT_SIZE);
+    file.read(reinterpret_cast<char*>(&num_tps), s_TP_COUNT_SIZE);
     
-    if (!file.good() || file.gcount() != TP_COUNT_SIZE) {
+    if (!file.good() || file.gcount() != s_TP_COUNT_SIZE) {
       // Incomplete record - stop reading
       break;
     }
