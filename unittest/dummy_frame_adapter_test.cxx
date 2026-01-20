@@ -33,7 +33,6 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameValid)
   write_file_header(temp_file);
   
   uint64_t timestamp = 1234567890;
-  uint64_t another_key = 9876543210;
   
   // Create test data: 64 channels, 256 time samples
   // Fill with test pattern: value = (time_sample * 100 + channel) % 1000
@@ -46,7 +45,7 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameValid)
     }
   }
   
-  write_frame(temp_file, timestamp, another_key, frame_data);
+  write_frame(temp_file, timestamp, frame_data);
   temp_file.close();
   
   // Read frame using FrameReader (fixed size, no parameters needed)
@@ -61,7 +60,6 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameValid)
   
   BOOST_CHECK(frame != nullptr);
   BOOST_CHECK_EQUAL(frame->timestamp, timestamp);
-  BOOST_CHECK_EQUAL(frame->another_key, another_key);
   // Data is stored as packed uint64_t words: 256 * 16 = 4096 words
   BOOST_CHECK_EQUAL(frame->data.size(), num_time_samples * 16);
   
@@ -84,10 +82,9 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameInvalidSize)
   write_file_header(temp_file);
   
   uint64_t timestamp = 1234;
-  uint64_t another_key = 5678;
   std::vector<int16_t> frame_data(12, 0x42);  // Wrong size (should be 64*256 = 16384)
   
-  write_frame(temp_file, timestamp, another_key, frame_data);
+  write_frame(temp_file, timestamp, frame_data);
   temp_file.close();
   
   // Read frame (will fail because size doesn't match fixed 64×256)
@@ -114,8 +111,8 @@ BOOST_AUTO_TEST_CASE(TestCalculateFrameSize)
 {
   // Test frame size calculation (fixed 64×256)
   size_t frame_size = tpglibs::testapp::DummyFrameAdapter::calculate_frame_size();
-  // Header: 16 bytes, Data: 64*256*2 = 32768 bytes, Total: 32784 bytes
-  BOOST_CHECK_EQUAL(frame_size, 16 + 32768);
+  // Header: 8 bytes, Data: 64*256*2 = 32768 bytes, Total: 32776 bytes
+  BOOST_CHECK_EQUAL(frame_size, 8 + 32768);
   
   size_t frame_data_size = tpglibs::testapp::DummyFrameAdapter::calculate_frame_data_size();
   BOOST_CHECK_EQUAL(frame_data_size, 32768);
@@ -130,12 +127,11 @@ BOOST_AUTO_TEST_CASE(TestValidateFrameView)
   write_file_header(temp_file);
   
   uint64_t timestamp = 1234;
-  uint64_t another_key = 5678;
   constexpr size_t num_channels = 64;
   constexpr size_t num_time_samples = 256;
   std::vector<int16_t> frame_data(num_channels * num_time_samples, 0x42);
   
-  write_frame(temp_file, timestamp, another_key, frame_data);
+  write_frame(temp_file, timestamp, frame_data);
   temp_file.close();
   
   // Read frame
@@ -270,7 +266,6 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameHighValues)
   write_file_header(temp_file);
   
   uint64_t timestamp = 1234;
-  uint64_t another_key = 5678;
   constexpr size_t num_channels = 64;
   constexpr size_t num_time_samples = 256;
   std::vector<int16_t> frame_data(num_channels * num_time_samples);
@@ -290,7 +285,7 @@ BOOST_AUTO_TEST_CASE(TestCreateFrameHighValues)
     }
   }
   
-  write_frame(temp_file, timestamp, another_key, frame_data);
+  write_frame(temp_file, timestamp, frame_data);
   temp_file.close();
   
   // Read and convert

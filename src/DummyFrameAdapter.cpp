@@ -76,7 +76,6 @@ DummyFrameAdapter::create_frame(const RawFrameView& frame_view) {
     return nullptr;
   }
   std::memcpy(&frame->timestamp, header_ptr, sizeof(uint64_t));
-  std::memcpy(&frame->another_key, header_ptr + 8, sizeof(uint64_t));
   
   const uint8_t* data_ptr = frame_view.data();
   if (data_ptr == nullptr || frame_view.data_size() != calculate_frame_data_size()) {

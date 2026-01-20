@@ -118,11 +118,11 @@ struct BinaryFileHeader {
 ┌─────────────────┐
 │ File Header     │ (12 bytes) - See Section 1
 ├─────────────────┤
-│ Frame 0         │ (32,784 bytes for 64×256 frames)
+│ Frame 0         │ (32,776 bytes for 64×256 frames)
 ├─────────────────┤
-│ Frame 1         │ (32,784 bytes)
+│ Frame 1         │ (32,776 bytes)
 ├─────────────────┤
-│ Frame 2         │ (32,784 bytes)
+│ Frame 2         │ (32,776 bytes)
 ├─────────────────┤
 │ ...             │
 └─────────────────┘
@@ -131,9 +131,8 @@ struct BinaryFileHeader {
 **Frame Structure:**
 ```
 ┌─────────────────────┐
-│ Frame Header        │ (16 bytes)
+│ Frame Header        │ (8 bytes)
 │ - timestamp (8)     │ uint64_t: Frame timestamp
-│ - another_key (8)   │ uint64_t: Additional header field
 ├─────────────────────┤
 │ Frame Data          │ (32,768 bytes for 64×256)
 │ - data[]            │ int16_t array: ADC samples
@@ -141,14 +140,14 @@ struct BinaryFileHeader {
 ```
 
 **Frame Size Calculation:**
-- Header: 16 bytes (8 bytes timestamp + 8 bytes another_key)
+- Header: 8 bytes (timestamp)
 - Data: `num_channels × num_time_samples × sizeof(int16_t)` bytes
-- Total: `16 + (num_channels × num_time_samples × 2)` bytes
+- Total: `8 + (num_channels × num_time_samples × 2)` bytes
 
 **Fixed Configuration:**
 - 64 channels (4 pipelines × 16 channels)
 - 256 time samples per frame
-- Frame size: `16 + (64 × 256 × 2) = 32,784` bytes
+- Frame size: `8 + (64 × 256 × 2) = 32,776` bytes
 
 **Frame Data Layout:**
 - **Data Type**: `int16_t` (2 bytes per sample, little-endian)

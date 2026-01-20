@@ -123,12 +123,10 @@
  void
  write_frame(std::ofstream& out, int frame_index, const std::vector<int16_t>& adc_data)
  {
-   // Frame header: 16 bytes (8 bytes timestamp + 8 bytes another_key)
+  // Frame header: 8 bytes (timestamp)
    uint64_t timestamp = static_cast<uint64_t>(frame_index) * FRAME_TIMESTAMP_MULTIPLIER;
-   uint64_t another_key = 0x123456789ABCDEF0; // Dummy value
  
    out.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
-   out.write(reinterpret_cast<const char*>(&another_key), sizeof(another_key));
  
    // Frame data: NUM_CHANNELS × NUM_TIME_SAMPLES × 2 bytes
    // Layout: row-major (time_sample[channel])

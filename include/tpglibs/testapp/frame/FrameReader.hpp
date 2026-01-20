@@ -34,48 +34,49 @@ enum class FrameReadStatus {
  *
  * This is a simple container for raw frame bytes that only divides the frame into header and data.
  * The frame consists of:
- * - Header: 16 bytes (8 bytes timestamp + 8 bytes another_key)
+ * - Header: 8 bytes (timestamp)
  * - Data: frame_data_size bytes
  */
 struct RawFrameView {
-  std::vector<uint8_t> bytes;  ///< Complete frame: header (16 bytes) + data
+  static constexpr size_t k_frame_header_size = 8;
+  std::vector<uint8_t> bytes;  ///< Complete frame: header (8 bytes) + data
   
   /**
-   * @brief Get pointer to frame header (first 16 bytes)
-   * @warning Returns nullptr if frame is invalid (bytes.size() < 16)
+   * @brief Get pointer to frame header (first 8 bytes)
+   * @warning Returns nullptr if frame is invalid (bytes.size() < 8)
    */
   const uint8_t* header() const { 
-    return (bytes.size() >= 16) ? bytes.data() : nullptr; 
+    return (bytes.size() >= k_frame_header_size) ? bytes.data() : nullptr; 
   }
   
   /**
    * @brief Get pointer to frame data (bytes after header)
-   * @warning Returns nullptr if frame is invalid (bytes.size() < 16)
+   * @warning Returns nullptr if frame is invalid (bytes.size() < 8)
    */
   const uint8_t* data() const { 
     // simple check to see if content exists after the header
-    return (bytes.size() >= 16) ? bytes.data() + 16 : nullptr; 
+    return (bytes.size() >= k_frame_header_size) ? bytes.data() + k_frame_header_size : nullptr; 
   }
   
   /**
    * @brief Get frame data size, which is the size of the frame minus the header size
-   * @warning Returns 0 if frame is invalid (bytes.size() < 16) to avoid unsigned underflow
+   * @warning Returns 0 if frame is invalid (bytes.size() < 8) to avoid unsigned underflow
    */
   size_t data_size() const { 
-    return (bytes.size() >= 16) ? bytes.size() - 16 : 0; 
+    return (bytes.size() >= k_frame_header_size) ? bytes.size() - k_frame_header_size : 0; 
   }
   
   /**
    * @brief Check if frame is valid (has header and data)
    */
-  bool is_valid() const { return bytes.size() >= 16; }
+  bool is_valid() const { return bytes.size() >= k_frame_header_size; }
 };
 
 /**
  * @brief Frame reader for binary frame files
  *
  * Reads frames sequentially from a binary file. Each frame consists of:
- * - Frame header: 16 bytes (timestamp + another_key)
+ * - Frame header: 8 bytes (timestamp)
  * - Frame data: configurable size (typically num_channels * num_time_samples * 2)
  * 2 stands for 2 bytes per sample, which is the size of int16_t
  *
@@ -144,10 +145,10 @@ class FrameReader {
 
  private:
   BinarySignalReader<uint8_t> m_reader;
-  size_t m_total_frame_size;  // 16 (header) + frame_data_size
+  size_t m_total_frame_size;  // 8 (header) + frame_data_size
   bool m_eof_reached;
   static constexpr size_t FILE_HEADER_SIZE = BinaryFileValidator::s_header_size;
-  static constexpr size_t FRAME_HEADER_SIZE = 16; // Frame header size
+  static constexpr size_t FRAME_HEADER_SIZE = 8; // Frame header size
   // Fixed frame data size for 64 channels × 256 time samples (unpacked int16_t format)
   static constexpr size_t FRAME_DATA_SIZE = 64 * 256 * sizeof(int16_t);  // 32,768 bytes
   

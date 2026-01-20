@@ -47,7 +47,7 @@ std::pair<FrameReadStatus, RawFrameView> FrameReader::next_frame() {
   RawFrameView frame;
   frame.bytes.reserve(m_total_frame_size);
   
-  // Read frame header (16 bytes)
+  // Read frame header (8 bytes)
   auto header_bytes = m_reader.next(FRAME_HEADER_SIZE);
   if (header_bytes.size() != FRAME_HEADER_SIZE) {
     // Only treat 0 bytes read + EOF as clean kEOF

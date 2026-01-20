@@ -33,34 +33,28 @@ inline void write_file_header(std::ofstream& file) {
 }
 
 /**
- * @brief Write frame (16-byte header + data) with uint8_t data
+ * @brief Write frame (8-byte header + data) with uint8_t data
  * @param file Output file stream
  * @param timestamp Frame timestamp (8 bytes)
- * @param another_key Additional header field (8 bytes)
  * @param data Frame data as vector of uint8_t
  */
 inline void write_frame(std::ofstream& file, 
-                        uint64_t timestamp, 
-                        uint64_t another_key, 
+                        uint64_t timestamp,
                         const std::vector<uint8_t>& data) {
   file.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
-  file.write(reinterpret_cast<const char*>(&another_key), sizeof(another_key));
   file.write(reinterpret_cast<const char*>(data.data()), data.size());
 }
 
 /**
- * @brief Write frame (16-byte header + data) with int16_t data
+ * @brief Write frame (8-byte header + data) with int16_t data
  * @param file Output file stream
  * @param timestamp Frame timestamp (8 bytes)
- * @param another_key Additional header field (8 bytes)
  * @param data Frame data as vector of int16_t
  */
 inline void write_frame(std::ofstream& file, 
-                        uint64_t timestamp, 
-                        uint64_t another_key, 
+                        uint64_t timestamp,
                         const std::vector<int16_t>& data) {
   file.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
-  file.write(reinterpret_cast<const char*>(&another_key), sizeof(another_key));
   file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(int16_t));
 }
 

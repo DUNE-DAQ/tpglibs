@@ -153,16 +153,14 @@
  /**
   * @brief Write a frame to the frames file
   */
- void
- write_frame(std::ofstream& out, int frame_index, const std::vector<int16_t>& adc_data)
- {
-   uint64_t timestamp = static_cast<uint64_t>(frame_index) * FRAME_TIMESTAMP_MULTIPLIER;
-   uint64_t another_key = 0x123456789ABCDEF0;
- 
-   out.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
-   out.write(reinterpret_cast<const char*>(&another_key), sizeof(another_key));
-   out.write(reinterpret_cast<const char*>(adc_data.data()), adc_data.size() * sizeof(int16_t));
- }
+void
+write_frame(std::ofstream& out, int frame_index, const std::vector<int16_t>& adc_data)
+{
+  uint64_t timestamp = static_cast<uint64_t>(frame_index) * FRAME_TIMESTAMP_MULTIPLIER;
+
+  out.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
+  out.write(reinterpret_cast<const char*>(adc_data.data()), adc_data.size() * sizeof(int16_t));
+}
  
  /**
   * @brief Write TPs to validation file

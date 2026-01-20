@@ -24,7 +24,7 @@ namespace testapp {
  * @brief Dummy frame structure for test applications
  *
  * Frame structure compatible with TPGenerator (64 channels, 256 time samples):
- * - Header: 16 bytes (8 bytes timestamp + 8 bytes another_key)
+ * - Header: 8 bytes (timestamp)
  * - Data: 256 time samples × 16 words × 8 bytes = 32,768 bytes (packed uint64_t format)
  * - Data layout: packed uint64_t words, each word contains 4 consecutive 16-bit ADC values
  * - ADC VALUE RANGE: Values must be in 14-bit range [0, 16383] to match TPGenerator expectations
@@ -45,7 +45,6 @@ struct DUMMY_FRAME_STRUCT {
   static constexpr int16_t s_adc_min_value = 0;       // 0 - 14-bit min
   
   uint64_t timestamp;      ///< Frame timestamp (8 bytes)
-  uint64_t another_key;    ///< Additional header field (8 bytes)
   
   // Data storage: packed uint64_t words (256 time samples × 16 words = 4096 words)
   // Each uint64_t word contains 4 consecutive 16-bit ADC values
@@ -135,7 +134,7 @@ class DummyFrameAdapter {
   static bool validate_frame_view(const RawFrameView& frame_view);
 
  private:
-  static constexpr size_t FRAME_HEADER_SIZE = 16;  // 8 bytes timestamp + 8 bytes another_key
+  static constexpr size_t FRAME_HEADER_SIZE = 8;  // 8 bytes timestamp
 };
 
 } // namespace testapp

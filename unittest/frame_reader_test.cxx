@@ -32,11 +32,10 @@ BOOST_AUTO_TEST_CASE(TestReadSingleFrame)
   write_file_header(temp_file);
   
   uint64_t timestamp = 1234567890;
-  uint64_t another_key = 9876543210;
   // Fixed frame size: 64 channels × 256 time samples × 2 bytes = 32,768 bytes
   constexpr size_t frame_data_size = 64 * 256 * sizeof(int16_t);
   std::vector<uint8_t> frame_data(frame_data_size, 0x42);
-  write_frame(temp_file, timestamp, another_key, frame_data);
+  write_frame(temp_file, timestamp, frame_data);
   
   temp_file.close();
   
@@ -47,15 +46,12 @@ BOOST_AUTO_TEST_CASE(TestReadSingleFrame)
   
   BOOST_CHECK(status == tpglibs::testapp::FrameReadStatus::kOk);
   BOOST_CHECK(frame.is_valid());
-  BOOST_CHECK_EQUAL(frame.bytes.size(), 16 + frame_data_size);  // header + data
+  BOOST_CHECK_EQUAL(frame.bytes.size(), 8 + frame_data_size);  // header + data
   
   // Verify header content
   uint64_t read_timestamp;
-  uint64_t read_another_key;
   std::memcpy(&read_timestamp, frame.header(), sizeof(read_timestamp));
-  std::memcpy(&read_another_key, frame.header() + 8, sizeof(read_another_key));
   BOOST_CHECK_EQUAL(read_timestamp, timestamp);
-  BOOST_CHECK_EQUAL(read_another_key, another_key);
   
   // Verify data content
   BOOST_CHECK_EQUAL(frame.data_size(), frame_data_size);
@@ -85,9 +81,8 @@ BOOST_AUTO_TEST_CASE(TestReadMultipleFrames)
   constexpr size_t frame_data_size = 64 * 256 * sizeof(int16_t);
   for (int i = 0; i < 3; ++i) {
     uint64_t timestamp = 1000 + i;
-    uint64_t another_key = 2000 + i;
     std::vector<uint8_t> frame_data(frame_data_size, static_cast<uint8_t>(i));  // Different data per frame
-    write_frame(temp_file, timestamp, another_key, frame_data);
+    write_frame(temp_file, timestamp, frame_data);
   }
   
   temp_file.close();
@@ -152,9 +147,7 @@ BOOST_AUTO_TEST_CASE(TestErrorIncompleteFrame)
   
   // Write frame header but only partial data
   uint64_t timestamp = 1234;
-  uint64_t another_key = 5678;
   temp_file.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
-  temp_file.write(reinterpret_cast<const char*>(&another_key), sizeof(another_key));
   // Write only partial data instead of expected 32,768 bytes
   constexpr size_t expected_data_size = 64 * 256 * sizeof(int16_t);
   std::vector<uint8_t> partial_data(expected_data_size / 2, 0xAA);  // Half the expected size
@@ -181,10 +174,10 @@ BOOST_AUTO_TEST_CASE(TestErrorPartialFrameHeader)
   
   write_file_header(temp_file);
   
-  // Write only partial frame header (8 bytes instead of 16)
-  uint64_t timestamp = 1234;
-  temp_file.write(reinterpret_cast<const char*>(&timestamp), sizeof(timestamp));
-  // Missing another_key (8 more bytes) - file ends here
+  // Write only partial frame header (4 bytes instead of 8)
+  uint32_t partial_timestamp = 1234;
+  temp_file.write(reinterpret_cast<const char*>(&partial_timestamp), sizeof(partial_timestamp));
+  // Missing the remaining 4 bytes of the timestamp - file ends here
   
   temp_file.close();
   
@@ -263,9 +256,8 @@ BOOST_AUTO_TEST_CASE(TestReset)
   constexpr size_t frame_data_size = 64 * 256 * sizeof(int16_t);
   for (int i = 0; i < 2; ++i) {
     uint64_t timestamp = 100 + i;
-    uint64_t another_key = 200 + i;
     std::vector<uint8_t> frame_data(frame_data_size, static_cast<uint8_t>(i));
-    write_frame(temp_file, timestamp, another_key, frame_data);
+    write_frame(temp_file, timestamp, frame_data);
   }
   
   temp_file.close();
