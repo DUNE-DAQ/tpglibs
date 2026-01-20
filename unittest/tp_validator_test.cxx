@@ -10,7 +10,7 @@
 #define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/tp/TPValidator.hpp"
-#include "test_helpers.hpp"
+#include "include/test_helpers.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <vector>

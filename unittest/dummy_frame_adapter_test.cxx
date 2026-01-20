@@ -11,7 +11,7 @@
 
 #include "tpglibs/testapp/frame/DummyFrameAdapter.hpp"
 #include "tpglibs/testapp/frame/FrameReader.hpp"
-#include "test_helpers.hpp"
+#include "include/test_helpers.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <fstream>
