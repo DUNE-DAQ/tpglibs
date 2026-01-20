@@ -7,7 +7,6 @@
  */
 
 #define BOOST_TEST_MODULE frame_reader_test
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/frame/FrameReader.hpp"
 #include "include/test_helpers.hpp"

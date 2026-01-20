@@ -7,7 +7,6 @@
  */
 
 #define BOOST_TEST_MODULE dummy_frame_adapter_test
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/frame/DummyFrameAdapter.hpp"
 #include "tpglibs/testapp/frame/FrameReader.hpp"

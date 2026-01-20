@@ -7,7 +7,6 @@
  */
 
 #define BOOST_TEST_MODULE tp_validator_test
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/tp/TPValidator.hpp"
 #include "include/test_helpers.hpp"

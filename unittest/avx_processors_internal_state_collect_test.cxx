@@ -9,7 +9,6 @@
  */
 
 #define BOOST_TEST_MODULE AVXProcessorInternalStateCollectionTest
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
 

@@ -7,7 +7,6 @@
  */
 
 #define BOOST_TEST_MODULE test_config_parser_test
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/common/TestConfigParser.hpp"
 #include <boost/test/unit_test.hpp>
