@@ -7,15 +7,12 @@
  */
 
 #define BOOST_TEST_MODULE boost_test_macro_overview
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/AVXPipeline.hpp"
 
 #include "trgdataformats/Types.hpp"
 
 #include <boost/test/unit_test.hpp>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 
 namespace tpglibs {
 

@@ -15,8 +15,6 @@
 #include "trgdataformats/Types.hpp"
 
 #include <boost/test/unit_test.hpp>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 
 namespace tpglibs {
 

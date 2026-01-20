@@ -7,7 +7,6 @@
  */
 
 #define BOOST_TEST_MODULE binary_file_validator_test
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 
