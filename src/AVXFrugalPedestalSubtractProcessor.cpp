@@ -28,10 +28,10 @@ void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config,
 
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   // Update sample counter and write internal states to buffer for harvesting
-  m_samples++;
-  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
-    m_internal_state_buffer_manager.write_to_active_buffer();
-  }
+//  m_samples++;
+//  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
+//    m_internal_state_buffer_manager.write_to_active_buffer();
+//  }
 
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);
