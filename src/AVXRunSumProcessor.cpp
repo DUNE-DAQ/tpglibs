@@ -57,10 +57,10 @@ void AVXRunSumProcessor::configure(const nlohmann::json& config, const int16_t* 
 
 __m256i AVXRunSumProcessor::process(const __m256i& signal) {
   // Update sample counter and write internal states to buffer for harvesting
-  m_samples++;
-  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
-    m_internal_state_buffer_manager.write_to_active_buffer();
-  }
+//  m_samples++;
+//  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
+//    m_internal_state_buffer_manager.write_to_active_buffer();
+//  }
 
   __m256i scaled_rs = _mm256_mulhrs_epi16(m_running_sum, m_memory_divisor);
   scaled_rs = _mm256_mullo_epi16(scaled_rs, m_memory_factor);

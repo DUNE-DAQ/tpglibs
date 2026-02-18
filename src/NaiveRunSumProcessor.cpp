@@ -40,10 +40,10 @@ void NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t
 
 NaiveRunSumProcessor::naive_array_t NaiveRunSumProcessor::process(const naive_array_t& signal) {
   // Update sample counter and write internal states to buffer for harvesting
-  m_samples++;
-  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
-    m_internal_state_buffer_manager.write_to_active_buffer();
-  }
+//  m_samples++;
+//  if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
+//    m_internal_state_buffer_manager.write_to_active_buffer();
+//  }
 
   for (int i = 0; i < 16; i++) {
     int32_t scaled_rs = _naive_div_int16(m_running_sum[i], 10);
