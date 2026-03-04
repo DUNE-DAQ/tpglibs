@@ -36,7 +36,7 @@ include(cmake/SourcesAndHeaders.cmake)
 add_library(tpglibs SHARED ${sources} ${headers})
 
 target_include_directories(tpglibs PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tpglibs/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>
 )
 
