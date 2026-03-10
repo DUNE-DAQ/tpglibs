@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) {
         // Check if this is a validation step
         if (validation_index < validation_data.size() &&
             step == validation_steps.at(validation_index).get<int>()) {
-            const std::vector<int16_t>& expected = validation_data[validation_index];
+            std::vector<int16_t>& expected = validation_data[validation_index];
             expected.resize(16, 0);
 
             // Find first mismatch using std::mismatch for clarity
