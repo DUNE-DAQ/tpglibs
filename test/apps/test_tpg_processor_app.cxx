@@ -278,8 +278,7 @@ int main(int argc, char* argv[]) {
         if (validation_index < validation_data.size() &&
             step == validation_steps.at(validation_index).get<int>()) {
             const std::vector<int16_t>& expected = validation_data[validation_index];
-std::vector<int16_t>& expected = validation_data[validation_index];
-expected.resize(16, 0);
+            expected.resize(16, 0);
 
             // Find first mismatch using std::mismatch for clarity
             auto mm = std::mismatch(result.begin(), result.end(), expected.begin());
