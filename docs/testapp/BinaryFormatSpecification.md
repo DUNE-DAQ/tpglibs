@@ -167,7 +167,7 @@ Stored as: `[ch0_t0, ch1_t0, ch2_t0, ch3_t0, ch0_t1, ch1_t1, ch2_t1, ch3_t1, ch0
 
 ### 3.2 TP Validation File Format (.val)
 
-**Purpose**: Store expected `TriggerPrimitive` objects for validation.
+**Purpose**: Store the expected `TriggerPrimitive` objects for validation.
 
 **File Structure:**
 ```
