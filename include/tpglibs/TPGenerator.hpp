@@ -90,13 +90,17 @@ class TPGenerator {
       const int register_alignment = T::s_bits_per_adc * m_num_channels_per_pipeline;
       // Loop in time.
       for (int t = 0; t < T::s_time_samples_per_frame; t++) {
-        const typename T::word_t *time_sample = words_base + static_cast<std::ptrdiff_t>(t) * row_stride;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const typename T::word_t *time_sample = words_base + static_cast<std::ptrdiff_t>(t) * row_stride;
         const char* cursor = reinterpret_cast<const char*>(time_sample); // Need to walk in terms of bytes/bits.
 
         // Loop in pipelines.
         for (int p = 0; p < m_num_pipelines; p++) {
-          if (p == m_num_pipelines - 1)
-            cursor -= 4; // Take a step of 32 bit backwards for the last sub-frame.  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+          if (p == m_num_pipelines - 1) {
+            // Take a step of 32 bit backwards for the last sub-frame.
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            cursor -= 4;
+          }
 
           __m256i regi = _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(cursor));
 
@@ -107,10 +111,13 @@ class TPGenerator {
           std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
 
           for (auto tp : tps) {
-            tp.time_start = static_cast<int64_t>(static_cast<float>(t - tp.samples_over_threshold) * m_sample_tick_difference) + timestamp;
+            const auto offset_samples = static_cast<float>(t - tp.samples_over_threshold);
+            tp.time_start =
+                static_cast<int64_t>(offset_samples * m_sample_tick_difference) + timestamp;
             tp_aggr.push_back(tp);
           }
-          cursor += register_alignment / 8; // Numerator is in bits. Need bytes.  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+          cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
         }
       }
 
