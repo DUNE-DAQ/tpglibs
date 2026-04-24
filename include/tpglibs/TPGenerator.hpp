@@ -82,21 +82,23 @@ class TPGenerator {
       std::vector<dunedaq::trgdataformats::TriggerPrimitive> tp_aggr;
       tp_aggr.reserve(T::s_num_channels * T::s_time_samples_per_frame / 2);
 
-      const typename T::word_t (*words_ptr)[T::s_bits_per_adc] = frame->adc_words;
+      // Flatten the external 2-D C-array to a 1-D base pointer; traversal by row stride.
+      const typename T::word_t* const words_base = &frame->adc_words[0][0];
+      constexpr int row_stride = T::s_bits_per_adc;
       const uint64_t timestamp = frame->get_timestamp();
 
       const int register_alignment = T::s_bits_per_adc * m_num_channels_per_pipeline;
       // Loop in time.
       for (int t = 0; t < T::s_time_samples_per_frame; t++) {
-        const typename T::word_t *time_sample = *(words_ptr + t);
-        char* cursor = (char*) time_sample; // Need to walk in terms of bytes/bits.
+        const typename T::word_t *time_sample = words_base + static_cast<std::ptrdiff_t>(t) * row_stride;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        const char* cursor = reinterpret_cast<const char*>(time_sample); // Need to walk in terms of bytes/bits.
 
         // Loop in pipelines.
         for (int p = 0; p < m_num_pipelines; p++) {
           if (p == m_num_pipelines - 1)
-            cursor -= 4; // Take a step of 32 bit backwards for the last sub-frame.
+            cursor -= 4; // Take a step of 32 bit backwards for the last sub-frame.  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-          __m256i regi = _mm256_lddqu_si256((__m256i*)cursor);
+          __m256i regi = _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(cursor));
 
           if (p == m_num_pipelines - 1) // Permute the row order to use the same operation.
             regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
@@ -105,10 +107,10 @@ class TPGenerator {
           std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
 
           for (auto tp : tps) {
-            tp.time_start = static_cast<int64_t>((t - tp.samples_over_threshold) * m_sample_tick_difference) + timestamp;
+            tp.time_start = static_cast<int64_t>(static_cast<float>(t - tp.samples_over_threshold) * m_sample_tick_difference) + timestamp;
             tp_aggr.push_back(tp);
           }
-          cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
+          cursor += register_alignment / 8; // Numerator is in bits. Need bytes.  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
       }
 
