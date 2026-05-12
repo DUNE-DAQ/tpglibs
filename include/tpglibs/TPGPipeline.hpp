@@ -16,6 +16,7 @@
 #include "trgdataformats/Types.hpp"
 
 #include <nlohmann/json.hpp>
+#include <array>
 #include <vector>
 
 namespace tpglibs {
@@ -45,8 +46,8 @@ class TPGPipeline {
       std::shared_ptr<processor_t> prev_processor = nullptr;
 
       for (int i = 0; i < 16; i++) {
-        m_channels[i] = channel_plane_numbers[i].first;
-        m_plane_numbers[i] = channel_plane_numbers[i].second;
+        m_channels.at(i) = channel_plane_numbers[i].first;
+        m_plane_numbers.at(i) = channel_plane_numbers[i].second;
       }
 
       for (const auto& name_config : configs) {
@@ -54,7 +55,7 @@ class TPGPipeline {
         std::shared_ptr<processor_t> processor = m_factory->create_processor(name_config.first);
 
         // Configure it.
-        processor->configure(name_config.second, m_plane_numbers);
+        processor->configure(name_config.second, m_plane_numbers.data());
 
         // If it's the first one, make it the head.
         if (!prev_processor) {
@@ -112,7 +113,7 @@ class TPGPipeline {
     virtual void set_sot_minima(const std::vector<uint16_t>& sot_minima) {
       int idx = 0;
       for (auto sot_minimum : sot_minima) {
-        m_sot_minima[idx++] = sot_minimum;
+        m_sot_minima.at(idx++) = sot_minimum;
       }
     }
 
@@ -127,11 +128,11 @@ class TPGPipeline {
     /** @brief The number of samples from `time_start` to the ADC peak. */
     signal_t m_samples_to_peak{};
     /** @brief Detector channel numbers for the 16 channels that are being processed. */
-    dunedaq::trgdataformats::channel_t m_channels[16];
+    std::array<dunedaq::trgdataformats::channel_t, 16> m_channels;
     /** @brief Detector plane numbers for the 16 channels that are being processed. */
-    int16_t m_plane_numbers[16];
+    std::array<int16_t, 16> m_plane_numbers;
     /** @brief The samples over threshold minimum that a TP from plane `i` must have. */
-    uint16_t m_sot_minima[3];
+    std::array<uint16_t, 3> m_sot_minima;
     /** @brief Processor factory singleton. */
     std::shared_ptr<AbstractFactory<processor_t>> m_factory = AbstractFactory<processor_t>::get_instance();
     /** @brief Processor head to start from. */

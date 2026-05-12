@@ -30,7 +30,6 @@ void AbstractFactory<T>::register_creator(const std::string& processor_name, cre
     return;
   }
   throw std::runtime_error("Attempted to overwrite a creator in factory with " + processor_name);
-  return;
 }
 
 template <typename T>
@@ -43,7 +42,6 @@ std::shared_ptr<T> AbstractFactory<T>::create_processor(const std::string& proce
   }
 
   throw std::runtime_error("Factory failed to find " + processor_name);
-  return nullptr;
 }
 
 template <typename T>
