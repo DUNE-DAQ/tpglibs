@@ -91,7 +91,7 @@ class TPGenerator {
       // Loop in time.
       for (int t = 0; t < T::s_time_samples_per_frame; t++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const typename T::word_t *time_sample = words_base + static_cast<std::ptrdiff_t>(t) * row_stride;
+        const typename T::word_t *time_sample = words_base + t * row_stride;
         const char* cursor = reinterpret_cast<const char*>(time_sample); // Need to walk in terms of bytes/bits.
 
         // Loop in pipelines.
