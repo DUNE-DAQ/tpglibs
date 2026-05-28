@@ -83,7 +83,7 @@ class TPGenerator {
       tp_aggr.reserve(T::s_num_channels * T::s_time_samples_per_frame / 2);
 
       // Flatten the external 2-D C-array to a 1-D base pointer; traversal by row stride.
-      const typename T::word_t* const words_base = &frame->adc_words[0][0];
+      const typename T::word_t* const words_base = frame->get_adc_words();
       constexpr int row_stride = T::s_bits_per_adc;
       const uint64_t timestamp = frame->get_timestamp();
 
