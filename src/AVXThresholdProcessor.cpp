@@ -28,7 +28,7 @@ __m256i AVXThresholdProcessor::process(const __m256i& signal) {
   __m256i mask = _mm256_cmpgt_epi16(signal, m_threshold);
 
   // Essentially: mask[i] ? signal[i] : 0.
-  __m256i above_threshold = _mm256_blendv_epi8(_mm256_setzero_si256(), signal, mask);
+  __m256i above_threshold = _mm256_and_si256(signal, mask);
   return AVXProcessor::process(above_threshold);
 }
 
