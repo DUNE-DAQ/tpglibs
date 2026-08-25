@@ -8,6 +8,8 @@
  * received with this code.
  */
 
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
+
 #define BOOST_TEST_MODULE AVXProcessorInternalStateCollectionTest
 #define FMT_HEADER_ONLY
 
@@ -1012,3 +1014,5 @@ BOOST_AUTO_TEST_CASE(test_multiple_allocations) {
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace tpglibs
+
+#endif // TPGLIBS_ENABLE_STATE_MONITORING

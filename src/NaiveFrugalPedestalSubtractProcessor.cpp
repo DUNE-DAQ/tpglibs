@@ -13,26 +13,25 @@ namespace tpglibs {
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveFrugalPedestalSubtractProcessor", NaiveFrugalPedestalSubtractProcessor)
 
 void NaiveFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
-  // Configure common metric collection parameters
-  // Register pointers to the ACTUAL member variables, not copies
-  // Use shared_ptr with no-op deleter to avoid double-free
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
   m_internal_state_name_registry.register_internal_state("pedestal", 
     std::shared_ptr<naive_array_t>(&m_pedestal, [](auto*){}));
   m_internal_state_name_registry.register_internal_state("accum", 
     std::shared_ptr<naive_array_t>(&m_accum, [](auto*){}));
-    
   configure_internal_state_collection(config);
+#endif
   
   m_accum_limit = config["accum_limit"];
 }
 
 NaiveFrugalPedestalSubtractProcessor::naive_array_t
 NaiveFrugalPedestalSubtractProcessor::process(const naive_array_t& signal) {
-  // Update sample counter and write internal states to buffer for harvesting
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
   m_samples++;
   if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
     m_internal_state_buffer_manager.write_to_active_buffer();
   }
+#endif
 
   naive_array_t subtracted_signal;
   for (int i = 0; i < 16; i++) {

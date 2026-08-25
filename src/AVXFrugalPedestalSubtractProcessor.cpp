@@ -13,25 +13,24 @@ namespace tpglibs {
 REGISTER_AVXPROCESSOR_CREATOR("AVXFrugalPedestalSubtractProcessor", AVXFrugalPedestalSubtractProcessor)
 
 void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* /* plane_numbers */) {
-  // Configure common metric collection parameters
-  // Register pointers to the ACTUAL member variables, not copies
-  // Use shared_ptr with no-op deleter to avoid double-free
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
   m_internal_state_name_registry.register_internal_state("pedestal", 
     std::shared_ptr<__m256i>(&m_pedestal, [](auto*){}));
   m_internal_state_name_registry.register_internal_state("accum", 
     std::shared_ptr<__m256i>(&m_accum, [](auto*){}));
-    
   configure_internal_state_collection(config);
+#endif
   
   m_accum_limit = config["accum_limit"];
 }
 
 __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
-  // Update sample counter and write internal states to buffer for harvesting
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
   m_samples++;
   if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
     m_internal_state_buffer_manager.write_to_active_buffer();
   }
+#endif
 
   // Find the channels that are above or below the pedestal.
   __m256i is_gt = _mm256_cmpgt_epi16(signal, m_pedestal);

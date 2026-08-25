@@ -1,6 +1,8 @@
 
 @PACKAGE_INIT@
 
+set(TPGLIBS_ENABLE_STATE_MONITORING @TPGLIBS_ENABLE_STATE_MONITORING@)
+
 include(CMakeFindDependencyMacro)
 
 # Insert find_dependency() calls for your package's dependencies in

@@ -14,8 +14,10 @@
 #include <memory>
 
 #include "tpglibs/ProcessorMetricArray.hpp"
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
 #include "tpglibs/ProcessorInternalStateBufferManager.hpp"
 #include "tpglibs/ProcessorInternalStateNameRegistry.hpp"
+#endif
 
 namespace tpglibs {
 
@@ -29,6 +31,7 @@ class AbstractProcessor {
   std::shared_ptr<AbstractProcessor<T>> m_next_processor;
 
   protected:
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
     ProcessorInternalStateBufferManager<T> m_internal_state_buffer_manager;
     ProcessorInternalStateNameRegistry<T> m_internal_state_name_registry;
     
@@ -36,6 +39,7 @@ class AbstractProcessor {
     std::atomic<uint64_t> m_samples{0};
     bool m_collect_internal_state_flag{false};
     uint64_t m_sample_period{1};
+#endif
 
   public:
     /** @brief Signal type to process on. General __m256i. */
@@ -43,6 +47,7 @@ class AbstractProcessor {
 
     virtual ~AbstractProcessor() = default;
 
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
     ProcessorInternalStateBufferManager<T>* _get_internal_state_buffer_manager() {
       return &m_internal_state_buffer_manager;
     }
@@ -78,6 +83,10 @@ class AbstractProcessor {
         }
       }
     }
+#else
+    /** @brief No-op: state monitoring disabled at build time. */
+    virtual void configure_internal_state_collection(const nlohmann::json& /* config */) {}
+#endif
 
     /** @brief Pure virtual function that will configure the processor using plane numbers. */
     virtual void configure(const nlohmann::json& config, const int16_t* plane_numbers) = 0;
@@ -102,11 +111,19 @@ class AbstractProcessor {
 
     /** @brief Get the names of requested internal states (delegates to registry). */
     virtual std::vector<std::string> get_requested_internal_state_names() const {
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
       return m_internal_state_name_registry.get_names_of_requested_internal_states();
+#else
+      return {};
+#endif
     }
 
     virtual ProcessorMetricArray<std::array<int16_t, 16>> read_internal_states_as_integer_array() {
+#ifdef TPGLIBS_ENABLE_STATE_MONITORING
       return m_internal_state_buffer_manager.switch_buffer_and_read_casted();
+#else
+      return {nullptr, 0};
+#endif
     }
 };
 
