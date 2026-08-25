@@ -5,7 +5,11 @@ find_package(daq-cmake REQUIRED)
 
 daq_setup_environment()
 
-option(TPGLIBS_ENABLE_STATE_MONITORING "Enable TPG internal state monitoring" OFF)
+if(DEFINED ENV{TPGLIBS_ENABLE_STATE_MONITORING})
+  option(TPGLIBS_ENABLE_STATE_MONITORING "Enable TPG internal state monitoring" $ENV{TPGLIBS_ENABLE_STATE_MONITORING})
+else()
+  option(TPGLIBS_ENABLE_STATE_MONITORING "Enable TPG internal state monitoring" OFF)
+endif()
 
 find_package(fmt REQUIRED)
 find_package(nlohmann_json REQUIRED)
