@@ -24,6 +24,15 @@ PYBIND11_MODULE(_daq_tpglibs_py, m)
   // you'd like to have a python binding to
 
   register_renameme(m);
+
+  // Add attributes signaling if state monitoring is enabled, to be consumed by 
+  // integration test tpg_state_collection_test
+  
+  #ifdef TPGLIBS_ENABLE_STATE_MONITORING
+    m.attr("state_monitoring_enabled") = true;
+  #else
+    m.attr("state_monitoring_enabled") = false;
+  #endif
 }
 
 } // namespace dunedaq::tpglibs::python
