@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(tpglibs VERSION 1.0.6)
+project(tpglibs VERSION 1.0.7)
 
 find_package(daq-cmake REQUIRED)
 
