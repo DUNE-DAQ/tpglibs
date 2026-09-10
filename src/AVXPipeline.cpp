@@ -37,7 +37,7 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
   m_adc_peak = _mm256_max_epi16(m_adc_peak, processed_signal);
   m_samples_to_peak = _mm256_blendv_epi8(m_samples_to_peak, m_samples_over_threshold, above_peak);
 
-  __m256i time_add = _mm256_blendv_epi8(_mm256_setzero_si256(), m_ones_register, active);
+  __m256i time_add = _mm256_and_si256(m_ones_register, active);
   m_samples_over_threshold = _mm256_adds_epi16(m_samples_over_threshold, time_add);
 
   return new_tps;
@@ -54,11 +54,11 @@ AVXPipeline::check_for_tps(const __m256i& tp_mask) {
 std::vector<dunedaq::trgdataformats::TriggerPrimitive>
 AVXPipeline::generate_tps(const __m256i& tp_mask) {
   // Mask everything that's relevant.
-  __m256i samples_over_threshold = _mm256_blendv_epi8(_mm256_setzero_si256(), m_samples_over_threshold, tp_mask);
-  __m256i adc_integral_lo = _mm256_blendv_epi8(_mm256_setzero_si256(), m_adc_integral_lo, tp_mask);
-  __m256i adc_integral_hi = _mm256_blendv_epi8(_mm256_setzero_si256(), m_adc_integral_hi, tp_mask);
-  __m256i adc_peak = _mm256_blendv_epi8(_mm256_setzero_si256(), m_adc_peak, tp_mask);
-  __m256i samples_to_peak = _mm256_blendv_epi8(_mm256_setzero_si256(), m_samples_to_peak, tp_mask);
+  __m256i samples_over_threshold = _mm256_and_si256(m_samples_over_threshold, tp_mask);
+  __m256i adc_integral_lo = _mm256_and_si256(m_adc_integral_lo, tp_mask);
+  __m256i adc_integral_hi = _mm256_and_si256(m_adc_integral_hi, tp_mask);
+  __m256i adc_peak = _mm256_and_si256(m_adc_peak, tp_mask);
+  __m256i samples_to_peak = _mm256_and_si256(m_samples_to_peak, tp_mask);
 
   // Convert to uint16_t.
   uint16_t tp_sot[16], tp_integral_lo[16], tp_integral_hi[16], tp_adc_peak[16], tp_samples_to_peak[16];
@@ -83,11 +83,11 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
   }
 
   // Reset the channels that generated tps.
-  m_samples_over_threshold = _mm256_blendv_epi8(m_samples_over_threshold, _mm256_setzero_si256(), tp_mask);
-  m_adc_integral_lo     = _mm256_blendv_epi8(m_adc_integral_lo, _mm256_setzero_si256(), tp_mask);
-  m_adc_integral_hi     = _mm256_blendv_epi8(m_adc_integral_hi, _mm256_setzero_si256(), tp_mask);
-  m_adc_peak            = _mm256_blendv_epi8(m_adc_peak, _mm256_setzero_si256(), tp_mask);
-  m_samples_to_peak     = _mm256_blendv_epi8(m_samples_to_peak, _mm256_setzero_si256(), tp_mask);
+  m_samples_over_threshold = _mm256_andnot_si256(tp_mask, m_samples_over_threshold);
+  m_adc_integral_lo     = _mm256_andnot_si256(tp_mask, m_adc_integral_lo);
+  m_adc_integral_hi     = _mm256_andnot_si256(tp_mask, m_adc_integral_hi);
+  m_adc_peak            = _mm256_andnot_si256(tp_mask, m_adc_peak);
+  m_samples_to_peak     = _mm256_andnot_si256(tp_mask, m_samples_to_peak);
 
   // Finalize.
   return tps;
