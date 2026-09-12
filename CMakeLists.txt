@@ -48,8 +48,15 @@ if(TPGLIBS_ENABLE_STATE_MONITORING)
   daq_add_unit_test(processor_state_registrate_collect_test LINK_LIBRARIES tpglibs)
 endif()
 daq_add_unit_test(binary_signal_reader_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(frame_reader_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(dummy_frame_adapter_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(tp_validation_reader_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(tp_validator_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(binary_file_validator_test LINK_LIBRARIES tpglibs)
+daq_add_unit_test(test_config_parser_test LINK_LIBRARIES tpglibs)
 
-# Add test application
+# Add test applications
 daq_add_application(tpglibs_processor_test test_tpg_processor_app.cxx TEST LINK_LIBRARIES tpglibs)
+daq_add_application(tpglibs_generator_test test_tpg_generator_app.cxx TEST LINK_LIBRARIES tpglibs)
 
 daq_install()

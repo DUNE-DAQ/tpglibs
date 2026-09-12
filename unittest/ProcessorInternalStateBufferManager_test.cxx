@@ -9,7 +9,6 @@
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
 
 #define BOOST_TEST_MODULE ProcessorInternalStateBufferManager_tests
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/ProcessorInternalStateBufferManager.hpp"
 #include "tpglibs/ProcessorInternalStateNameRegistry.hpp"

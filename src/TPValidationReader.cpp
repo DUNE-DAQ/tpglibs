@@ -1,0 +1,143 @@
+/**
+ * @file TPValidationReader.cpp
+ *
+ * @copyright This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * Licensing/copyright details are in the COPYING file that you should have
+ * received with this code.
+ */
+
+#include "tpglibs/testapp/tp/TPValidationReader.hpp"
+#include <fstream>
+#include <cstring>
+#include <stdexcept>
+#include <climits>
+#include <limits>
+#include <string>
+
+namespace tpglibs {
+namespace testapp {
+
+TPValidationReader::TPValidationReader(const std::string& filepath) {
+  std::ifstream file(filepath, std::ios::binary);
+  if (!file.is_open()) {
+    throw std::runtime_error("Failed to open TP validation file: " + filepath);
+  }
+  
+  // Validate file header
+  std::string header_error;
+  if (!validate_file_header(file, header_error)) {
+    throw std::runtime_error("Invalid file header in TP validation file: " + filepath +
+                             (header_error.empty() ? "" : (": " + header_error)));
+  }
+  
+  // Build index from remaining file content
+  build_index(file);
+  
+  file.close();
+}
+
+bool TPValidationReader::validate_file_header(std::ifstream& file, std::string& error) {
+  BinaryFileHeader header;
+  return BinaryFileValidator::validate_stream(file, header, error);
+}
+
+void TPValidationReader::build_index(std::ifstream& file) {
+  const size_t tp_size = sizeof(dunedaq::trgdataformats::TriggerPrimitive);
+  
+  // Maximum TPs per frame: 64 channels × 256 time samples / 2 = 8192
+  // This assumes alternating threshold crossings (max TP count scenario)
+  constexpr uint32_t MAX_TPS_PER_FRAME = 8192;
+  
+  while (file.good()) {
+    // Read frame index
+    uint32_t frame_index;
+    file.read(reinterpret_cast<char*>(&frame_index), s_FRAME_INDEX_SIZE);
+    
+    // Check if read was successful
+    if (!file.good() || file.gcount() != s_FRAME_INDEX_SIZE) {
+      // End of file (normal) or read error
+      if (file.eof() && file.gcount() == 0) {
+        // Clean EOF - no more records
+        break;
+      }
+      // Partial read indicates corrupted file - stop building index
+      // Note: This is acceptable for validation files - partial data is better than crashing
+      break;
+    }
+    
+    // Read TP count
+    uint32_t num_tps;
+    file.read(reinterpret_cast<char*>(&num_tps), s_TP_COUNT_SIZE);
+    
+    if (!file.good() || file.gcount() != s_TP_COUNT_SIZE) {
+      // Incomplete record - stop reading
+      break;
+    }
+    
+    // Validate num_tps to prevent DoS and integer overflow
+    if (num_tps > MAX_TPS_PER_FRAME) {
+      // Skip this record - invalid num_tps (likely corrupted file)
+      // Don't throw to allow reading other valid records if any
+      break;
+    }
+    
+    // Check for integer overflow in expected_bytes calculation
+    // If num_tps * tp_size would overflow size_t, skip this record
+    const size_t max_safe_tps = std::numeric_limits<size_t>::max() / tp_size;
+    if (num_tps > max_safe_tps) {
+      // Would overflow - skip this record
+      break;
+    }
+    
+    // Read TPs
+    std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps;
+    try {
+      tps.resize(num_tps);
+    } catch (const std::bad_alloc&) {
+      // Memory allocation failed - skip this record
+      break;
+    }
+    
+    const size_t expected_bytes = num_tps * tp_size;
+    file.read(reinterpret_cast<char*>(tps.data()), expected_bytes);
+    
+    // Check if read was successful
+    if (!file.good() || file.gcount() != static_cast<std::streamsize>(expected_bytes)) {
+      // Incomplete TP data - skip this record
+      break;
+    }
+    
+    // Store in index (overwrites if frame_index already exists - last write wins)
+    m_index[frame_index] = std::move(tps);
+  }
+}
+
+std::vector<dunedaq::trgdataformats::TriggerPrimitive> 
+TPValidationReader::get_tps_for_frame(uint32_t frame_index) const {
+  auto it = m_index.find(frame_index);
+  if (it != m_index.end()) {
+    return it->second;  // Return copy of TPs
+  }
+  return std::vector<dunedaq::trgdataformats::TriggerPrimitive>();  // Empty vector if not found
+}
+
+std::vector<uint32_t> TPValidationReader::get_validation_frames() const {
+  std::vector<uint32_t> frames;
+  frames.reserve(m_index.size());
+  for (const auto& pair : m_index) {
+    frames.push_back(pair.first);
+  }
+  return frames;
+}
+
+bool TPValidationReader::has_frame(uint32_t frame_index) const {
+  return m_index.find(frame_index) != m_index.end();
+}
+
+size_t TPValidationReader::num_frames() const {
+  return m_index.size();
+}
+
+} // namespace testapp
+} // namespace tpglibs
+

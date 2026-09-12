@@ -1,151 +1,277 @@
-# TPG Test Application - Binary File Format
+# Binary File Format Specification
 
 ## Overview
 
-This document specifies the binary file format used by the TPG test application.
+This document specifies the binary file formats used by:
+- `test_tpg_processor_app.cxx` - TPG Processor test application
+- `test_tpg_generator_app.cxx` - TPGenerator test application
 
-## 1. Binary File Format (.bin/.val)
+## 1. Common File Header
 
-**Binary file with header and int16 data.**
+All binary files start with a 12-byte header:
 
-### 1.1 File Structure
+| Offset | Size (bytes) | Type   | Name         | Description                          |
+|--------|--------------|--------|--------------|--------------------------------------|
+| 0      | 4            | uint32 | magic_number | Magic number: `0x54504754` ("TPGT")  |
+| 4      | 4            | uint32 | version      | Format version: `0x010004` (1.0.4)   |
+| 8      | 4            | uint32 | reserved     | Reserved for future use              |
 
+**C++ Structure:**
+```cpp
+struct BinaryFileHeader {
+  uint32_t magic_number;
+  uint32_t version;
+  uint32_t reserved;
+};
+```
+
+## 2. Processor Test Binary Format
+
+### 2.1 Input File Format (.bin)
+
+**Purpose**: Store time step data for processor testing.
+
+**File Structure:**
 ```
 ┌─────────────────┐
-│ File Header     │ (12 bytes)
+│ File Header     │ (12 bytes) - See Section 1
 ├─────────────────┤
-│ Data Block 0    │ (N samples × 2 bytes each)
+│ Data Block 0    │ (samples_per_time_step × 2 bytes)
 ├─────────────────┤
-│ Data Block 1    │ (N samples × 2 bytes each)
+│ Data Block 1    │ (samples_per_time_step × 2 bytes)
 ├─────────────────┤
-│ Data Block 2    │ (N samples × 2 bytes each)
+│ Data Block 2    │ (samples_per_time_step × 2 bytes)
 ├─────────────────┤
 │ ...             │
 └─────────────────┘
 ```
 
-This binary file format can be used for:
-- **Input data files (.bin)**: Time step data for processor testing
-- **Validation files (.bin)**: Expected results for validation steps
-- **Pipeline tests**: Multiple time step payloads for different channels
+**Data Format:**
+- **Data Type**: `int16_t` (2 bytes per sample)
+- **Byte Order**: Little-endian
+- **Block Size**: `samples_per_time_step × sizeof(int16_t)` bytes per block
+- **Layout**: Sequential blocks, each containing `samples_per_time_step` consecutive `int16_t` values
 
-### 1.2 Header Specification
+### 2.2 Validation File Format (.bin)
 
-| Offset | Size (bytes) | Type   | Name         | Description                                    |
-|-------|--------------|--------|--------------|------------------------------------------------|
-| 0     | 4            | uint32 | magic_number | Magic number: 0x54504754 ("TPGT")              |
-| 4     | 4            | uint32 | version      | Format version: 1.0.4 (matches tpglibs)        |
-| 8     | 4            | uint32 | reserved     | Reserved for future use                        |
+**Purpose**: Store expected processor outputs for validation steps.
 
-### 1.3 Data Format
-
-- **Data Type:** int16 (2 bytes per sample)
-- **Byte Order:** Little-endian
-- **Layout:** One data block per read operation
-- **Header:** 16 bytes with magic number and version
-
-### 1.4 Usage with BinarySignalReader
-
-`samples_per_block` is a logical abstraction for the size of data to be fed into a processing entity. If it is a single processor, then it is 16 integer type data for the 16 channels. If it is a TPGenerator data block, then it would be 4 pipelines * 16 channels.
-
-```cpp
-BinarySignalReader<int16_t> reader("data.bin");
-
-// Read one data block at a time
-while (!reader.eof()) {
-    auto data_block = reader.next(samples_per_block);
-    if (data_block.empty()) break;
-    
-    // Process this data block
-    auto result = processor->process(data_block);
-}
+**File Structure:**
+```
+┌─────────────────┐
+│ File Header     │ (12 bytes) - See Section 1
+├─────────────────┤
+│ Data Block 0    │ (samples_per_time_step × 2 bytes)
+├─────────────────┤
+│ Data Block 1    │ (samples_per_time_step × 2 bytes)
+├─────────────────┤
+│ Data Block 2    │ (samples_per_time_step × 2 bytes)
+├─────────────────┤
+│ ...             │
+└─────────────────┘
 ```
 
-### 1.5 Header Validation
+**Data Format:**
+- **Data Type**: `int16_t` (2 bytes per sample)
+- **Byte Order**: Little-endian
+- **Block Size**: `samples_per_time_step × sizeof(int16_t)` bytes per block
+- **Layout**: Sequential blocks, where block N corresponds to step N
+- **Access**: Validation data for step `target_step` is located at offset:
+  ```
+  offset = 12 + (target_step × samples_per_time_step × 2)
+  ```
 
-```cpp
-struct BinaryFileHeader {
-    uint32_t magic_number;
-    uint32_t version;
-    uint32_t reserved;
-};
+### 2.3 Configuration File Format (.json)
 
-// Validate header when opening file
-BinaryFileHeader header;
-file.read(reinterpret_cast<char*>(&header), sizeof(BinaryFileHeader));
+**Purpose**: Configure processor and test parameters.
 
-if (header.magic_number != 0x54504754) {
-    throw std::runtime_error("Invalid binary file format");
-}
-if (header.version != 0x010004) {  // 1.0.4 in hex
-    throw std::runtime_error("Unsupported file version");
-}
-```
-
-## 2. Configuration File Format (.json)
-
-**Simple JSON configuration file.**
-
-### 2.1 Example Configuration
-
+**Structure:**
 ```json
 {
   "processor_config": {
-    "accum_limit": 10,
-    "metric_collect_toggle_state": false
+    /* Processor-specific parameters */
   },
   "test_config": {
-    "processor_name": "AVXFrugalPedestalSubtractProcessor",
-    "max_steps": 250000,
-    "samples_per_time_step": 16,
-    "validation_steps": [1, 200000]
+    "processor_name": "string",
+    "samples_per_time_step": integer,
+    "max_steps": integer,
+    "validation_steps": [integer, ...]
   }
 }
 ```
 
-### 2.2 Configuration Fields
+**Fields:**
+- **processor_config** (object, required): Processor-specific configuration parameters
+- **test_config.processor_name** (string, required): Processor class name
+- **test_config.samples_per_time_step** (integer, required): Number of samples per time step (typically 16)
+- **test_config.max_steps** (integer, optional): Maximum number of processing steps
+- **test_config.validation_steps** (array of integers, optional): Step indices to perform validation
 
-- **processor_config:** Processor-specific parameters (varies by processor type)
-- **test_config.processor_name:** String specifying the processor name to use for the test. This must correspond to a known processor class name (e.g., `"AVXFrugalPedestalSubtractProcessor"`)
-- **test_config.max_steps:** Integer specifying the maximum number of processing steps/time steps to run processing (even if no validation steps are being performed). If not provided, the maximum step will be inferred from the largest value in `validation_steps`.
-- **test_config.samples_per_time_step:** Number of samples per time step (should in most cases be 16 for a single processor)
-- **test_config.validation_steps:** Array of processing step numbers to perform validation (exact integer comparison)
+## 3. TPGenerator Test Binary Format
 
+### 3.1 Frame Input File Format (.bin)
 
-## 3. Test File Examples
+**Purpose**: Store frame data to be processed by TPGenerator.
 
-### 3.1 AVXFrugalPedestalSubtractProcessor Sanity Test
+**File Structure:**
+```
+┌─────────────────┐
+│ File Header     │ (12 bytes) - See Section 1
+├─────────────────┤
+│ Frame 0         │ (32,776 bytes for 64×256 frames)
+├─────────────────┤
+│ Frame 1         │ (32,776 bytes)
+├─────────────────┤
+│ Frame 2         │ (32,776 bytes)
+├─────────────────┤
+│ ...             │
+└─────────────────┘
+```
 
-**Files:**
-- `tpg_processor_avx_fps_sanity_test.bin` - Input file with constant 0 values
-- `tpg_processor_avx_fps_sanity_val.bin` - Validation file with expected outputs
-- `tpg_processor_avx_fps_sanity_config.json` - Configuration file
+**Frame Structure:**
+```
+┌─────────────────────┐
+│ Frame Header        │ (8 bytes)
+│ - timestamp (8)     │ uint64_t: Frame timestamp
+├─────────────────────┤
+│ Frame Data          │ (32,768 bytes for 64×256)
+│ - data[]            │ int16_t array: ADC samples
+└─────────────────────┘
+```
 
-**Test Logic:**
-- **Input:** Constant 0 values for all channels across all time steps
-- **Step 1:** Baseline validation - output should be `-16384` (0 - initial_pedestal)
-- **Step 200000:** Convergence validation - output should be `0` (0 - converged_pedestal)
+**Frame Size Calculation:**
+- Header: 8 bytes (timestamp)
+- Data: `num_channels × num_time_samples × sizeof(int16_t)` bytes
+- Total: `8 + (num_channels × num_time_samples × 2)` bytes
 
-**Configuration:**
+**Fixed Configuration:**
+- 64 channels (4 pipelines × 16 channels)
+- 256 time samples per frame
+- Frame size: `8 + (64 × 256 × 2) = 32,776` bytes
+
+**Frame Data Layout:**
+- **Data Type**: `int16_t` (2 bytes per sample, little-endian)
+- **ADC Value Range**: Values must be in 14-bit range [0, 16383] to match TPGenerator expectations
+  - Values exceeding this range will be clamped to [0, 16383] during frame creation
+  - Storage is 16-bit `int16_t`, but valid values are constrained to 14-bit range
+- **Organization**: Row-major order - all channels for time sample 0, then all channels for time sample 1, etc.
+- **Channel Ordering**: Channels 0-15 (pipeline 0), 16-31 (pipeline 1), 32-47 (pipeline 2), 48-63 (pipeline 3)
+
+**Example** (4 channels, 3 time samples):
+```
+Time 0: [ch0, ch1, ch2, ch3]
+Time 1: [ch0, ch1, ch2, ch3]
+Time 2: [ch0, ch1, ch2, ch3]
+```
+Stored as: `[ch0_t0, ch1_t0, ch2_t0, ch3_t0, ch0_t1, ch1_t1, ch2_t1, ch3_t1, ch0_t2, ch1_t2, ch2_t2, ch3_t2]`
+
+### 3.2 TP Validation File Format (.val)
+
+**Purpose**: Store the expected `TriggerPrimitive` objects for validation.
+
+**File Structure:**
+```
+┌─────────────────┐
+│ File Header     │ (12 bytes) - See Section 1
+├─────────────────┤
+│ Frame Index 0   │ (4 bytes: uint32_t)
+│ TP Count 0      │ (4 bytes: uint32_t)
+│ TP Data 0       │ (num_tps × sizeof(TriggerPrimitive))
+├─────────────────┤
+│ Frame Index 1   │ (4 bytes: uint32_t)
+│ TP Count 1      │ (4 bytes: uint32_t)
+│ TP Data 1       │ (num_tps × sizeof(TriggerPrimitive))
+├─────────────────┤
+│ ...             │
+└─────────────────┘
+```
+
+**TP Record Structure:**
+
+For each validation frame:
+
+| Offset | Size (bytes) | Type   | Name        | Description                          |
+|--------|--------------|--------|-------------|--------------------------------------|
+| 0      | 4            | uint32 | frame_index | Frame index this TP set belongs to    |
+| 4      | 4            | uint32 | num_tps     | Number of TPs in this record         |
+| 8      | N            | TP[]   | tps         | Array of TriggerPrimitive objects    |
+
+**TP Serialization Format:**
+
+TPs are stored using raw binary serialization of the `dunedaq::trgdataformats::TriggerPrimitive` struct:
+
+1. **Serialization Method**: Direct memory copy (`memcpy`-style) of the struct
+2. **Byte Order**: Platform-dependent (little-endian on x86_64)
+3. **Alignment/Padding**: Matches the struct's natural alignment (compiler-dependent)
+4. **Field Order**: Matches the struct definition in `trgdataformats/TriggerPrimitive.hpp`
+5. **Size**: Use `sizeof(dunedaq::trgdataformats::TriggerPrimitive)` at compile time
+
+**Key Fields in TriggerPrimitive** (for reference):
+- `time_start` (int64_t): Timestamp when TP starts
+- `channel` (channel_t, which is uint32_t): Channel number
+  - The TP channel value is 24 bits wide
+  - `channel_t` is defined as `uint32_t` (32 bits) in `trgdataformats`, providing sufficient coverage for the 24-bit channel value
+- `adc_peak` (int16_t): Peak ADC value
+- `samples_over_threshold` (uint16_t): Number of samples over threshold
+
+**Note**: The exact size and layout of `TriggerPrimitive` depends on the DUNE DAQ version. The test application uses `sizeof(dunedaq::trgdataformats::TriggerPrimitive)` at compile time.
+
+**TP Sorting Requirements:**
+
+In the test application, TPs are sorted for deterministic file format consistency:
+1. **Primary key**: `time_start` (ascending)
+2. **Secondary key**: `channel` (ascending)
+3. **Tertiary key**: `samples_over_threshold` (ascending)
+
+### 3.3 Configuration File Format (.json)
+
+**Purpose**: Configure TPGenerator and test parameters.
+
+**Structure:**
 ```json
 {
-  "processor_config": {
-    "accum_limit": 10,
-    "metric_collect_toggle_state": false
-  },
+  "processor_configs": [
+    {
+      "processor_name": "string",
+      "config": {
+        /* Processor-specific parameters */
+      }
+    }
+  ],
   "test_config": {
-    "samples_per_time_step": 16,
-    "validation_steps": [1, 200000]
-  }
+    "num_channels": integer,
+    "num_time_samples": integer,
+    "num_pipelines": integer,
+    "sample_tick_difference": float,
+    "sot_minima": [integer, integer, integer],
+    "max_frames": integer,
+    "validation_frames": [integer, ...]
+  },
+  "channel_plane_mappings": [
+    [integer, integer],
+    ...
+  ]
 }
 ```
 
-### 4. General Test File Naming Convention
+**Fields:**
 
-**Pattern:** `tpg_processor_[processor_name]_[test_name]_[test/val/config]`
+**processor_configs** (array, required):
+- Array of processor configurations
+- Each element contains:
+  - `processor_name` (string): Processor class name
+  - `config` (object): Processor-specific configuration parameters
 
-**Examples:**
-- `tpg_processor_avx_fps_sanity_test.bin` - AVX Frugal Pedestal Subtract sanity test input
-- `tpg_processor_avx_fps_sanity_val.val` - AVX Frugal Pedestal Subtract sanity test validation
-- `tpg_processor_avx_fps_sanity_config.json` - AVX Frugal Pedestal Subtract sanity test config
+**test_config** (object, required):
+- `num_channels` (integer): Total number of channels (typically 64)
+- `num_time_samples` (integer): Number of time samples per frame (typically 256)
+- `num_pipelines` (integer): Number of pipelines (typically 4)
+- `sample_tick_difference` (float): Number of ticks between time samples
+- `sot_minima` (array of 3 integers): Minimum samples over threshold per plane [plane0, plane1, plane2]
+- `max_frames` (integer, optional): Maximum number of frames to process
+- `validation_frames` (array of integers): Frame indices to perform validation on
 
+**channel_plane_mappings** (array, required):
+- Array of `[channel_id, plane_number]` pairs
+- Must contain exactly `num_channels` entries
+- Channel IDs must be unique and in range [0, num_channels-1]

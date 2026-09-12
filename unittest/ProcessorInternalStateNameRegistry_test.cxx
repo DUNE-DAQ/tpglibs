@@ -11,7 +11,6 @@
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
 
 #define BOOST_TEST_MODULE ProcessorInternalStateNameRegistry_test
-#define FMT_HEADER_ONLY
 #define TPGLIBS_ENABLE_TEST_INTERFACES
 
 #include "tpglibs/ProcessorInternalStateNameRegistry.hpp"

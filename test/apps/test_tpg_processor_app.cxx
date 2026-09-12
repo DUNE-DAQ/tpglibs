@@ -8,6 +8,7 @@
  * received with this code.
  */
 
+#include "tpglibs/testapp/common/BinaryFileValidator.hpp"
 #include "tpglibs/testapp/reader/BinarySignalReader.hpp"
 #include "tpglibs/AVXFactory.hpp"
 #include "tpglibs/NaiveFactory.hpp"
@@ -17,32 +18,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <cstdint>
-#include <cstring>
 #include <algorithm>
-
-struct BinaryFileHeader {
-    uint32_t magic_number;
-    uint32_t version;
-    uint32_t reserved;
-};
-
-bool validate_binary_header(std::ifstream& file) {
-    BinaryFileHeader header;
-    file.read(reinterpret_cast<char*>(&header), sizeof(BinaryFileHeader));
-    
-    if (header.magic_number != 0x54504754) {  // "TPGT"
-        std::cerr << "ERROR: Invalid input file magic number: 0x" 
-                  << std::hex << header.magic_number << std::dec << std::endl;
-        return false;
-    }
-    if (header.version != 0x010004) {  // 1.0.4 in hex
-        std::cerr << "ERROR: Unsupported input file version: 0x" 
-                  << std::hex << header.version << std::dec << std::endl;
-        return false;
-    }
-    return true;
-}
-
 
 std::shared_ptr<tpglibs::AbstractProcessor<std::array<int16_t, 16>>> 
 create_naive_processor(const std::string& processor_name) {
@@ -118,7 +94,23 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    if (!validate_binary_header(input_stream)) {
+    auto validate_binary_file = [](std::ifstream& stream,
+                                   const std::string& path,
+                                   const std::string& label) {
+        tpglibs::testapp::BinaryFileHeader header;
+        std::string error;
+        if (!tpglibs::testapp::BinaryFileValidator::validate_stream(stream, header, error)) {
+            std::cerr << "ERROR: Invalid " << label << " file header for " << path;
+            if (!error.empty()) {
+                std::cerr << ": " << error;
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    };
+    
+    if (!validate_binary_file(input_stream, input_file, "input")) {
         return 1;
     }
     
@@ -129,7 +121,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    if (!validate_binary_header(validation_stream)) {
+    if (!validate_binary_file(validation_stream, validation_file, "validation")) {
         return 1;
     }
     
@@ -220,7 +212,8 @@ int main(int argc, char* argv[]) {
         // Read expected outputs by seeking to the correct step offset in the validation file
         validation_data.resize(validation_steps.size());
         const std::streamsize step_bytes = static_cast<std::streamsize>(samples_per_time_step * sizeof(int16_t));
-        const std::streamoff header_size = static_cast<std::streamoff>(sizeof(BinaryFileHeader));
+        const std::streamoff header_size =
+            static_cast<std::streamoff>(tpglibs::testapp::BinaryFileValidator::s_header_size);
 
         for (size_t i = 0; i < validation_steps.size(); ++i) {
             validation_data[i].resize(samples_per_time_step);
@@ -284,7 +277,8 @@ int main(int argc, char* argv[]) {
         // Check if this is a validation step
         if (validation_index < validation_data.size() &&
             step == validation_steps.at(validation_index).get<int>()) {
-            const std::vector<int16_t>& expected = validation_data[validation_index];
+            std::vector<int16_t>& expected = validation_data[validation_index];
+            expected.resize(16, 0);
 
             // Find first mismatch using std::mismatch for clarity
             auto mm = std::mismatch(result.begin(), result.end(), expected.begin());

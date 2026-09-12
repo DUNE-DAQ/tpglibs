@@ -12,7 +12,6 @@
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
 
 #define BOOST_TEST_MODULE ProcessorStateRegistrationCollectionTest
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/AVXRunSumProcessor.hpp"
 #include "tpglibs/AVXAbsRunSumProcessor.hpp"

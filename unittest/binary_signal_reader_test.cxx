@@ -7,7 +7,6 @@
  */
 
 #define BOOST_TEST_MODULE binary_signal_reader_test
-#define FMT_HEADER_ONLY
 
 #include "tpglibs/testapp/reader/BinarySignalReader.hpp"
 
