@@ -12,20 +12,23 @@ namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveFrugalPedestalSubtractProcessor", NaiveFrugalPedestalSubtractProcessor)
 
-void NaiveFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
+void
+NaiveFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers)
+{
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
-  m_internal_state_name_registry.register_internal_state("pedestal", 
-    std::shared_ptr<naive_array_t>(&m_pedestal, [](auto*){}));
-  m_internal_state_name_registry.register_internal_state("accum", 
-    std::shared_ptr<naive_array_t>(&m_accum, [](auto*){}));
+  m_internal_state_name_registry.register_internal_state("pedestal",
+                                                         std::shared_ptr<naive_array_t>(&m_pedestal, [](auto*) {}));
+  m_internal_state_name_registry.register_internal_state("accum",
+                                                         std::shared_ptr<naive_array_t>(&m_accum, [](auto*) {}));
   configure_internal_state_collection(config);
 #endif
-  
+
   m_accum_limit = config["accum_limit"];
 }
 
 NaiveFrugalPedestalSubtractProcessor::naive_array_t
-NaiveFrugalPedestalSubtractProcessor::process(const naive_array_t& signal) {
+NaiveFrugalPedestalSubtractProcessor::process(const naive_array_t& signal)
+{
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
   m_samples++;
   if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
@@ -50,7 +53,7 @@ NaiveFrugalPedestalSubtractProcessor::process(const naive_array_t& signal) {
     }
 
     // Decrement pedestal if we've hit the low limit.
-    if (m_accum[i] < -1*m_accum_limit) {
+    if (m_accum[i] < -1 * m_accum_limit) {
       m_pedestal[i]--;
       m_accum[i] = 0;
     }

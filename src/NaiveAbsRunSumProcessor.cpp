@@ -12,7 +12,9 @@ namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveAbsRunSumProcessor", NaiveAbsRunSumProcessor)
 
-NaiveAbsRunSumProcessor::naive_array_t NaiveAbsRunSumProcessor::process(const naive_array_t& signal) {
+NaiveAbsRunSumProcessor::naive_array_t
+NaiveAbsRunSumProcessor::process(const naive_array_t& signal)
+{
   naive_array_t abs_signal;
 
   for (int i = 0; i < 16; i++) {

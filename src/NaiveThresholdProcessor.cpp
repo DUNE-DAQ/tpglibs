@@ -12,8 +12,10 @@ namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveThresholdProcessor", NaiveThresholdProcessor)
 
-void NaiveThresholdProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
-  int16_t config_thresholds[3] = {config["plane0"], config["plane1"], config["plane2"]};
+void
+NaiveThresholdProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers)
+{
+  int16_t config_thresholds[3] = { config["plane0"], config["plane1"], config["plane2"] };
 
   // Messy. Assumes plane numbers are in {0, 1, 2}.
   for (int i = 0; i < 16; i++) {
@@ -21,7 +23,9 @@ void NaiveThresholdProcessor::configure(const nlohmann::json& config, const int1
   }
 }
 
-NaiveThresholdProcessor::naive_array_t NaiveThresholdProcessor::process(const naive_array_t& signal) {
+NaiveThresholdProcessor::naive_array_t
+NaiveThresholdProcessor::process(const naive_array_t& signal)
+{
   naive_array_t above_threshold;
   for (int i = 0; i < 16; i++) {
     if (signal[i] > m_threshold[i])

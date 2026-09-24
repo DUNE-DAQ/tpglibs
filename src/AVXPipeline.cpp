@@ -10,9 +10,10 @@
 namespace tpglibs {
 
 __m256i
-AVXPipeline::save_state(const __m256i& processed_signal) {
-  __m256i active       = _mm256_cmpgt_epi16(processed_signal, _mm256_setzero_si256());
-  __m256i inactive     = _mm256_cmpeq_epi16(processed_signal, _mm256_setzero_si256());
+AVXPipeline::save_state(const __m256i& processed_signal)
+{
+  __m256i active = _mm256_cmpgt_epi16(processed_signal, _mm256_setzero_si256());
+  __m256i inactive = _mm256_cmpeq_epi16(processed_signal, _mm256_setzero_si256());
   __m256i was_inactive = _mm256_cmpeq_epi16(m_samples_over_threshold, _mm256_setzero_si256());
 
   // If it was *not* inactive and is now inactive, then it must be a new TP.
@@ -27,7 +28,7 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
   // If lo and sat are the same, then it is *not* saturated and happened to exactly sum to 0xFFFF.
   __m256i exact = _mm256_cmpeq_epi16(m_adc_integral_lo, adc_integral_sat);
   // So, (!exact) & is_saturated == [truly saturated].
-  is_saturated  = _mm256_andnot_si256(exact, is_saturated);
+  is_saturated = _mm256_andnot_si256(exact, is_saturated);
 
   __m256i to_add = _mm256_and_si256(m_ones_register, is_saturated);
   m_adc_integral_hi = _mm256_adds_epu16(m_adc_integral_hi, to_add);
@@ -44,7 +45,8 @@ AVXPipeline::save_state(const __m256i& processed_signal) {
 }
 
 bool
-AVXPipeline::check_for_tps(const __m256i& tp_mask) {
+AVXPipeline::check_for_tps(const __m256i& tp_mask)
+{
   // tp_mask & 0xFFFF = 0 -> tp_mask == 0.
   // True => tp_mask is all zeros and has no TPs.
   // Negate!
@@ -52,7 +54,8 @@ AVXPipeline::check_for_tps(const __m256i& tp_mask) {
 }
 
 std::vector<dunedaq::trgdataformats::TriggerPrimitive>
-AVXPipeline::generate_tps(const __m256i& tp_mask) {
+AVXPipeline::generate_tps(const __m256i& tp_mask)
+{
   // Mask everything that's relevant.
   __m256i samples_over_threshold = _mm256_blendv_epi8(_mm256_setzero_si256(), m_samples_over_threshold, tp_mask);
   __m256i adc_integral_lo = _mm256_blendv_epi8(_mm256_setzero_si256(), m_adc_integral_lo, tp_mask);
@@ -70,12 +73,13 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
 
   std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps;
   for (int i = 0; i < 16; i++) {
-    if (tp_sot[i] < m_sot_minima[m_plane_numbers[i]]) continue;  // Don't track short TPs.
+    if (tp_sot[i] < m_sot_minima[m_plane_numbers[i]])
+      continue; // Don't track short TPs.
     dunedaq::trgdataformats::TriggerPrimitive tp;
-    tp.adc_integral        = uint32_t(tp_integral_lo[i]) + (uint32_t(tp_integral_hi[i]) << 16);
-    tp.adc_peak            = tp_adc_peak[i];
-    tp.channel             = m_channels[i];
-    tp.samples_to_peak     = tp_samples_to_peak[i];
+    tp.adc_integral = uint32_t(tp_integral_lo[i]) + (uint32_t(tp_integral_hi[i]) << 16);
+    tp.adc_peak = tp_adc_peak[i];
+    tp.channel = m_channels[i];
+    tp.samples_to_peak = tp_samples_to_peak[i];
     tp.samples_over_threshold = tp_sot[i];
 
     // time_start is handled at the next level up, since it is aware of the true and relative times.
@@ -84,10 +88,10 @@ AVXPipeline::generate_tps(const __m256i& tp_mask) {
 
   // Reset the channels that generated tps.
   m_samples_over_threshold = _mm256_blendv_epi8(m_samples_over_threshold, _mm256_setzero_si256(), tp_mask);
-  m_adc_integral_lo     = _mm256_blendv_epi8(m_adc_integral_lo, _mm256_setzero_si256(), tp_mask);
-  m_adc_integral_hi     = _mm256_blendv_epi8(m_adc_integral_hi, _mm256_setzero_si256(), tp_mask);
-  m_adc_peak            = _mm256_blendv_epi8(m_adc_peak, _mm256_setzero_si256(), tp_mask);
-  m_samples_to_peak     = _mm256_blendv_epi8(m_samples_to_peak, _mm256_setzero_si256(), tp_mask);
+  m_adc_integral_lo = _mm256_blendv_epi8(m_adc_integral_lo, _mm256_setzero_si256(), tp_mask);
+  m_adc_integral_hi = _mm256_blendv_epi8(m_adc_integral_hi, _mm256_setzero_si256(), tp_mask);
+  m_adc_peak = _mm256_blendv_epi8(m_adc_peak, _mm256_setzero_si256(), tp_mask);
+  m_samples_to_peak = _mm256_blendv_epi8(m_samples_to_peak, _mm256_setzero_si256(), tp_mask);
 
   // Finalize.
   return tps;

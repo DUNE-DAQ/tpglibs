@@ -15,9 +15,8 @@
 #include "trgdataformats/Types.hpp"
 
 #include <memory>
-#include <utility>
 #include <unordered_map>
-
+#include <utility>
 
 namespace tpglibs {
 
@@ -28,105 +27,108 @@ namespace tpglibs {
  *
  * This is the interface that receives raw data frames to process and outputs the TPs accordingly.
  */
-class TPGenerator {
-  static const uint8_t m_num_channels_per_pipeline = 16; // AVX2 with int16 data samples allows us to process 16 channels.
-  bool m_configured {false};
-  uint8_t m_num_pipelines = 0;  // Gets set inside configure.
+class TPGenerator
+{
+  static const uint8_t m_num_channels_per_pipeline =
+    16; // AVX2 with int16 data samples allows us to process 16 channels.
+  bool m_configured{ false };
+  uint8_t m_num_pipelines = 0; // Gets set inside configure.
   std::vector<AVXPipeline> m_tpg_pipelines;
   float m_sample_tick_difference = 0;
-  std::vector<uint16_t> m_sot_minima{1,1,1};  // Defaults to 1 for all planes.
+  std::vector<uint16_t> m_sot_minima{ 1, 1, 1 }; // Defaults to 1 for all planes.
 
-  public:
-    /**
-     * @brief Setup and configure the AVX pipelines.
-     *
-     * @param configs A vector of pairs: AVX pipeline to use and its configuration.
-     * @param channel_plane_numbers A vector of channel numbers and their plane numbers.
-     * @param sample_tick_difference Number of ticks between time samples in expected data frames.
-     */
-    void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
-                   const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
-                   const float sample_tick_difference);
+public:
+  /**
+   * @brief Setup and configure the AVX pipelines.
+   *
+   * @param configs A vector of pairs: AVX pipeline to use and its configuration.
+   * @param channel_plane_numbers A vector of channel numbers and their plane numbers.
+   * @param sample_tick_difference Number of ticks between time samples in expected data frames.
+   */
+  void configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
+                 const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
+                 const float sample_tick_difference);
 
-    /**
-     * @brief Remove all pipelines and reset member variables to default state.
-     */
-    void reset();
+  /**
+   * @brief Remove all pipelines and reset member variables to default state.
+   */
+  void reset();
 
-    /**
-     * @brief Set the minimum samples over threshold for a TP according to plane.
-     *
-     * @param sot_minima TPs from plane `i` will have at least `sot_minima[i]` value for its samples_over_threshold.
-     */
-    void set_sot_minima(const std::vector<uint16_t>& sot_minima);
+  /**
+   * @brief Set the minimum samples over threshold for a TP according to plane.
+   *
+   * @param sot_minima TPs from plane `i` will have at least `sot_minima[i]` value for its samples_over_threshold.
+   */
+  void set_sot_minima(const std::vector<uint16_t>& sot_minima);
 
-    /**
-     * @brief Return reference to all processors, under all pipelines, where 
-     * the index of the pipeline is tagged along with the reference.
-     *
-     * @return A vector of all processor references.
-     */
-    std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> get_all_processor_references_with_pipeline_index();
+  /**
+   * @brief Return reference to all processors, under all pipelines, where
+   * the index of the pipeline is tagged along with the reference.
+   *
+   * @return A vector of all processor references.
+   */
+  std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>>
+  get_all_processor_references_with_pipeline_index();
 
-    /**
-     * @brief Driving function for the TPG.
-     *
-     * This function receives the frames, expands, sends down AVX pipelines, and returns TPs that were generated.
-     *
-     * @param frame A data frame to process and generate TPs from.
-     * @return A vector of TPs.
-     */
-    template <typename T>
-    std::vector<dunedaq::trgdataformats::TriggerPrimitive> operator()(const T* frame) {
-      // Max number of TPs for a channel: number of time samples / 2.
-      std::vector<dunedaq::trgdataformats::TriggerPrimitive> tp_aggr;
-      tp_aggr.reserve(T::s_num_channels * T::s_time_samples_per_frame / 2);
+  /**
+   * @brief Driving function for the TPG.
+   *
+   * This function receives the frames, expands, sends down AVX pipelines, and returns TPs that were generated.
+   *
+   * @param frame A data frame to process and generate TPs from.
+   * @return A vector of TPs.
+   */
+  template<typename T>
+  std::vector<dunedaq::trgdataformats::TriggerPrimitive> operator()(const T* frame)
+  {
+    // Max number of TPs for a channel: number of time samples / 2.
+    std::vector<dunedaq::trgdataformats::TriggerPrimitive> tp_aggr;
+    tp_aggr.reserve(T::s_num_channels * T::s_time_samples_per_frame / 2);
 
-      // Flatten the external 2-D C-array to a 1-D base pointer; traversal by row stride.
-      const typename T::word_t* const words_base = &frame->adc_words[0][0];
-      constexpr int row_stride = T::s_bits_per_adc;
-      const uint64_t timestamp = frame->get_timestamp();
+    // Flatten the external 2-D C-array to a 1-D base pointer; traversal by row stride.
+    const typename T::word_t* const words_base = &frame->adc_words[0][0];
+    constexpr int row_stride = T::s_bits_per_adc;
+    const uint64_t timestamp = frame->get_timestamp();
 
-      const int register_alignment = T::s_bits_per_adc * m_num_channels_per_pipeline;
-      // Loop in time.
-      for (int t = 0; t < T::s_time_samples_per_frame; t++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const typename T::word_t *time_sample = words_base + t * row_stride;
-        const char* cursor = reinterpret_cast<const char*>(time_sample); // Need to walk in terms of bytes/bits.
+    const int register_alignment = T::s_bits_per_adc * m_num_channels_per_pipeline;
+    // Loop in time.
+    for (int t = 0; t < T::s_time_samples_per_frame; t++) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      const typename T::word_t* time_sample = words_base + t * row_stride;
+      const char* cursor = reinterpret_cast<const char*>(time_sample); // Need to walk in terms of bytes/bits.
 
-        // Loop in pipelines.
-        for (int p = 0; p < m_num_pipelines; p++) {
-          if (p == m_num_pipelines - 1) {
-            // Take a step of 32 bit backwards for the last sub-frame.
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            cursor -= 4;
-          }
-
-          __m256i regi = _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(cursor));
-
-          if (p == m_num_pipelines - 1) // Permute the row order to use the same operation.
-            regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
-
-          __m256i expanded_subframe = expand_frame(regi);
-          std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
-
-          for (auto tp : tps) {
-            const auto offset_samples = static_cast<float>(t - tp.samples_over_threshold);
-            tp.time_start =
-                static_cast<int64_t>(offset_samples * m_sample_tick_difference) + timestamp;
-            tp_aggr.push_back(tp);
-          }
+      // Loop in pipelines.
+      for (int p = 0; p < m_num_pipelines; p++) {
+        if (p == m_num_pipelines - 1) {
+          // Take a step of 32 bit backwards for the last sub-frame.
           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-          cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
+          cursor -= 4;
         }
-      }
 
-      return tp_aggr;
+        __m256i regi = _mm256_lddqu_si256(reinterpret_cast<const __m256i*>(cursor));
+
+        if (p == m_num_pipelines - 1) // Permute the row order to use the same operation.
+          regi = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 2, 3, 4, 5, 6, 7, 0));
+
+        __m256i expanded_subframe = expand_frame(regi);
+        std::vector<dunedaq::trgdataformats::TriggerPrimitive> tps = m_tpg_pipelines[p].process(expanded_subframe);
+
+        for (auto tp : tps) {
+          const auto offset_samples = static_cast<float>(t - tp.samples_over_threshold);
+          tp.time_start = static_cast<int64_t>(offset_samples * m_sample_tick_difference) + timestamp;
+          tp_aggr.push_back(tp);
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        cursor += register_alignment / 8; // Numerator is in bits. Need bytes.
+      }
     }
 
-  private:
-    __m256i expand_frame(const __m256i& regi); /// @brief Expansion from 14-bit signals to 16-bit.
-    __m256i old_expand_frame(const __m256i& regi); /// @brief Legacy expansion function.
+    return tp_aggr;
+  }
+
+private:
+  __m256i expand_frame(const __m256i& regi);     /// @brief Expansion from 14-bit signals to 16-bit.
+  __m256i old_expand_frame(const __m256i& regi); /// @brief Legacy expansion function.
 };
 
 } // namespace tpglibs

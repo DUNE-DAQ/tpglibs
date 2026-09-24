@@ -19,14 +19,15 @@ namespace tpglibs {
  *
  *  Look to NaiveRunSumProcessor for details on the running sum calculation.
  */
-class NaiveAbsRunSumProcessor : public NaiveRunSumProcessor {
-  public:
-    /** @brief Calculate and store the running sum with absolute values.
-     *
-     *  @param signal The input signal to process on.
-     *  @return The calculated running sum.
-     */
-    naive_array_t process(const naive_array_t& signal) override;
+class NaiveAbsRunSumProcessor : public NaiveRunSumProcessor
+{
+public:
+  /** @brief Calculate and store the running sum with absolute values.
+   *
+   *  @param signal The input signal to process on.
+   *  @return The calculated running sum.
+   */
+  naive_array_t process(const naive_array_t& signal) override;
 };
 
 } // namespace tpglibs

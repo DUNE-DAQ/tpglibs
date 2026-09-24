@@ -12,19 +12,22 @@ namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXFrugalPedestalSubtractProcessor", AVXFrugalPedestalSubtractProcessor)
 
-void AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* /* plane_numbers */) {
+void
+AVXFrugalPedestalSubtractProcessor::configure(const nlohmann::json& config, const int16_t* /* plane_numbers */)
+{
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
-  m_internal_state_name_registry.register_internal_state("pedestal", 
-    std::shared_ptr<__m256i>(&m_pedestal, [](auto*){}));
-  m_internal_state_name_registry.register_internal_state("accum", 
-    std::shared_ptr<__m256i>(&m_accum, [](auto*){}));
+  m_internal_state_name_registry.register_internal_state("pedestal",
+                                                         std::shared_ptr<__m256i>(&m_pedestal, [](auto*) {}));
+  m_internal_state_name_registry.register_internal_state("accum", std::shared_ptr<__m256i>(&m_accum, [](auto*) {}));
   configure_internal_state_collection(config);
 #endif
-  
+
   m_accum_limit = config["accum_limit"];
 }
 
-__m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
+__m256i
+AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal)
+{
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
   m_samples++;
   if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {
@@ -37,15 +40,15 @@ __m256i AVXFrugalPedestalSubtractProcessor::process(const __m256i& signal) {
   __m256i is_lt = _mm256_cmpgt_epi16(m_pedestal, signal);
 
   // Update m_accum.
-  __m256i to_add = _mm256_setzero_si256();                                    // Assumes equal to pedestal.
-  to_add = _mm256_blendv_epi8(to_add, _mm256_set1_epi16(1), is_gt);           // Set the above pedestal case.
-  to_add = _mm256_blendv_epi8(to_add, _mm256_set1_epi16(-1), is_lt);          // Set the below pedestal case.
+  __m256i to_add = _mm256_setzero_si256();                           // Assumes equal to pedestal.
+  to_add = _mm256_blendv_epi8(to_add, _mm256_set1_epi16(1), is_gt);  // Set the above pedestal case.
+  to_add = _mm256_blendv_epi8(to_add, _mm256_set1_epi16(-1), is_lt); // Set the below pedestal case.
 
   m_accum = _mm256_add_epi16(m_accum, to_add);
 
   // Check the accum limit condition.
   is_gt = _mm256_cmpgt_epi16(m_accum, _mm256_set1_epi16(m_accum_limit));      // m_accum > +limit.
-  is_lt = _mm256_cmpgt_epi16(_mm256_set1_epi16(-1*m_accum_limit), m_accum);   // m_accum < -limit = -limit > m_accum.
+  is_lt = _mm256_cmpgt_epi16(_mm256_set1_epi16(-1 * m_accum_limit), m_accum); // m_accum < -limit = -limit > m_accum.
 
   to_add = _mm256_setzero_si256();
   to_add = _mm256_blendv_epi8(to_add, _mm256_set1_epi16(1), is_gt);

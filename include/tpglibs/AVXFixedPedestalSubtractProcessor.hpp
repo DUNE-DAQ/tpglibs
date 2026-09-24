@@ -18,24 +18,25 @@ namespace tpglibs {
  *
  *  Look to AVXFrugalPedestalSubtractProcessor for details on how the pedestal is estimated.
  */
-class AVXFixedPedestalSubtractProcessor : public AVXFrugalPedestalSubtractProcessor {
-  protected:
-    /** @brief Configured number of samples to use before fixing. */
-    uint16_t m_start_period{1000};
+class AVXFixedPedestalSubtractProcessor : public AVXFrugalPedestalSubtractProcessor
+{
+protected:
+  /** @brief Configured number of samples to use before fixing. */
+  uint16_t m_start_period{ 1000 };
 
-    /** @brief Counted number of samples. */
-    uint16_t m_num_time_steps{0};
+  /** @brief Counted number of samples. */
+  uint16_t m_num_time_steps{ 0 };
 
-  public:
-    /** @brief Estimates the pedestal for some time and subtracts. */
-    __m256i process(const __m256i& signal) override;
+public:
+  /** @brief Estimates the pedestal for some time and subtracts. */
+  __m256i process(const __m256i& signal) override;
 
-    /** @brief Configure the number of startup samples to use before fixing.
-     *
-     *  @param config JSON config for start period per plane.
-     *  @param plane_numbers Array of plane numbers. Gives the channels to apply the start period.
-     */
-    void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+  /** @brief Configure the number of startup samples to use before fixing.
+   *
+   *  @param config JSON config for start period per plane.
+   *  @param plane_numbers Array of plane numbers. Gives the channels to apply the start period.
+   */
+  void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
 } // namespace tpglibs

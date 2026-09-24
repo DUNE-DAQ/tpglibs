@@ -15,10 +15,11 @@
 namespace tpglibs {
 
 /// @brief Dynamic array of processor metrics, templated on signal type.
-template <typename signal_type_t>
-struct ProcessorMetricArray {
-  signal_type_t* m_data;      ///< Pointer to contiguous metric data
-  std::size_t m_size;         ///< Number of metrics in the array
+template<typename signal_type_t>
+struct ProcessorMetricArray
+{
+  signal_type_t* m_data; ///< Pointer to contiguous metric data
+  std::size_t m_size;    ///< Number of metrics in the array
 };
 
 } // namespace tpglibs

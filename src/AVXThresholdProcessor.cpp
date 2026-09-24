@@ -12,9 +12,11 @@ namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXThresholdProcessor", AVXThresholdProcessor)
 
-void AVXThresholdProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
+void
+AVXThresholdProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers)
+{
   int16_t thresholds[16];
-  int16_t config_thresholds[3] = {config["plane0"], config["plane1"], config["plane2"]};
+  int16_t config_thresholds[3] = { config["plane0"], config["plane1"], config["plane2"] };
 
   // Messy. Assumes plane numbers are in {0, 1, 2}.
   for (int i = 0; i < 16; i++) {
@@ -24,7 +26,9 @@ void AVXThresholdProcessor::configure(const nlohmann::json& config, const int16_
   m_threshold = _mm256_lddqu_si256(reinterpret_cast<__m256i*>(thresholds));
 }
 
-__m256i AVXThresholdProcessor::process(const __m256i& signal) {
+__m256i
+AVXThresholdProcessor::process(const __m256i& signal)
+{
   __m256i mask = _mm256_cmpgt_epi16(signal, m_threshold);
 
   // Essentially: mask[i] ? signal[i] : 0.

@@ -20,12 +20,11 @@ namespace tpglibs {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 /** @brief AVX typed abstract signal processor. */
-class AVXProcessor : public AbstractProcessor<__m256i> {
-  public:
-    /** @brief Simple signal pass-through on __m256i type. */
-    virtual __m256i process(const __m256i& signal) override {
-      return AbstractProcessor<__m256i>::process(signal);
-    }
+class AVXProcessor : public AbstractProcessor<__m256i>
+{
+public:
+  /** @brief Simple signal pass-through on __m256i type. */
+  virtual __m256i process(const __m256i& signal) override { return AbstractProcessor<__m256i>::process(signal); }
 };
 #pragma GCC diagnostic pop
 

@@ -26,7 +26,8 @@ namespace tpglibs {
  *  * `signal` is the incoming signal.
  *  Division is intentionally unorthodox to match what is possible in AVX.
  */
-class NaiveRunSumProcessor : public NaiveProcessor {
+class NaiveRunSumProcessor : public NaiveProcessor
+{
   /** @brief The `R` factor in the model equation. */
   naive_array_t m_memory_factor;
 
@@ -36,20 +37,20 @@ class NaiveRunSumProcessor : public NaiveProcessor {
   /** @brief The `RS` in the model equation. */
   naive_array_t m_running_sum;
 
-  public:
-    /** @brief Calculate and store the running sum.
-     *
-     *  @param signal The input signal to process on.
-     *  @return The calculated running sum.
-     */
-    naive_array_t process(const naive_array_t& signal) override;
+public:
+  /** @brief Calculate and store the running sum.
+   *
+   *  @param signal The input signal to process on.
+   *  @return The calculated running sum.
+   */
+  naive_array_t process(const naive_array_t& signal) override;
 
-    /** @brief Configures the `R` factor and `S` factor according to plane.
-     *
-     *  @param config JSON of the `R` and `S` factors to use per plane.
-     *  @param plane_numbers Array of plane numbers. Gives the channels to apply the `R` and `S` factors.
-     */
-    void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+  /** @brief Configures the `R` factor and `S` factor according to plane.
+   *
+   *  @param config JSON of the `R` and `S` factors to use per plane.
+   *  @param plane_numbers Array of plane numbers. Gives the channels to apply the `R` and `S` factors.
+   */
+  void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
 } // namespace tpglibs

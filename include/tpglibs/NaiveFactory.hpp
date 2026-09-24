@@ -13,17 +13,22 @@
 #include "tpglibs/NaiveProcessor.hpp"
 
 /** @brief Factory registration macro. */
-#define REGISTER_NAIVEPROCESSOR_CREATOR(processor_name, processor_class)                                                                                     \
-    static struct processor_class##Registrar {                                                                                                               \
-          processor_class##Registrar() {                                                                                                                     \
-                  tpglibs::NaiveFactory::register_creator(processor_name, []() -> std::shared_ptr<tpglibs::NaiveProcessor> {return std::make_shared<processor_class>();});      \
-                }                                                                                                                                            \
-        } processor_class##_registrar;
+#define REGISTER_NAIVEPROCESSOR_CREATOR(processor_name, processor_class)                                               \
+  static struct processor_class##Registrar                                                                             \
+  {                                                                                                                    \
+    processor_class##Registrar()                                                                                       \
+    {                                                                                                                  \
+      tpglibs::NaiveFactory::register_creator(processor_name, []() -> std::shared_ptr<tpglibs::NaiveProcessor> {       \
+        return std::make_shared<processor_class>();                                                                    \
+      });                                                                                                              \
+    }                                                                                                                  \
+  } processor_class##_registrar;
 
 namespace tpglibs {
 
 /** @brief Naive typed abstract factory. */
-class NaiveFactory : public AbstractFactory<NaiveProcessor> {};
+class NaiveFactory : public AbstractFactory<NaiveProcessor>
+{};
 
 } // namespace tpglibs
 

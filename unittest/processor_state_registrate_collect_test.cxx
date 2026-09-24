@@ -14,18 +14,18 @@
 #define BOOST_TEST_MODULE ProcessorStateRegistrationCollectionTest
 #define FMT_HEADER_ONLY
 
-#include "tpglibs/AVXRunSumProcessor.hpp"
 #include "tpglibs/AVXAbsRunSumProcessor.hpp"
 #include "tpglibs/AVXFrugalPedestalSubtractProcessor.hpp"
-#include "tpglibs/NaiveRunSumProcessor.hpp"
+#include "tpglibs/AVXRunSumProcessor.hpp"
 #include "tpglibs/NaiveAbsRunSumProcessor.hpp"
 #include "tpglibs/NaiveFrugalPedestalSubtractProcessor.hpp"
+#include "tpglibs/NaiveRunSumProcessor.hpp"
 
+#include <array>
 #include <boost/test/unit_test.hpp>
 #include <immintrin.h>
-#include <array>
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace tpglibs {
 
@@ -34,17 +34,31 @@ namespace tpglibs {
 // =============================================================================
 
 // Helper function to create test signal for AVX processors
-__m256i create_avx_test_signal(const int16_t values[16]) {
-  return _mm256_set_epi16(
-    values[15], values[14], values[13], values[12],
-    values[11], values[10], values[9], values[8],
-    values[7], values[6], values[5], values[4],
-    values[3], values[2], values[1], values[0]
-  );
+__m256i
+create_avx_test_signal(const int16_t values[16])
+{
+  return _mm256_set_epi16(values[15],
+                          values[14],
+                          values[13],
+                          values[12],
+                          values[11],
+                          values[10],
+                          values[9],
+                          values[8],
+                          values[7],
+                          values[6],
+                          values[5],
+                          values[4],
+                          values[3],
+                          values[2],
+                          values[1],
+                          values[0]);
 }
 
 // Helper function to create test signal for Naive processors
-std::array<int16_t, 16> create_naive_test_signal(const int16_t values[16]) {
+std::array<int16_t, 16>
+create_naive_test_signal(const int16_t values[16])
+{
   std::array<int16_t, 16> signal;
   for (int i = 0; i < 16; ++i) {
     signal[i] = values[i];
@@ -53,21 +67,24 @@ std::array<int16_t, 16> create_naive_test_signal(const int16_t values[16]) {
 }
 
 // Helper function to extract values from __m256i
-void extract_avx_values(__m256i vec, int16_t output[16]) {
+void
+extract_avx_values(__m256i vec, int16_t output[16])
+{
   _mm256_storeu_si256(reinterpret_cast<__m256i*>(output), vec);
 }
 
 // Helper function to create standard test configuration
-nlohmann::json create_test_config(const std::string& requested_states = "") {
+nlohmann::json
+create_test_config(const std::string& requested_states = "")
+{
   nlohmann::json config = {
-    {"metric_collect_toggle_state", true},
-    {"metric_collect_time_sample_period", 1}  // Collect every sample
+    { "metric_collect_toggle_state", true }, { "metric_collect_time_sample_period", 1 } // Collect every sample
   };
-  
+
   if (!requested_states.empty()) {
     config["requested_internal_states"] = requested_states;
   }
-  
+
   return config;
 }
 
@@ -77,9 +94,10 @@ nlohmann::json create_test_config(const std::string& requested_states = "") {
 
 BOOST_AUTO_TEST_SUITE(AVXRunSumProcessorTests)
 
-BOOST_AUTO_TEST_CASE(test_avx_runsum_configuration_and_registration) {
+BOOST_AUTO_TEST_CASE(test_avx_runsum_configuration_and_registration)
+{
   auto processor = std::make_shared<AVXRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "r,s,rs";
@@ -106,9 +124,10 @@ BOOST_AUTO_TEST_CASE(test_avx_runsum_configuration_and_registration) {
   BOOST_TEST(requested_states[2] == "rs");
 }
 
-BOOST_AUTO_TEST_CASE(test_avx_runsum_initial_state_collection) {
+BOOST_AUTO_TEST_CASE(test_avx_runsum_initial_state_collection)
+{
   auto processor = std::make_shared<AVXRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "r,s,rs";
@@ -137,13 +156,13 @@ BOOST_AUTO_TEST_CASE(test_avx_runsum_initial_state_collection) {
 
   // Check initial values
   // r (memory_factor) should be configured values
-  int16_t expected_r[16] = {100, 100, 100, 100, 100, 200, 200, 200, 200, 200, 300, 300, 300, 300, 300, 300};
+  int16_t expected_r[16] = { 100, 100, 100, 100, 100, 200, 200, 200, 200, 200, 300, 300, 300, 300, 300, 300 };
   for (int i = 0; i < 16; ++i) {
     BOOST_TEST(state_value.m_data[0][i] == expected_r[i]);
   }
 
   // s (scale_factor) should be configured values
-  int16_t expected_s[16] = {10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30};
+  int16_t expected_s[16] = { 10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30 };
   for (int i = 0; i < 16; ++i) {
     BOOST_TEST(state_value.m_data[1][i] == expected_s[i]);
   }
@@ -154,12 +173,13 @@ BOOST_AUTO_TEST_CASE(test_avx_runsum_initial_state_collection) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_avx_runsum_processing_and_state_update) {
+BOOST_AUTO_TEST_CASE(test_avx_runsum_processing_and_state_update)
+{
   auto processor = std::make_shared<AVXRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
-  config["requested_internal_states"] = "rs";  // Only collect running sum
+  config["requested_internal_states"] = "rs"; // Only collect running sum
   config["memory_factor_plane0"] = 100;
   config["memory_factor_plane1"] = 200;
   config["memory_factor_plane2"] = 300;
@@ -178,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_avx_runsum_processing_and_state_update) {
   // Create test signal
   int16_t signal_values[16];
   for (int i = 0; i < 16; ++i) {
-    signal_values[i] = 1000;  // Constant signal
+    signal_values[i] = 1000; // Constant signal
   }
   __m256i signal = create_avx_test_signal(signal_values);
 
@@ -212,9 +232,10 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(AVXAbsRunSumProcessorTests)
 
-BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_inherits_registration) {
+BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_inherits_registration)
+{
   auto processor = std::make_shared<AVXAbsRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "r,s,rs";
@@ -241,9 +262,10 @@ BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_inherits_registration) {
   BOOST_TEST(requested_states[2] == "rs");
 }
 
-BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_processing_with_absolute_values) {
+BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_processing_with_absolute_values)
+{
   auto processor = std::make_shared<AVXAbsRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "rs";
@@ -265,7 +287,7 @@ BOOST_AUTO_TEST_CASE(test_avx_abs_runsum_processing_with_absolute_values) {
   // Create test signal with negative values
   int16_t signal_values[16];
   for (int i = 0; i < 16; ++i) {
-    signal_values[i] = -1000;  // Negative signal
+    signal_values[i] = -1000; // Negative signal
   }
   __m256i signal = create_avx_test_signal(signal_values);
 
@@ -299,9 +321,10 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(NaiveRunSumProcessorTests)
 
-BOOST_AUTO_TEST_CASE(test_naive_runsum_configuration_and_registration) {
+BOOST_AUTO_TEST_CASE(test_naive_runsum_configuration_and_registration)
+{
   auto processor = std::make_shared<NaiveRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "r,s,rs";
@@ -328,9 +351,10 @@ BOOST_AUTO_TEST_CASE(test_naive_runsum_configuration_and_registration) {
   BOOST_TEST(requested_states[2] == "rs");
 }
 
-BOOST_AUTO_TEST_CASE(test_naive_runsum_initial_state_collection) {
+BOOST_AUTO_TEST_CASE(test_naive_runsum_initial_state_collection)
+{
   auto processor = std::make_shared<NaiveRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "r,s,rs";
@@ -359,13 +383,13 @@ BOOST_AUTO_TEST_CASE(test_naive_runsum_initial_state_collection) {
 
   // Check initial values
   // r (memory_factor) should be configured values
-  int16_t expected_r[16] = {100, 100, 100, 100, 100, 200, 200, 200, 200, 200, 300, 300, 300, 300, 300, 300};
+  int16_t expected_r[16] = { 100, 100, 100, 100, 100, 200, 200, 200, 200, 200, 300, 300, 300, 300, 300, 300 };
   for (int i = 0; i < 16; ++i) {
     BOOST_TEST(state_value.m_data[0][i] == expected_r[i]);
   }
 
   // s (scale_factor) should be configured values
-  int16_t expected_s[16] = {10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30};
+  int16_t expected_s[16] = { 10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30 };
   for (int i = 0; i < 16; ++i) {
     BOOST_TEST(state_value.m_data[1][i] == expected_s[i]);
   }
@@ -376,12 +400,13 @@ BOOST_AUTO_TEST_CASE(test_naive_runsum_initial_state_collection) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_naive_runsum_processing_and_state_update) {
+BOOST_AUTO_TEST_CASE(test_naive_runsum_processing_and_state_update)
+{
   auto processor = std::make_shared<NaiveRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
-  config["requested_internal_states"] = "rs";  // Only collect running sum
+  config["requested_internal_states"] = "rs"; // Only collect running sum
   config["memory_factor_plane0"] = 100;
   config["memory_factor_plane1"] = 200;
   config["memory_factor_plane2"] = 300;
@@ -400,7 +425,7 @@ BOOST_AUTO_TEST_CASE(test_naive_runsum_processing_and_state_update) {
   // Create test signal
   int16_t signal_values[16];
   for (int i = 0; i < 16; ++i) {
-    signal_values[i] = 1000;  // Constant signal
+    signal_values[i] = 1000; // Constant signal
   }
   auto signal = create_naive_test_signal(signal_values);
 
@@ -434,9 +459,10 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(AVXFrugalPedestalSubtractProcessorTests)
 
-BOOST_AUTO_TEST_CASE(test_avx_frugal_configuration_and_registration) {
+BOOST_AUTO_TEST_CASE(test_avx_frugal_configuration_and_registration)
+{
   auto processor = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "pedestal,accum";
@@ -451,9 +477,10 @@ BOOST_AUTO_TEST_CASE(test_avx_frugal_configuration_and_registration) {
   BOOST_TEST(requested_states[1] == "accum");
 }
 
-BOOST_AUTO_TEST_CASE(test_avx_frugal_initial_state_collection) {
+BOOST_AUTO_TEST_CASE(test_avx_frugal_initial_state_collection)
+{
   auto processor = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "pedestal,accum";
@@ -481,20 +508,21 @@ BOOST_AUTO_TEST_CASE(test_avx_frugal_initial_state_collection) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_avx_frugal_processing_and_state_update) {
+BOOST_AUTO_TEST_CASE(test_avx_frugal_processing_and_state_update)
+{
   auto processor = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "pedestal,accum";
-  config["accum_limit"] = 3;  // Small limit for faster adaptation
+  config["accum_limit"] = 3; // Small limit for faster adaptation
 
   processor->configure(config, plane_numbers);
 
   // Create test signal consistently above initial pedestal
   int16_t signal_values[16];
   for (int i = 0; i < 16; ++i) {
-    signal_values[i] = 0x5000;  // Above initial pedestal (0x4000)
+    signal_values[i] = 0x5000; // Above initial pedestal (0x4000)
   }
   __m256i signal = create_avx_test_signal(signal_values);
 
@@ -530,9 +558,10 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(NaiveAbsRunSumProcessorTests)
 
-BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_inherits_registration) {
+BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_inherits_registration)
+{
   auto processor = std::make_shared<NaiveAbsRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "r,s,rs";
@@ -559,9 +588,10 @@ BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_inherits_registration) {
   BOOST_TEST(requested_states[2] == "rs");
 }
 
-BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_processing_with_absolute_values) {
+BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_processing_with_absolute_values)
+{
   auto processor = std::make_shared<NaiveAbsRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "rs";
@@ -583,7 +613,7 @@ BOOST_AUTO_TEST_CASE(test_naive_abs_runsum_processing_with_absolute_values) {
   // Create test signal with negative values
   int16_t signal_values[16];
   for (int i = 0; i < 16; ++i) {
-    signal_values[i] = -1000;  // Negative signal
+    signal_values[i] = -1000; // Negative signal
   }
   auto signal = create_naive_test_signal(signal_values);
 
@@ -617,9 +647,10 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(NaiveFrugalPedestalSubtractProcessorTests)
 
-BOOST_AUTO_TEST_CASE(test_naive_frugal_configuration_and_registration) {
+BOOST_AUTO_TEST_CASE(test_naive_frugal_configuration_and_registration)
+{
   auto processor = std::make_shared<NaiveFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "pedestal,accum";
@@ -634,9 +665,10 @@ BOOST_AUTO_TEST_CASE(test_naive_frugal_configuration_and_registration) {
   BOOST_TEST(requested_states[1] == "accum");
 }
 
-BOOST_AUTO_TEST_CASE(test_naive_frugal_initial_state_collection) {
+BOOST_AUTO_TEST_CASE(test_naive_frugal_initial_state_collection)
+{
   auto processor = std::make_shared<NaiveFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "pedestal,accum";
@@ -664,20 +696,21 @@ BOOST_AUTO_TEST_CASE(test_naive_frugal_initial_state_collection) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_naive_frugal_processing_and_state_update) {
+BOOST_AUTO_TEST_CASE(test_naive_frugal_processing_and_state_update)
+{
   auto processor = std::make_shared<NaiveFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "pedestal,accum";
-  config["accum_limit"] = 3;  // Small limit for faster adaptation
+  config["accum_limit"] = 3; // Small limit for faster adaptation
 
   processor->configure(config, plane_numbers);
 
   // Create test signal consistently above initial pedestal
   int16_t signal_values[16];
   for (int i = 0; i < 16; ++i) {
-    signal_values[i] = 1000;  // Above initial pedestal (0)
+    signal_values[i] = 1000; // Above initial pedestal (0)
   }
   auto signal = create_naive_test_signal(signal_values);
 
@@ -713,7 +746,8 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(CrossProcessorIntegrationTests)
 
-BOOST_AUTO_TEST_CASE(test_all_processors_independence) {
+BOOST_AUTO_TEST_CASE(test_all_processors_independence)
+{
   // Create all processor types
   auto avx_runsum = std::make_shared<AVXRunSumProcessor>();
   auto avx_abs_runsum = std::make_shared<AVXAbsRunSumProcessor>();
@@ -722,7 +756,7 @@ BOOST_AUTO_TEST_CASE(test_all_processors_independence) {
   auto naive_abs_runsum = std::make_shared<NaiveAbsRunSumProcessor>();
   auto naive_frugal = std::make_shared<NaiveFrugalPedestalSubtractProcessor>();
 
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   // Configure all processors
   auto config = create_test_config();
@@ -744,23 +778,23 @@ BOOST_AUTO_TEST_CASE(test_all_processors_independence) {
   auto avx_runsum_config = config;
   avx_runsum_config["requested_internal_states"] = "r,s,rs";
   avx_runsum->configure(avx_runsum_config, plane_numbers);
-  
+
   auto avx_abs_runsum_config = config;
   avx_abs_runsum_config["requested_internal_states"] = "r,s,rs";
   avx_abs_runsum->configure(avx_abs_runsum_config, plane_numbers);
-  
+
   auto avx_frugal_config = config;
   avx_frugal_config["requested_internal_states"] = "pedestal,accum";
   avx_frugal->configure(avx_frugal_config, plane_numbers);
-  
+
   auto naive_runsum_config = config;
   naive_runsum_config["requested_internal_states"] = "r,s,rs";
   naive_runsum->configure(naive_runsum_config, plane_numbers);
-  
+
   auto naive_abs_runsum_config = config;
   naive_abs_runsum_config["requested_internal_states"] = "r,s,rs";
   naive_abs_runsum->configure(naive_abs_runsum_config, plane_numbers);
-  
+
   auto naive_frugal_config = config;
   naive_frugal_config["requested_internal_states"] = "pedestal,accum";
   naive_frugal->configure(naive_frugal_config, plane_numbers);
@@ -807,12 +841,13 @@ BOOST_AUTO_TEST_CASE(test_all_processors_independence) {
   // Note: Can't compare AVX and Naive buffer managers directly due to different types
 }
 
-BOOST_AUTO_TEST_CASE(test_processor_chain_with_internal_states) {
+BOOST_AUTO_TEST_CASE(test_processor_chain_with_internal_states)
+{
   // Create a chain of processors (same type to avoid template issues)
   auto avx_runsum1 = std::make_shared<AVXRunSumProcessor>();
   auto avx_runsum2 = std::make_shared<AVXRunSumProcessor>();
 
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "r,s,rs";
@@ -870,25 +905,18 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(BasicEdgeCases)
 
-BOOST_AUTO_TEST_CASE(test_collection_disabled) {
+BOOST_AUTO_TEST_CASE(test_collection_disabled)
+{
   auto processor = std::make_shared<AVXRunSumProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
-  nlohmann::json config = {
-    {"memory_factor_plane0", 100},
-    {"memory_factor_plane1", 200},
-    {"memory_factor_plane2", 300},
-    {"scale_factor_plane0", 10},
-    {"scale_factor_plane1", 20},
-    {"scale_factor_plane2", 30},
-    {"memory_divisor_plane0", 10},
-    {"memory_divisor_plane1", 10},
-    {"memory_divisor_plane2", 10},
-    {"scale_divisor_plane0", 10},
-    {"scale_divisor_plane1", 10},
-    {"scale_divisor_plane2", 10},
-    {"metric_collect_toggle_state", false}
-  };
+  nlohmann::json config = { { "memory_factor_plane0", 100 },         { "memory_factor_plane1", 200 },
+                            { "memory_factor_plane2", 300 },         { "scale_factor_plane0", 10 },
+                            { "scale_factor_plane1", 20 },           { "scale_factor_plane2", 30 },
+                            { "memory_divisor_plane0", 10 },         { "memory_divisor_plane1", 10 },
+                            { "memory_divisor_plane2", 10 },         { "scale_divisor_plane0", 10 },
+                            { "scale_divisor_plane1", 10 },          { "scale_divisor_plane2", 10 },
+                            { "metric_collect_toggle_state", false } };
 
   processor->configure(config, plane_numbers);
 
@@ -902,9 +930,10 @@ BOOST_AUTO_TEST_CASE(test_collection_disabled) {
   BOOST_TEST(state_value.m_size == 0);
 }
 
-BOOST_AUTO_TEST_CASE(test_empty_internal_state_request) {
+BOOST_AUTO_TEST_CASE(test_empty_internal_state_request)
+{
   auto processor = std::make_shared<NaiveFrugalPedestalSubtractProcessor>();
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["requested_internal_states"] = "";
@@ -930,20 +959,21 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(CoreRegistrationAndCollectionVerification)
 
-BOOST_AUTO_TEST_CASE(test_all_processors_core_functionality) {
+BOOST_AUTO_TEST_CASE(test_all_processors_core_functionality)
+{
   // Test that all processors properly register and collect their internal states
-  
+
   // AVX Processors
   auto avx_runsum = std::make_shared<AVXRunSumProcessor>();
   auto avx_abs_runsum = std::make_shared<AVXAbsRunSumProcessor>();
   auto avx_frugal = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
-  
-  // Naive Processors  
+
+  // Naive Processors
   auto naive_runsum = std::make_shared<NaiveRunSumProcessor>();
   auto naive_abs_runsum = std::make_shared<NaiveAbsRunSumProcessor>();
   auto naive_frugal = std::make_shared<NaiveFrugalPedestalSubtractProcessor>();
 
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   // Configure all processors with collection enabled
   auto config = create_test_config();
@@ -965,23 +995,23 @@ BOOST_AUTO_TEST_CASE(test_all_processors_core_functionality) {
   auto avx_runsum_config = config;
   avx_runsum_config["requested_internal_states"] = "r,s,rs";
   avx_runsum->configure(avx_runsum_config, plane_numbers);
-  
+
   auto avx_abs_runsum_config = config;
   avx_abs_runsum_config["requested_internal_states"] = "r,s,rs";
   avx_abs_runsum->configure(avx_abs_runsum_config, plane_numbers);
-  
+
   auto avx_frugal_config = config;
   avx_frugal_config["requested_internal_states"] = "pedestal,accum";
   avx_frugal->configure(avx_frugal_config, plane_numbers);
-  
+
   auto naive_runsum_config = config;
   naive_runsum_config["requested_internal_states"] = "r,s,rs";
   naive_runsum->configure(naive_runsum_config, plane_numbers);
-  
+
   auto naive_abs_runsum_config = config;
   naive_abs_runsum_config["requested_internal_states"] = "r,s,rs";
   naive_abs_runsum->configure(naive_abs_runsum_config, plane_numbers);
-  
+
   auto naive_frugal_config = config;
   naive_frugal_config["requested_internal_states"] = "pedestal,accum";
   naive_frugal->configure(naive_frugal_config, plane_numbers);
@@ -1034,15 +1064,16 @@ BOOST_AUTO_TEST_CASE(test_all_processors_core_functionality) {
   BOOST_TEST(naive_frugal_state.m_size > 0);
 }
 
-BOOST_AUTO_TEST_CASE(test_processor_specific_internal_states) {
+BOOST_AUTO_TEST_CASE(test_processor_specific_internal_states)
+{
   // Verify each processor registers the correct internal state names
-  
+
   auto avx_runsum = std::make_shared<AVXRunSumProcessor>();
   auto avx_frugal = std::make_shared<AVXFrugalPedestalSubtractProcessor>();
   auto naive_runsum = std::make_shared<NaiveRunSumProcessor>();
   auto naive_frugal = std::make_shared<NaiveFrugalPedestalSubtractProcessor>();
 
-  int16_t plane_numbers[16] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2};
+  int16_t plane_numbers[16] = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2 };
 
   auto config = create_test_config();
   config["memory_factor_plane0"] = 100;
@@ -1063,15 +1094,15 @@ BOOST_AUTO_TEST_CASE(test_processor_specific_internal_states) {
   auto avx_runsum_config = config;
   avx_runsum_config["requested_internal_states"] = "r,s,rs";
   avx_runsum->configure(avx_runsum_config, plane_numbers);
-  
+
   auto avx_frugal_config = config;
   avx_frugal_config["requested_internal_states"] = "pedestal,accum";
   avx_frugal->configure(avx_frugal_config, plane_numbers);
-  
+
   auto naive_runsum_config = config;
   naive_runsum_config["requested_internal_states"] = "r,s,rs";
   naive_runsum->configure(naive_runsum_config, plane_numbers);
-  
+
   auto naive_frugal_config = config;
   naive_frugal_config["requested_internal_states"] = "pedestal,accum";
   naive_frugal->configure(naive_frugal_config, plane_numbers);
@@ -1099,7 +1130,8 @@ BOOST_AUTO_TEST_CASE(test_processor_specific_internal_states) {
   // Check NaiveFrugalPedestalSubtractProcessor states
   auto naive_frugal_states = naive_frugal->get_requested_internal_state_names();
   BOOST_TEST(naive_frugal_states.size() == 2);
-  BOOST_TEST((std::find(naive_frugal_states.begin(), naive_frugal_states.end(), "pedestal") != naive_frugal_states.end()));
+  BOOST_TEST(
+    (std::find(naive_frugal_states.begin(), naive_frugal_states.end(), "pedestal") != naive_frugal_states.end()));
   BOOST_TEST((std::find(naive_frugal_states.begin(), naive_frugal_states.end(), "accum") != naive_frugal_states.end()));
 }
 
