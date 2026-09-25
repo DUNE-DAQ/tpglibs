@@ -349,4 +349,4 @@ main(int argc, char* argv[])
     std::cout << "Validation: Not performed" << std::endl;
     return 0;
   }
-}
+} // NOLINT

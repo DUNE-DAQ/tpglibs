@@ -12,6 +12,8 @@
 #include "tpglibs/AbstractFactory.hpp"
 #include "tpglibs/NaiveProcessor.hpp"
 
+#include <memory>
+
 /** @brief Factory registration macro. */
 #define REGISTER_NAIVEPROCESSOR_CREATOR(processor_name, processor_class)                                               \
   static struct processor_class##Registrar                                                                             \

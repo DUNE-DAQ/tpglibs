@@ -12,6 +12,8 @@
 #include "tpglibs/AVXProcessor.hpp"
 #include "tpglibs/AbstractFactory.hpp"
 
+#include <memory>
+
 /** @brief Factory registration macro. */
 #define REGISTER_AVXPROCESSOR_CREATOR(processor_name, processor_class)                                                 \
   static struct processor_class##Registrar                                                                             \
