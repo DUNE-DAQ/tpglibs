@@ -12,7 +12,9 @@ namespace tpglibs {
 
 REGISTER_AVXPROCESSOR_CREATOR("AVXAbsRunSumProcessor", AVXAbsRunSumProcessor)
 
-__m256i AVXAbsRunSumProcessor::process(const __m256i& signal) {
+__m256i
+AVXAbsRunSumProcessor::process(const __m256i& signal)
+{
   return AVXRunSumProcessor::process(_mm256_abs_epi16(signal));
 }
 

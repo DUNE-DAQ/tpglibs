@@ -1,2 +1,8 @@
 *~
 __pycache__
+
+# clang-format files
+.clang-format
+.clang-format.previous
+.DS_Store
+.vscode/settings.json

@@ -8,7 +8,6 @@
  * received with this code.
  */
 
-
 #ifndef TPGLIBS_PYBINDSRC_REGISTRATORS_HPP_
 #define TPGLIBS_PYBINDSRC_REGISTRATORS_HPP_
 
@@ -16,7 +15,8 @@
 
 namespace dunedaq::tpglibs::python {
 
-  void register_renameme(pybind11::module&);
+void
+register_renameme(pybind11::module&);
 
 }
 

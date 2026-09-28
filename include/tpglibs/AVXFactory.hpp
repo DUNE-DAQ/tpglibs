@@ -9,21 +9,28 @@
 #ifndef TPGLIBS_AVXFACTORY_HPP_
 #define TPGLIBS_AVXFACTORY_HPP_
 
-#include "tpglibs/AbstractFactory.hpp"
 #include "tpglibs/AVXProcessor.hpp"
+#include "tpglibs/AbstractFactory.hpp"
+
+#include <memory>
 
 /** @brief Factory registration macro. */
-#define REGISTER_AVXPROCESSOR_CREATOR(processor_name, processor_class)                                                                     \
-  static struct processor_class##Registrar {                                                                                               \
-    processor_class##Registrar() {                                                                                                         \
-      tpglibs::AVXFactory::register_creator(processor_name, []() -> std::shared_ptr<tpglibs::AVXProcessor> {return std::make_shared<processor_class>();});      \
-    }                                                                                                                                      \
+#define REGISTER_AVXPROCESSOR_CREATOR(processor_name, processor_class)                                                 \
+  static struct processor_class##Registrar                                                                             \
+  {                                                                                                                    \
+    processor_class##Registrar()                                                                                       \
+    {                                                                                                                  \
+      tpglibs::AVXFactory::register_creator(processor_name, []() -> std::shared_ptr<tpglibs::AVXProcessor> {           \
+        return std::make_shared<processor_class>();                                                                    \
+      });                                                                                                              \
+    }                                                                                                                  \
   } processor_class##_registrar;
 
 namespace tpglibs {
 
 /** @brief AVX typed abstract factory. */
-class AVXFactory : public AbstractFactory<AVXProcessor> {};
+class AVXFactory : public AbstractFactory<AVXProcessor>
+{};
 
 } // namespace tpglibs
 

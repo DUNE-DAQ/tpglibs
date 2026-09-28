@@ -15,6 +15,7 @@ namespace dunedaq::tpglibs::python {
 
 void
 register_renameme(py::module& m)
-{}
+{
+}
 
 } // namespace dunedaq::tpglibs::python

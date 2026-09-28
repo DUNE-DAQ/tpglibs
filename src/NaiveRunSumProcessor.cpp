@@ -12,23 +12,25 @@ namespace tpglibs {
 
 REGISTER_NAIVEPROCESSOR_CREATOR("NaiveRunSumProcessor", NaiveRunSumProcessor)
 
-void NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers) {
+void
+NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t* plane_numbers)
+{
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
-  m_internal_state_name_registry.register_internal_state("r", 
-    std::shared_ptr<naive_array_t>(&m_memory_factor, [](auto*){}));
-  m_internal_state_name_registry.register_internal_state("s", 
-    std::shared_ptr<naive_array_t>(&m_scale_factor, [](auto*){}));
-  m_internal_state_name_registry.register_internal_state("rs", 
-    std::shared_ptr<naive_array_t>(&m_running_sum, [](auto*){}));
+  m_internal_state_name_registry.register_internal_state(
+    "r", std::shared_ptr<naive_array_t>(&m_memory_factor, [](auto*) {}));
+  m_internal_state_name_registry.register_internal_state("s",
+                                                         std::shared_ptr<naive_array_t>(&m_scale_factor, [](auto*) {}));
+  m_internal_state_name_registry.register_internal_state("rs",
+                                                         std::shared_ptr<naive_array_t>(&m_running_sum, [](auto*) {}));
   configure_internal_state_collection(config);
 #endif
 
-  int16_t config_memory[3] = {config["memory_factor_plane0"],
-                              config["memory_factor_plane1"],
-                              config["memory_factor_plane2"]};
-  int16_t config_scale[3]  = {config["scale_factor_plane0"],
+  int16_t config_memory[3] = { config["memory_factor_plane0"],
+                               config["memory_factor_plane1"],
+                               config["memory_factor_plane2"] };
+  int16_t config_scale[3] = { config["scale_factor_plane0"],
                               config["scale_factor_plane1"],
-                              config["scale_factor_plane2"]};
+                              config["scale_factor_plane2"] };
 
   for (int i = 0; i < 16; i++) {
     m_memory_factor[i] = config_memory[plane_numbers[i]];
@@ -36,7 +38,9 @@ void NaiveRunSumProcessor::configure(const nlohmann::json& config, const int16_t
   }
 }
 
-NaiveRunSumProcessor::naive_array_t NaiveRunSumProcessor::process(const naive_array_t& signal) {
+NaiveRunSumProcessor::naive_array_t
+NaiveRunSumProcessor::process(const naive_array_t& signal)
+{
 #ifdef TPGLIBS_ENABLE_STATE_MONITORING
   m_samples++;
   if (m_collect_internal_state_flag && (m_samples % m_sample_period == 0)) {

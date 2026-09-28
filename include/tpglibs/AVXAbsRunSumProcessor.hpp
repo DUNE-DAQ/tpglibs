@@ -17,14 +17,15 @@ namespace tpglibs {
  *
  *  Look to AVXRunSumProcessor for details on the running sum calculation.
  */
-class AVXAbsRunSumProcessor : public AVXRunSumProcessor {
-  public:
-    /** @brief Calculate and store the running sum with absolute values.
-     *
-     *  @param signal The input signal to process on.
-     *  @return The calculated running sum.
-     */
-    __m256i process(const __m256i& signal) override;
+class AVXAbsRunSumProcessor : public AVXRunSumProcessor
+{
+public:
+  /** @brief Calculate and store the running sum with absolute values.
+   *
+   *  @param signal The input signal to process on.
+   *  @return The calculated running sum.
+   */
+  __m256i process(const __m256i& signal) override;
 };
 
 } // namespace tpglibs

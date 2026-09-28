@@ -23,11 +23,13 @@ namespace tpglibs {
  *  @param b The divisor.
  *  @return a / b with funky rounding.
  */
-inline int16_t _naive_div_int16(const int16_t& a, const int16_t& b) {
-  int16_t vb = (1 << 15) / b;         //  1 / b * 2^15
-  int32_t mulhrs = a * vb;            //  a / b * 2^15
-  mulhrs = (mulhrs >> 14) + 1;        // (a / b * 2^15) * 2^-14 + 1 ~ a / b * 2 + 1
-  mulhrs = mulhrs >> 1;               //~ a / b. The +1 causes unorthodox rounding.
+inline int16_t
+_naive_div_int16(const int16_t& a, const int16_t& b)
+{
+  int16_t vb = (1 << 15) / b;  //  1 / b * 2^15
+  int32_t mulhrs = a * vb;     //  a / b * 2^15
+  mulhrs = (mulhrs >> 14) + 1; // (a / b * 2^15) * 2^-14 + 1 ~ a / b * 2 + 1
+  mulhrs = mulhrs >> 1;        //~ a / b. The +1 causes unorthodox rounding.
   return (int16_t)(mulhrs);
 }
 

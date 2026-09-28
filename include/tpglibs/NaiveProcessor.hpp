@@ -16,15 +16,17 @@
 namespace tpglibs {
 
 /** @brief Naive typed abstract signal processor. */
-class NaiveProcessor : public AbstractProcessor<std::array<int16_t, 16>> {
-  public:
-    /** @brief The naive version uses a standard array instead of __m256i. */
-    using naive_array_t = std::array<int16_t, 16>;
+class NaiveProcessor : public AbstractProcessor<std::array<int16_t, 16>>
+{
+public:
+  /** @brief The naive version uses a standard array instead of __m256i. */
+  using naive_array_t = std::array<int16_t, 16>;
 
-    /** @brief Simple signal pass-through on naive type. */
-    virtual naive_array_t process(const naive_array_t& signal) override {
-      return AbstractProcessor<naive_array_t>::process(signal);
-    }
+  /** @brief Simple signal pass-through on naive type. */
+  virtual naive_array_t process(const naive_array_t& signal) override
+  {
+    return AbstractProcessor<naive_array_t>::process(signal);
+  }
 };
 
 } // namespace tpglibs

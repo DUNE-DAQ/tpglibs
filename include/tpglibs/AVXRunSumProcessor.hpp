@@ -23,7 +23,8 @@ namespace tpglibs {
  *  * `S` is the scale factor for the incoming signal to avoid overflowing,
  *  * `signal` is the incoming signal.
  */
-class AVXRunSumProcessor : public AVXProcessor {
+class AVXRunSumProcessor : public AVXProcessor
+{
   /** @brief The `R` factor in the model equation. */
   __m256i m_memory_factor;
 
@@ -39,20 +40,20 @@ class AVXRunSumProcessor : public AVXProcessor {
   /** @brief The divisor for the `R` factor. */
   __m256i m_memory_divisor;
 
-  public:
-    /** @brief Calculate and store the running sum.
-     *
-     *  @param signal The input signal to process on.
-     *  @return The calculated running sum.
-     */
-    __m256i process(const __m256i& signal) override;
+public:
+  /** @brief Calculate and store the running sum.
+   *
+   *  @param signal The input signal to process on.
+   *  @return The calculated running sum.
+   */
+  __m256i process(const __m256i& signal) override;
 
-    /** @brief Configures the `R` factor and `S` factor according to plane.
-     *
-     *  @param config JSON of the `R` and `S` factors to use per plane.
-     *  @param plane_numbers Array of plane numbers. Gives the channels to apply the `R` and `S` factors.
-     */
-    void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
+  /** @brief Configures the `R` factor and `S` factor according to plane.
+   *
+   *  @param config JSON of the `R` and `S` factors to use per plane.
+   *  @param plane_numbers Array of plane numbers. Gives the channels to apply the `R` and `S` factors.
+   */
+  void configure(const nlohmann::json& config, const int16_t* plane_numbers) override;
 };
 
 } // namespace tpglibs

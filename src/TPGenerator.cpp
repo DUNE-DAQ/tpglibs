@@ -13,7 +13,8 @@ namespace tpglibs {
 void
 TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>& configs,
                        const std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>> channel_plane_numbers,
-                       const float sample_tick_difference) {
+                       const float sample_tick_difference)
+{
   if (m_configured) {
     reset();
   }
@@ -23,9 +24,11 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
 
   for (int p = 0; p < m_num_pipelines; p++) {
     AVXPipeline new_pipe = AVXPipeline();
-    auto begin_channel_plane = channel_plane_numbers.begin() + p*m_num_channels_per_pipeline;
+    auto begin_channel_plane = channel_plane_numbers.begin() + p * m_num_channels_per_pipeline;
     auto end_channel_plane = begin_channel_plane + m_num_channels_per_pipeline;
-    new_pipe.configure(configs, std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
+    new_pipe.configure(
+      configs,
+      std::vector<std::pair<dunedaq::trgdataformats::channel_t, int16_t>>(begin_channel_plane, end_channel_plane));
     new_pipe.set_sot_minima(m_sot_minima);
     m_tpg_pipelines.push_back(new_pipe);
   }
@@ -33,7 +36,9 @@ TPGenerator::configure(const std::vector<std::pair<std::string, nlohmann::json>>
   m_configured = true;
 }
 
-std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> TPGenerator::get_all_processor_references_with_pipeline_index() {
+std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>>
+TPGenerator::get_all_processor_references_with_pipeline_index()
+{
   std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> processor_references;
 
   for (int pipeline_id = 0; pipeline_id < m_num_pipelines; ++pipeline_id) {
@@ -45,42 +50,45 @@ std::vector<std::pair<std::shared_ptr<AbstractProcessor<__m256i>>, int>> TPGener
 }
 
 void
-TPGenerator::reset() {
+TPGenerator::reset()
+{
   m_num_pipelines = 0;
   m_tpg_pipelines.clear();
   m_sample_tick_difference = 0;
-  m_sot_minima = {1, 1, 1};
+  m_sot_minima = { 1, 1, 1 };
   m_configured = false;
 }
 
 void
-TPGenerator::set_sot_minima(const std::vector<uint16_t>& sot_minima) {
+TPGenerator::set_sot_minima(const std::vector<uint16_t>& sot_minima)
+{
   m_sot_minima = sot_minima;
 }
 
-
 __m256i
-TPGenerator::expand_frame(const __m256i& regi) {
+TPGenerator::expand_frame(const __m256i& regi)
+{
   // Refer to the diagram and documentation on frame expansion for details.
 
   // Prepare even (2,4,6,8), odd (1,3,5,7) rows in 64-bit sense.
-  __m256i odd  = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 0, 1, 2, 3, 4, 5, 6));
+  __m256i odd = _mm256_permutevar8x32_epi32(regi, _mm256_setr_epi32(1, 0, 1, 2, 3, 4, 5, 6));
 
   // Shift into place.
   __m256i even = _mm256_sllv_epi64(regi, _mm256_setr_epi64x(6, 14, 22, 30));
-  odd  = _mm256_srlv_epi64(odd, _mm256_setr_epi64x(30, 22, 14, 6));
+  odd = _mm256_srlv_epi64(odd, _mm256_setr_epi64x(30, 22, 14, 6));
 
   // Everything is center aligned in 32-bit. Mask and right-align the right side.
-  __m256i both  = _mm256_blend_epi32(even, odd, 0b01010101);
+  __m256i both = _mm256_blend_epi32(even, odd, 0b01010101);
   __m256i right = _mm256_and_si256(_mm256_set1_epi32(0xFFFFu), both);
-  __m256i left  = _mm256_and_si256(_mm256_set1_epi32(0x3FFF0000u), both);
+  __m256i left = _mm256_and_si256(_mm256_set1_epi32(0x3FFF0000u), both);
 
   right = _mm256_srli_epi32(right, 2);
   return _mm256_or_si256(left, right);
 }
 
 __m256i
-TPGenerator::old_expand_frame(const __m256i& regi) {
+TPGenerator::old_expand_frame(const __m256i& regi)
+{
   // Refer to the diagram and documentation on frame expansion for details.
 
   // Rearrange original with row 3 doubled.
@@ -90,7 +98,7 @@ TPGenerator::old_expand_frame(const __m256i& regi) {
   // Left shift each row.
   __m256i count = _mm256_set_epi32(12, 8, 4, 0, 14, 10, 6, 2);
   __m256i high_half = _mm256_sllv_epi32(shuf1, count);
-  high_half = _mm256_and_si256(high_half, _mm256_set1_epi32(0x3FFF0000u));  // Mask out the low half.
+  high_half = _mm256_and_si256(high_half, _mm256_set1_epi32(0x3FFF0000u)); // Mask out the low half.
 
   // Left shift for low half later.
   count = _mm256_set_epi32(10, 6, 2, 0, 12, 8, 4, 0);
@@ -126,6 +134,5 @@ TPGenerator::old_expand_frame(const __m256i& regi) {
   both = _mm256_or_si256(both, shuf3);
   return both;
 }
-
 
 } // namespace tpglibs
